@@ -29,15 +29,15 @@ export class SodotSigner implements BaseSigner {
   // TODO: Make this configurable and extendable
   private SODOT_VERTICES = [
     {
-      url: import.meta.env.VITE_SODOT_VERTEX_URL_0!,
+      url: "/sodot-vertex-0",
       apiKey: import.meta.env.VITE_SODOT_VERTEX_API_KEY_0!,
     },
     {
-      url: import.meta.env.VITE_SODOT_VERTEX_URL_1!,
+      url: "/sodot-vertex-1",
       apiKey: import.meta.env.VITE_SODOT_VERTEX_API_KEY_1!,
     },
     {
-      url: import.meta.env.VITE_SODOT_VERTEX_URL_2!,
+      url: "/sodot-vertex-2",
       apiKey: import.meta.env.VITE_SODOT_VERTEX_API_KEY_2!,
     },
   ];
