@@ -110,17 +110,7 @@ export const chainCommand: Command = {
 
       const chainId = args[0].toLowerCase();
 
-      // First check if the chain is in our hardcoded list
-      if (hardcodedChains[chainId]) {
-        const chain = hardcodedChains[chainId];
-        return {
-          success: true,
-          output: renderChainDetails(chainId, chain),
-          type: "success",
-        };
-      }
-
-      // If not in hardcoded list, fetch from API
+      // Fetch chain details from API
       console.log(`Fetching chain information for ${chainId}...`);
       const chain = await adamikGetChain(chainId);
 
@@ -314,7 +304,10 @@ export const startCommand: Command = {
       resetWorkflowState();
 
       // Store chains in session storage
-      sessionStorage.setItem("adamikChains", JSON.stringify(hardcodedChains));
+      sessionStorage.setItem(
+        "adamikChainIds",
+        JSON.stringify(Object.keys(hardcodedChains))
+      );
 
       // Format chains for display
       const chainsList = Object.entries(hardcodedChains).map(

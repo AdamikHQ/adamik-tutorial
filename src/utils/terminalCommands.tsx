@@ -11,6 +11,7 @@ import { encodePubKeyToAddress } from "../adamik/encodePubkeyToAddress";
 import { getAccountState } from "../adamik/getAccountState";
 import { infoTerminal } from "./utils";
 import { renderChainInfo } from "./chainRenderer";
+import { adamikGetChain } from "../adamik/getChain";
 
 // Collect all commands
 const commands = {
@@ -42,9 +43,9 @@ export const executeCommand = async (input: string): Promise<CommandResult> => {
       // User is selecting a chain
       const chainId = commandName;
 
-      // Get chains from session storage
-      const chainsJson = sessionStorage.getItem("adamikChains");
-      if (!chainsJson) {
+      // Get chain IDs from session storage
+      const chainIdsJson = sessionStorage.getItem("adamikChainIds");
+      if (!chainIdsJson) {
         return {
           success: false,
           output: 'No chains data available. Please run "start" again.',
@@ -52,9 +53,9 @@ export const executeCommand = async (input: string): Promise<CommandResult> => {
         };
       }
 
-      const chains = JSON.parse(chainsJson);
+      const chainIds = JSON.parse(chainIdsJson);
 
-      if (!chains[chainId]) {
+      if (!chainIds.includes(chainId)) {
         return {
           success: false,
           output: (
@@ -70,12 +71,15 @@ export const executeCommand = async (input: string): Promise<CommandResult> => {
         };
       }
 
-      // Chain found, store in workflow state
-      const chain = chains[chainId];
-      workflowState.selectedChain = chainId;
-      workflowState.selectedChainData = chain;
-
       try {
+        // Fetch chain details from API
+        console.log(`Fetching chain information for ${chainId}...`);
+        const chain = await adamikGetChain(chainId);
+
+        // Store chain details in workflow state
+        workflowState.selectedChain = chainId;
+        workflowState.selectedChainData = chain;
+
         // Create SodotSigner instance and generate pubkey
         const signer = new SodotSigner(chainId, chain.signerSpec);
         infoTerminal(`Generating keys for ${chain.name}...`, "TERMINAL");
