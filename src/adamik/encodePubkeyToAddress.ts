@@ -1,4 +1,3 @@
-import prompts from "prompts";
 import { AdamikAPIError, AdamikEncodePubkeyToAddressResponse } from "./types";
 
 export const encodePubKeyToAddress = async (
@@ -6,11 +5,11 @@ export const encodePubKeyToAddress = async (
   chainId: string
 ) => {
   const fetchPubkeyToAddresses = await fetch(
-    `${process.env.ADAMIK_API_BASE_URL}/api/${chainId}/address/encode`,
+    `${import.meta.env.VITE_ADAMIK_API_BASE_URL}/api/${chainId}/address/encode`,
     {
       method: "POST",
       headers: {
-        Authorization: process.env.ADAMIK_API_KEY!,
+        Authorization: import.meta.env.VITE_ADAMIK_API_KEY!,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
@@ -29,26 +28,14 @@ export const encodePubKeyToAddress = async (
   const addresses = pubkeyToAddresses.addresses;
 
   if (addresses.length === 0) {
-    throw new Error("No addresses found, please verify ");
+    throw new Error("No addresses found for the given public key");
   }
 
-  if (addresses.length === 1) {
-    return addresses[0].address;
-  }
-
-  const { address } = await prompts({
-    type: "select",
-    name: "address",
-    message: "Select the corresponding address for the pubkey you provided",
-    choices: addresses.map((address: { type: string; address: string }) => ({
-      title: `${address.address} (${address.type})`,
-      value: address.address,
-    })),
-  });
-
-  if (!address) {
-    throw new Error("No address selected");
-  }
-
-  return address;
+  // In browser context, we'll always use the first address
+  // This is typically the most common/default address format for the chain
+  return {
+    address: addresses[0].address,
+    type: addresses[0].type,
+    allAddresses: addresses,
+  };
 };

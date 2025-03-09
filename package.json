@@ -62,7 +62,6 @@
     "starknet": "^6.23.1",
     "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
-    "tonweb-mnemonic": "^1.0.1",
     "tweetnacl": "^1.0.3",
     "vaul": "^0.9.3",
     "zod": "^3.23.8"

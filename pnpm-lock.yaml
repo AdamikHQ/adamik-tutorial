@@ -161,9 +161,6 @@ importers:
       tailwindcss-animate:
         specifier: ^1.0.7
         version: 1.0.7(tailwindcss@3.4.17)
-      tonweb-mnemonic:
-        specifier: ^1.0.1
-        version: 1.0.1
       tweetnacl:
         specifier: ^1.0.3
         version: 1.0.3
@@ -2626,10 +2623,6 @@ packages:
   to-regex-range@5.0.1:
     resolution: {integrity: sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ==}
     engines: {node: '>=8.0'}
-
-  tonweb-mnemonic@1.0.1:
-    resolution: {integrity: sha512-YQAEXQHBHb0dnNy50bwIutXwyWa6Den7+cLcXWoG7ZClcqo4bjALOr6tnIqI+hs5jab+AGSsRjilxcp8ao/CpA==}
-    engines: {node: '>=15'}
 
   tough-cookie@4.1.4:
     resolution: {integrity: sha512-Loo5UUvLD9ScZ6jh8beX1T6sO1w2/MpCRpEP7V280GKMVUQ0Jzar2U3UJPsrdbziLEMMhu3Ujnq//rhiFuIeag==}
@@ -5164,10 +5157,6 @@ snapshots:
   to-regex-range@5.0.1:
     dependencies:
       is-number: 7.0.0
-
-  tonweb-mnemonic@1.0.1:
-    dependencies:
-      tweetnacl: 1.0.3
 
   tough-cookie@4.1.4:
     dependencies:

@@ -8,7 +8,7 @@ import {
   extractSignature,
   infoTerminal,
   italicInfoTerminal,
-} from "../utils";
+} from "../utils/utils";
 import { Signer } from "./index";
 import { BaseSigner } from "./types";
 
@@ -29,16 +29,16 @@ export class SodotSigner implements BaseSigner {
   // TODO: Make this configurable and extendable
   private SODOT_VERTICES = [
     {
-      url: process.env.SODOT_VERTEX_URL_0!,
-      apiKey: process.env.SODOT_VERTEX_API_KEY_0!,
+      url: "/sodot-vertex-0",
+      apiKey: import.meta.env.VITE_SODOT_VERTEX_API_KEY_0!,
     },
     {
-      url: process.env.SODOT_VERTEX_URL_1!,
-      apiKey: process.env.SODOT_VERTEX_API_KEY_1!,
+      url: "/sodot-vertex-1",
+      apiKey: import.meta.env.VITE_SODOT_VERTEX_API_KEY_1!,
     },
     {
-      url: process.env.SODOT_VERTEX_URL_2!,
-      apiKey: process.env.SODOT_VERTEX_API_KEY_2!,
+      url: "/sodot-vertex-2",
+      apiKey: import.meta.env.VITE_SODOT_VERTEX_API_KEY_2!,
     },
   ];
   private n = 3;
@@ -53,11 +53,11 @@ export class SodotSigner implements BaseSigner {
     switch (signerSpec.curve) {
       case AdamikCurve.SECP256K1:
         this.keyIds =
-          process.env.SODOT_EXISTING_ECDSA_KEY_IDS?.split(",") || [];
+          import.meta.env.VITE_SODOT_EXISTING_ECDSA_KEY_IDS?.split(",") || [];
         break;
       case AdamikCurve.ED25519:
         this.keyIds =
-          process.env.SODOT_EXISTING_ED25519_KEY_IDS?.split(",") || [];
+          import.meta.env.VITE_SODOT_EXISTING_ED25519_KEY_IDS?.split(",") || [];
         break;
       default:
         throw new Error(`Unsupported curve: ${signerSpec.curve}`);
@@ -65,14 +65,20 @@ export class SodotSigner implements BaseSigner {
   }
 
   static isConfigValid(): boolean {
-    if (!process.env.SODOT_VERTEX_API_KEY_0) {
-      throw new Error("SODOT_VERTEX_API_KEY_0 is not set");
+    if (!import.meta.env.VITE_SODOT_VERTEX_API_KEY_0) {
+      throw new Error(
+        "VITE_SODOT_VERTEX_API_KEY_0 is not set in your .env.local file"
+      );
     }
-    if (!process.env.SODOT_VERTEX_API_KEY_1) {
-      throw new Error("SODOT_VERTEX_API_KEY_1 is not set");
+    if (!import.meta.env.VITE_SODOT_VERTEX_API_KEY_1) {
+      throw new Error(
+        "VITE_SODOT_VERTEX_API_KEY_1 is not set in your .env.local file"
+      );
     }
-    if (!process.env.SODOT_VERTEX_API_KEY_2) {
-      throw new Error("SODOT_VERTEX_API_KEY_2 is not set");
+    if (!import.meta.env.VITE_SODOT_VERTEX_API_KEY_2) {
+      throw new Error(
+        "VITE_SODOT_VERTEX_API_KEY_2 is not set in your .env.local file"
+      );
     }
 
     return true;
@@ -89,21 +95,23 @@ export class SodotSigner implements BaseSigner {
 
       if (this.signerSpec.curve === AdamikCurve.SECP256K1) {
         infoTerminal(
-          "please use SODOT_EXISTING_ECDSA_KEY_IDS to be able to reuse the same keys",
+          "please use VITE_SODOT_EXISTING_ECDSA_KEY_IDS to be able to reuse the same keys",
           this.signerName
         );
         await italicInfoTerminal(
-          `export SODOT_EXISTING_ECDSA_KEY_IDS="${this.keyIds.join(",")}"`,
+          `export VITE_SODOT_EXISTING_ECDSA_KEY_IDS="${this.keyIds.join(",")}"`,
           1000
         );
         infoTerminal(`keyIds: ${this.keyIds}`, this.signerName);
       } else if (this.signerSpec.curve === AdamikCurve.ED25519) {
         infoTerminal(
-          "please use SODOT_EXISTING_ED25519_KEY_IDS to be able to reuse the same keys",
+          "please use VITE_SODOT_EXISTING_ED25519_KEY_IDS to be able to reuse the same keys",
           this.signerName
         );
         await italicInfoTerminal(
-          `export SODOT_EXISTING_ED25519_KEY_IDS="${this.keyIds.join(",")}"`,
+          `export VITE_SODOT_EXISTING_ED25519_KEY_IDS="${this.keyIds.join(
+            ","
+          )}"`,
           10000
         );
       }

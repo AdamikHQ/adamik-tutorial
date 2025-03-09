@@ -8,9 +8,8 @@ import {
 import { extractSignature, infoTerminal } from "../utils/utils";
 import * as nacl from "tweetnacl";
 import { ec } from "starknet";
-import { Slip10, Slip10Curve, stringToPath, Bip39 } from "@cosmjs/crypto";
+import { Slip10, Slip10Curve, stringToPath } from "@cosmjs/crypto";
 import { BaseSigner } from "./types";
-
 /**
  * LocalSigner implements key derivation and signing for multiple curves:
  *
@@ -56,7 +55,7 @@ export class LocalSigner implements BaseSigner {
   constructor(public chainId: string, public signerSpec: AdamikSignerSpec) {
     if (!import.meta.env.VITE_UNSECURE_LOCAL_SEED) {
       throw new Error(
-        "VITE_UNSECURE_LOCAL_SEED is not set in environment variables"
+        "VITE_UNSECURE_LOCAL_SEED is not set in your .env.local file"
       );
     }
   }
@@ -70,7 +69,6 @@ export class LocalSigner implements BaseSigner {
       const masterNode = ethers.HDNodeWallet.fromPhrase(
         import.meta.env.VITE_UNSECURE_LOCAL_SEED!
       );
-
       const derivationPath = `44'/${this.signerSpec.coinType}'/0'/0/0`;
       this.wallet = masterNode.derivePath(derivationPath);
     }
@@ -79,23 +77,20 @@ export class LocalSigner implements BaseSigner {
 
   private async getEd25519KeyPair(): Promise<nacl.SignKeyPair> {
     if (!this.ed25519KeyPair) {
-      const words = import.meta.env.VITE_UNSECURE_LOCAL_SEED!.split(" ");
-      // Convert mnemonic to seed using Bip39
-      const seed = await Bip39.mnemonicToSeed(words.join(" "));
+      const masterNode = ethers.HDNodeWallet.fromPhrase(
+        import.meta.env.VITE_UNSECURE_LOCAL_SEED!
+      );
 
-      if (DIRECT_SEED_CHAINS.includes(this.signerSpec.coinType)) {
-        // For chains that use direct seed (like TON)
-        // Convert seed (Uint8Array) to the format needed by nacl
-        const seedBytes = new Uint8Array(seed).slice(0, 32);
-        this.ed25519KeyPair = nacl.sign.keyPair.fromSeed(seedBytes);
+      if (this.signerSpec.coinType === "607") {
+        const seed = hexToBytes(masterNode.privateKey.slice(2));
+        this.ed25519KeyPair = nacl.sign.keyPair.fromSeed(seed.slice(0, 32));
       } else {
-        // For chains that follow SLIP-0010 (like Algorand)
         const hdPath = stringToPath(
-          `m/44'/${this.signerSpec.coinType}'/0'/0'/0'`
+          `44'/${this.signerSpec.coinType}'/0'/0'/0'`
         );
         const { privkey } = Slip10.derivePath(
           Slip10Curve.Ed25519,
-          seed,
+          hexToBytes(masterNode.privateKey.slice(2)),
           hdPath
         );
         this.ed25519KeyPair = nacl.sign.keyPair.fromSeed(privkey);

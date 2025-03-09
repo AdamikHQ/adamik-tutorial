@@ -1,6 +1,7 @@
 import React from "react";
 import { AdamikChain } from "../adamik/types";
-import { LocalSigner } from "../signers/LocalSigner";
+import { SodotSigner } from "../signers/Sodot";
+import { encodePubKeyToAddress } from "../adamik/encodePubkeyToAddress";
 
 // Define the structure for commands
 type CommandResult = {
@@ -240,10 +241,14 @@ export const executeCommand = async (input: string): Promise<CommandResult> => {
       workflowState.selectedChainData = chain;
 
       try {
-        // Create LocalSigner instance and generate pubkey
-        const signer = new LocalSigner(chainId, chain.signerSpec);
+        // Create SodotSigner instance and generate pubkey
+        const signer = new SodotSigner(chainId, chain.signerSpec);
         const pubkey = await signer.getPubkey();
         workflowState.pubkey = pubkey;
+
+        // Get address from pubkey
+        const addressInfo = await encodePubKeyToAddress(pubkey, chainId);
+        workflowState.address = addressInfo.address;
 
         // Clear the chain selection state
         sessionStorage.removeItem("lastCommandResult");
@@ -253,7 +258,7 @@ export const executeCommand = async (input: string): Promise<CommandResult> => {
           output: (
             <div>
               <p className="mb-4 text-green-400 font-bold">
-                ✓ Chain selected and public key generated!
+                ✓ Chain selected and keys generated!
               </p>
               <div className="bg-gray-800 p-4 rounded mb-4">
                 <h3 className="text-lg font-bold mb-2 text-yellow-400">
@@ -287,11 +292,36 @@ export const executeCommand = async (input: string): Promise<CommandResult> => {
               </div>
               <div className="bg-gray-800 p-4 rounded mb-4">
                 <h3 className="text-lg font-bold mb-2 text-yellow-400">
-                  Public Key Details
+                  Key Details (SODOT MPC)
                 </h3>
-                <p className="font-mono text-sm break-all bg-black p-2 rounded">
-                  {pubkey}
-                </p>
+                <div>
+                  <div className="mb-2">
+                    <strong>Public Key:</strong>
+                    <div className="font-mono text-sm break-all bg-black p-2 rounded mt-1">
+                      {pubkey}
+                    </div>
+                  </div>
+                  <div className="mb-2">
+                    <strong>Address:</strong> ({addressInfo.type})
+                    <div className="font-mono text-sm break-all bg-black p-2 rounded mt-1">
+                      {addressInfo.address}
+                    </div>
+                  </div>
+                  {addressInfo.allAddresses.length > 1 && (
+                    <div className="mt-2">
+                      <p className="text-sm text-gray-400">
+                        Other available address formats:
+                      </p>
+                      <ul className="list-disc ml-4 text-sm text-gray-400">
+                        {addressInfo.allAddresses.slice(1).map((addr) => (
+                          <li key={addr.address}>
+                            {addr.type}: {addr.address}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
               </div>
               <p className="mb-2">Supported Features:</p>
               <ul className="list-disc ml-4 mb-4">
@@ -312,17 +342,17 @@ export const executeCommand = async (input: string): Promise<CommandResult> => {
           type: "success",
         };
       } catch (error) {
-        console.error("Error generating pubkey:", error);
+        console.error("Error generating keys:", error);
         return {
           success: false,
           output: (
             <div>
               <p className="text-red-400 mb-2">
-                Chain selected but failed to generate public key!
+                Chain selected but failed to generate keys!
               </p>
               <p>{error instanceof Error ? error.message : "Unknown error"}</p>
               <p className="mt-2 text-xs text-gray-400">
-                Make sure VITE_UNSECURE_LOCAL_SEED is set in your .env.local
+                Make sure your SODOT configuration is correct in your .env.local
                 file.
               </p>
             </div>
