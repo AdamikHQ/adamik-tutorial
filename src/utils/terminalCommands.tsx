@@ -84,9 +84,14 @@ const commands = {
         // Reset workflow state when starting a new flow
         workflowState = {};
 
-        // Hardcoded values for development
-        const apiKey = "4e91430e-3622-4bb9-86f5-803090d7a913";
-        const apiBaseUrl = "http://localhost:3000";
+        const apiKey = import.meta.env.VITE_ADAMIK_API_KEY;
+        const apiBaseUrl = import.meta.env.VITE_ADAMIK_API_BASE_URL;
+
+        if (!apiKey || !apiBaseUrl) {
+          throw new Error(
+            "Missing API configuration. Please check your environment variables."
+          );
+        }
 
         // Show loading message
         console.log("Fetching chains from API...");
@@ -162,8 +167,11 @@ const commands = {
                 This could be because:
               </p>
               <ul className="list-disc ml-4 text-xs text-gray-400">
-                <li>The API server is not running at http://localhost:3000</li>
-                <li>The API key is invalid</li>
+                <li>
+                  The API server is not running at{" "}
+                  {import.meta.env.VITE_ADAMIK_API_BASE_URL}
+                </li>
+                <li>The API key is invalid or missing</li>
                 <li>The API endpoint structure has changed</li>
               </ul>
               <p className="mt-2 text-xs">
