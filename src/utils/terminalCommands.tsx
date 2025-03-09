@@ -2,6 +2,7 @@ import React from "react";
 import { AdamikChain } from "../adamik/types";
 import { SodotSigner } from "../signers/Sodot";
 import { encodePubKeyToAddress } from "../adamik/encodePubkeyToAddress";
+import { getAccountState } from "../adamik/getAccountState";
 
 // Define the structure for commands
 type CommandResult = {
@@ -68,6 +69,9 @@ const commands = {
               blockchain networks
             </li>
             <li className="mb-1">
+              <strong>balance</strong> - Check balance and state of an address
+            </li>
+            <li className="mb-1">
               <strong>clear</strong> - Clears the terminal
             </li>
           </ul>
@@ -76,6 +80,255 @@ const commands = {
       type: "success",
       clearTerminal: true,
     }),
+  },
+
+  balance: {
+    name: "balance",
+    description: "Check balance and state of an address",
+    execute: async (args: string[] = []): Promise<CommandResult> => {
+      try {
+        if (!workflowState.selectedChain || !workflowState.selectedChainData) {
+          return {
+            success: false,
+            output: 'Please select a chain first using the "start" command.',
+            type: "error",
+          };
+        }
+
+        const address = args[0];
+        if (!address) {
+          return {
+            success: false,
+            output: "Please provide an address to check.",
+            type: "error",
+          };
+        }
+
+        const chain = workflowState.selectedChainData;
+        const chainId = workflowState.selectedChain;
+
+        const balance = await getAccountState(chainId, address);
+
+        // Format the native balance
+        const formattedNativeBalance = (
+          Number(balance.balances.native.available) /
+          Math.pow(10, chain.decimals)
+        ).toFixed(chain.decimals);
+
+        return {
+          success: true,
+          output: (
+            <div>
+              <div className="bg-gray-800 p-4 rounded mb-4">
+                <h3 className="text-lg font-bold mb-2 text-yellow-400">
+                  Account Information
+                </h3>
+                <div className="grid gap-2">
+                  <p>
+                    <strong>Chain:</strong> {chain.name} ({chainId})
+                  </p>
+                  <p>
+                    <strong>Address:</strong>
+                    <div className="font-mono text-sm break-all bg-black p-2 rounded mt-1">
+                      {address}
+                    </div>
+                  </p>
+                  <div>
+                    <strong>Native Balance:</strong>
+                    <div className="grid grid-cols-2 gap-2 ml-4 mt-1">
+                      <p>
+                        Available: {formattedNativeBalance} {chain.ticker}
+                      </p>
+                      <p>
+                        Total:{" "}
+                        {(
+                          Number(balance.balances.native.total) /
+                          Math.pow(10, chain.decimals)
+                        ).toFixed(chain.decimals)}{" "}
+                        {chain.ticker}
+                      </p>
+                      {balance.balances.native.unconfirmed !== "0" &&
+                        !isNaN(Number(balance.balances.native.unconfirmed)) && (
+                          <p>
+                            Unconfirmed:{" "}
+                            {(
+                              Number(balance.balances.native.unconfirmed) /
+                              Math.pow(10, chain.decimals)
+                            ).toFixed(chain.decimals)}{" "}
+                            {chain.ticker}
+                          </p>
+                        )}
+                    </div>
+                  </div>
+                  {balance.balances.tokens.length > 0 && (
+                    <div>
+                      <strong>Tokens:</strong>
+                      <div className="ml-4 mt-1">
+                        {balance.balances.tokens.map((token, index) => (
+                          <div key={index} className="mb-2">
+                            <p>
+                              {token.token.name} ({token.token.ticker})
+                            </p>
+                            <p className="text-sm text-gray-400">
+                              Amount:{" "}
+                              {(
+                                Number(token.amount) /
+                                Math.pow(10, Number(token.token.decimals))
+                              ).toFixed(Number(token.token.decimals))}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {balance.balances.staking && (
+                    <div>
+                      <strong>Staking:</strong>
+                      <div className="grid gap-1 ml-4 mt-1">
+                        <p>
+                          Total:{" "}
+                          {(
+                            Number(balance.balances.staking.total) /
+                            Math.pow(10, chain.decimals)
+                          ).toFixed(chain.decimals)}{" "}
+                          {chain.ticker}
+                        </p>
+                        <p>
+                          Locked:{" "}
+                          {(
+                            Number(balance.balances.staking.locked) /
+                            Math.pow(10, chain.decimals)
+                          ).toFixed(chain.decimals)}{" "}
+                          {chain.ticker}
+                        </p>
+                        <p>
+                          Unlocking:{" "}
+                          {(
+                            Number(balance.balances.staking.unlocking) /
+                            Math.pow(10, chain.decimals)
+                          ).toFixed(chain.decimals)}{" "}
+                          {chain.ticker}
+                        </p>
+                        <p>
+                          Unlocked:{" "}
+                          {(
+                            Number(balance.balances.staking.unlocked) /
+                            Math.pow(10, chain.decimals)
+                          ).toFixed(chain.decimals)}{" "}
+                          {chain.ticker}
+                        </p>
+                        {balance.balances.staking.positions.length > 0 && (
+                          <div className="mt-2">
+                            <p className="font-semibold">Staking Positions:</p>
+                            <div className="ml-4">
+                              {balance.balances.staking.positions.map(
+                                (pos, index) => (
+                                  <div
+                                    key={index}
+                                    className="mb-2 bg-black p-2 rounded"
+                                  >
+                                    <p>
+                                      Amount:{" "}
+                                      {(
+                                        Number(pos.amount) /
+                                        Math.pow(10, chain.decimals)
+                                      ).toFixed(chain.decimals)}{" "}
+                                      {chain.ticker}
+                                    </p>
+                                    <p>Status: {pos.status}</p>
+                                    <p>
+                                      Completion:{" "}
+                                      {new Date(
+                                        pos.completionDate * 1000
+                                      ).toLocaleString()}
+                                    </p>
+                                    <p className="text-sm text-gray-400">
+                                      Validators:{" "}
+                                      {pos.validatorAddresses.join(", ")}
+                                    </p>
+                                  </div>
+                                )
+                              )}
+                            </div>
+                          </div>
+                        )}
+                        {(balance.balances.staking.rewards.native.length > 0 ||
+                          balance.balances.staking.rewards.tokens.length >
+                            0) && (
+                          <div className="mt-2">
+                            <p className="font-semibold">Rewards:</p>
+                            <div className="ml-4">
+                              {balance.balances.staking.rewards.native.map(
+                                (reward, index) => (
+                                  <div key={index} className="mb-1">
+                                    <p>
+                                      {(
+                                        Number(reward.amount) /
+                                        Math.pow(10, chain.decimals)
+                                      ).toFixed(chain.decimals)}{" "}
+                                      {chain.ticker}
+                                      <span className="text-sm text-gray-400">
+                                        {" "}
+                                        from {reward.validatorAddress}
+                                      </span>
+                                    </p>
+                                  </div>
+                                )
+                              )}
+                              {balance.balances.staking.rewards.tokens.map(
+                                (reward, index) => (
+                                  <div key={index} className="mb-1">
+                                    <p>
+                                      {(
+                                        Number(reward.amount) /
+                                        Math.pow(
+                                          10,
+                                          Number(reward.token.decimals)
+                                        )
+                                      ).toFixed(
+                                        Number(reward.token.decimals)
+                                      )}{" "}
+                                      {reward.token.ticker}
+                                      <span className="text-sm text-gray-400">
+                                        {" "}
+                                        from {reward.validatorAddress}
+                                      </span>
+                                    </p>
+                                  </div>
+                                )
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          ),
+          type: "success",
+        };
+      } catch (error) {
+        console.error("Error fetching account state:", error);
+        return {
+          success: false,
+          output: (
+            <div>
+              <p className="text-red-400 mb-2">
+                Failed to fetch account state!
+              </p>
+              <p>
+                {error instanceof Error
+                  ? error.message
+                  : "Unknown error occurred"}
+              </p>
+            </div>
+          ),
+          type: "error",
+        };
+      }
+    },
   },
 
   start: {
@@ -250,6 +503,13 @@ export const executeCommand = async (input: string): Promise<CommandResult> => {
         const addressInfo = await encodePubKeyToAddress(pubkey, chainId);
         workflowState.address = addressInfo.address;
 
+        // Fetch balance information
+        const balance = await getAccountState(chainId, addressInfo.address);
+        const formattedNativeBalance = (
+          Number(balance.balances.native.available) /
+          Math.pow(10, chain.decimals)
+        ).toFixed(chain.decimals);
+
         // Clear the chain selection state
         sessionStorage.removeItem("lastCommandResult");
 
@@ -319,6 +579,183 @@ export const executeCommand = async (input: string): Promise<CommandResult> => {
                           </li>
                         ))}
                       </ul>
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="bg-gray-800 p-4 rounded mb-4">
+                <h3 className="text-lg font-bold mb-2 text-yellow-400">
+                  Account Information
+                </h3>
+                <div className="grid gap-2">
+                  <div>
+                    <strong>Native Balance:</strong>
+                    <div className="grid grid-cols-2 gap-2 ml-4 mt-1">
+                      <p>
+                        Available: {formattedNativeBalance} {chain.ticker}
+                      </p>
+                      <p>
+                        Total:{" "}
+                        {(
+                          Number(balance.balances.native.total) /
+                          Math.pow(10, chain.decimals)
+                        ).toFixed(chain.decimals)}{" "}
+                        {chain.ticker}
+                      </p>
+                      {balance.balances.native.unconfirmed !== "0" &&
+                        !isNaN(Number(balance.balances.native.unconfirmed)) && (
+                          <p>
+                            Unconfirmed:{" "}
+                            {(
+                              Number(balance.balances.native.unconfirmed) /
+                              Math.pow(10, chain.decimals)
+                            ).toFixed(chain.decimals)}{" "}
+                            {chain.ticker}
+                          </p>
+                        )}
+                    </div>
+                  </div>
+                  {balance.balances.tokens.length > 0 && (
+                    <div>
+                      <strong>Tokens:</strong>
+                      <div className="ml-4 mt-1">
+                        {balance.balances.tokens.map((token, index) => (
+                          <div key={index} className="mb-2">
+                            <p>
+                              {token.token.name} ({token.token.ticker})
+                            </p>
+                            <p className="text-sm text-gray-400">
+                              Amount:{" "}
+                              {(
+                                Number(token.amount) /
+                                Math.pow(10, Number(token.token.decimals))
+                              ).toFixed(Number(token.token.decimals))}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {balance.balances.staking && (
+                    <div>
+                      <strong>Staking:</strong>
+                      <div className="grid gap-1 ml-4 mt-1">
+                        <p>
+                          Total:{" "}
+                          {(
+                            Number(balance.balances.staking.total) /
+                            Math.pow(10, chain.decimals)
+                          ).toFixed(chain.decimals)}{" "}
+                          {chain.ticker}
+                        </p>
+                        <p>
+                          Locked:{" "}
+                          {(
+                            Number(balance.balances.staking.locked) /
+                            Math.pow(10, chain.decimals)
+                          ).toFixed(chain.decimals)}{" "}
+                          {chain.ticker}
+                        </p>
+                        <p>
+                          Unlocking:{" "}
+                          {(
+                            Number(balance.balances.staking.unlocking) /
+                            Math.pow(10, chain.decimals)
+                          ).toFixed(chain.decimals)}{" "}
+                          {chain.ticker}
+                        </p>
+                        <p>
+                          Unlocked:{" "}
+                          {(
+                            Number(balance.balances.staking.unlocked) /
+                            Math.pow(10, chain.decimals)
+                          ).toFixed(chain.decimals)}{" "}
+                          {chain.ticker}
+                        </p>
+                        {balance.balances.staking.positions.length > 0 && (
+                          <div className="mt-2">
+                            <p className="font-semibold">Staking Positions:</p>
+                            <div className="ml-4">
+                              {balance.balances.staking.positions.map(
+                                (pos, index) => (
+                                  <div
+                                    key={index}
+                                    className="mb-2 bg-black p-2 rounded"
+                                  >
+                                    <p>
+                                      Amount:{" "}
+                                      {(
+                                        Number(pos.amount) /
+                                        Math.pow(10, chain.decimals)
+                                      ).toFixed(chain.decimals)}{" "}
+                                      {chain.ticker}
+                                    </p>
+                                    <p>Status: {pos.status}</p>
+                                    <p>
+                                      Completion:{" "}
+                                      {new Date(
+                                        pos.completionDate * 1000
+                                      ).toLocaleString()}
+                                    </p>
+                                    <p className="text-sm text-gray-400">
+                                      Validators:{" "}
+                                      {pos.validatorAddresses.join(", ")}
+                                    </p>
+                                  </div>
+                                )
+                              )}
+                            </div>
+                          </div>
+                        )}
+                        {(balance.balances.staking.rewards.native.length > 0 ||
+                          balance.balances.staking.rewards.tokens.length >
+                            0) && (
+                          <div className="mt-2">
+                            <p className="font-semibold">Rewards:</p>
+                            <div className="ml-4">
+                              {balance.balances.staking.rewards.native.map(
+                                (reward, index) => (
+                                  <div key={index} className="mb-1">
+                                    <p>
+                                      {(
+                                        Number(reward.amount) /
+                                        Math.pow(10, chain.decimals)
+                                      ).toFixed(chain.decimals)}{" "}
+                                      {chain.ticker}
+                                      <span className="text-sm text-gray-400">
+                                        {" "}
+                                        from {reward.validatorAddress}
+                                      </span>
+                                    </p>
+                                  </div>
+                                )
+                              )}
+                              {balance.balances.staking.rewards.tokens.map(
+                                (reward, index) => (
+                                  <div key={index} className="mb-1">
+                                    <p>
+                                      {(
+                                        Number(reward.amount) /
+                                        Math.pow(
+                                          10,
+                                          Number(reward.token.decimals)
+                                        )
+                                      ).toFixed(
+                                        Number(reward.token.decimals)
+                                      )}{" "}
+                                      {reward.token.ticker}
+                                      <span className="text-sm text-gray-400">
+                                        {" "}
+                                        from {reward.validatorAddress}
+                                      </span>
+                                    </p>
+                                  </div>
+                                )
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
