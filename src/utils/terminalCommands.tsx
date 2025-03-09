@@ -1,5 +1,6 @@
 import React from "react";
 import { AdamikChain } from "../adamik/types";
+import { LocalSigner } from "../signers/LocalSigner";
 
 // Define the structure for commands
 type CommandResult = {
@@ -233,67 +234,102 @@ export const executeCommand = async (input: string): Promise<CommandResult> => {
         };
       }
 
-      // Chain found, display information
+      // Chain found, store in workflow state
       const chain = chains[chainId];
+      workflowState.selectedChain = chainId;
+      workflowState.selectedChainData = chain;
 
-      // Clear the chain selection state
-      sessionStorage.removeItem("lastCommandResult");
+      try {
+        // Create LocalSigner instance and generate pubkey
+        const signer = new LocalSigner(chainId, chain.signerSpec);
+        const pubkey = await signer.getPubkey();
+        workflowState.pubkey = pubkey;
 
-      return {
-        success: true,
-        output: (
-          <div>
-            <p className="mb-4 text-green-400 font-bold">
-              ✓ Chain selected: {chain.name}
-            </p>
-            <div className="bg-gray-800 p-4 rounded mb-4">
-              <h3 className="text-lg font-bold mb-2 text-yellow-400">
-                {chain.name} ({chainId})
-              </h3>
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <p className="mb-1">
-                    <strong>Token:</strong> {chain.ticker}
-                  </p>
-                  <p className="mb-1">
-                    <strong>Decimals:</strong> {chain.decimals}
-                  </p>
-                  <p className="mb-1">
-                    <strong>Family:</strong> {chain.family}
-                  </p>
-                </div>
-                <div>
-                  <p className="mb-1">
-                    <strong>Curve:</strong> {chain.signerSpec.curve}
-                  </p>
-                  <p className="mb-1">
-                    <strong>Hash Function:</strong>{" "}
-                    {chain.signerSpec.hashFunction}
-                  </p>
-                  <p className="mb-1">
-                    <strong>Coin Type:</strong> {chain.signerSpec.coinType}
-                  </p>
+        // Clear the chain selection state
+        sessionStorage.removeItem("lastCommandResult");
+
+        return {
+          success: true,
+          output: (
+            <div>
+              <p className="mb-4 text-green-400 font-bold">
+                ✓ Chain selected and public key generated!
+              </p>
+              <div className="bg-gray-800 p-4 rounded mb-4">
+                <h3 className="text-lg font-bold mb-2 text-yellow-400">
+                  {chain.name} ({chainId})
+                </h3>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <p className="mb-1">
+                      <strong>Token:</strong> {chain.ticker}
+                    </p>
+                    <p className="mb-1">
+                      <strong>Decimals:</strong> {chain.decimals}
+                    </p>
+                    <p className="mb-1">
+                      <strong>Family:</strong> {chain.family}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="mb-1">
+                      <strong>Curve:</strong> {chain.signerSpec.curve}
+                    </p>
+                    <p className="mb-1">
+                      <strong>Hash Function:</strong>{" "}
+                      {chain.signerSpec.hashFunction}
+                    </p>
+                    <p className="mb-1">
+                      <strong>Coin Type:</strong> {chain.signerSpec.coinType}
+                    </p>
+                  </div>
                 </div>
               </div>
+              <div className="bg-gray-800 p-4 rounded mb-4">
+                <h3 className="text-lg font-bold mb-2 text-yellow-400">
+                  Public Key Details
+                </h3>
+                <p className="font-mono text-sm break-all bg-black p-2 rounded">
+                  {pubkey}
+                </p>
+              </div>
+              <p className="mb-2">Supported Features:</p>
+              <ul className="list-disc ml-4 mb-4">
+                {Object.entries(chain.supportedFeatures).map(
+                  ([category, features]) => (
+                    <li key={category}>
+                      <strong className="capitalize">{category}:</strong>{" "}
+                      {Object.keys(features).join(", ")}
+                    </li>
+                  )
+                )}
+              </ul>
+              <p className="mt-4">
+                Type <code>start</code> to select a different chain.
+              </p>
             </div>
-            <p className="mb-2">Supported Features:</p>
-            <ul className="list-disc ml-4 mb-4">
-              {Object.entries(chain.supportedFeatures).map(
-                ([category, features]) => (
-                  <li key={category}>
-                    <strong className="capitalize">{category}:</strong>{" "}
-                    {Object.keys(features).join(", ")}
-                  </li>
-                )
-              )}
-            </ul>
-            <p className="mt-4">
-              Type <code>start</code> to select a different chain.
-            </p>
-          </div>
-        ),
-        type: "success",
-      };
+          ),
+          type: "success",
+        };
+      } catch (error) {
+        console.error("Error generating pubkey:", error);
+        return {
+          success: false,
+          output: (
+            <div>
+              <p className="text-red-400 mb-2">
+                Chain selected but failed to generate public key!
+              </p>
+              <p>{error instanceof Error ? error.message : "Unknown error"}</p>
+              <p className="mt-2 text-xs text-gray-400">
+                Make sure VITE_UNSECURE_LOCAL_SEED is set in your .env.local
+                file.
+              </p>
+            </div>
+          ),
+          type: "error",
+        };
+      }
     }
   }
 

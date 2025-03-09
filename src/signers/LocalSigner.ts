@@ -2,13 +2,14 @@ import { HDNodeWallet, ethers } from "ethers";
 import {
   AdamikCurve,
   AdamikHashFunction,
+  AdamikSignatureFormat,
   AdamikSignerSpec,
 } from "../adamik/types";
-import { extractSignature, infoTerminal } from "../utils";
-import { BaseSigner } from "./types";
+import { extractSignature, infoTerminal } from "../utils/utils";
 import * as nacl from "tweetnacl";
 import { ec } from "starknet";
-import { Bip39, Slip10, Slip10Curve, stringToPath } from "@cosmjs/crypto";
+import { Slip10, Slip10Curve, stringToPath, Bip39 } from "@cosmjs/crypto";
+import { BaseSigner } from "./types";
 
 /**
  * LocalSigner implements key derivation and signing for multiple curves:
@@ -30,6 +31,22 @@ import { Bip39, Slip10, Slip10Curve, stringToPath } from "@cosmjs/crypto";
 // Define chains that use direct seed instead of SLIP-0010
 const DIRECT_SEED_CHAINS = ["607"]; // TON
 
+// Helper functions for hex string handling
+function hexToBytes(hex: string): Uint8Array {
+  const cleanHex = hex.startsWith("0x") ? hex.slice(2) : hex;
+  const bytes = new Uint8Array(cleanHex.length / 2);
+  for (let i = 0; i < bytes.length; i++) {
+    bytes[i] = parseInt(cleanHex.slice(i * 2, i * 2 + 2), 16);
+  }
+  return bytes;
+}
+
+function bytesToHex(bytes: Uint8Array): string {
+  return Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
 export class LocalSigner implements BaseSigner {
   private wallet: HDNodeWallet | null = null;
   private ed25519KeyPair: nacl.SignKeyPair | null = null;
@@ -37,21 +54,21 @@ export class LocalSigner implements BaseSigner {
   public signerName = "LOCAL_UNSECURE";
 
   constructor(public chainId: string, public signerSpec: AdamikSignerSpec) {
-    if (!process.env.UNSECURE_LOCAL_SEED) {
+    if (!import.meta.env.VITE_UNSECURE_LOCAL_SEED) {
       throw new Error(
-        "UNSECURE_LOCAL_SEED is not set in environment variables"
+        "VITE_UNSECURE_LOCAL_SEED is not set in environment variables"
       );
     }
   }
 
   static isConfigValid(): boolean {
-    return !!process.env.UNSECURE_LOCAL_SEED;
+    return !!import.meta.env.VITE_UNSECURE_LOCAL_SEED;
   }
 
   private async getSecp256k1Wallet(): Promise<HDNodeWallet> {
     if (!this.wallet) {
       const masterNode = ethers.HDNodeWallet.fromPhrase(
-        process.env.UNSECURE_LOCAL_SEED!
+        import.meta.env.VITE_UNSECURE_LOCAL_SEED!
       );
 
       const derivationPath = `44'/${this.signerSpec.coinType}'/0'/0/0`;
@@ -62,17 +79,17 @@ export class LocalSigner implements BaseSigner {
 
   private async getEd25519KeyPair(): Promise<nacl.SignKeyPair> {
     if (!this.ed25519KeyPair) {
-      if (this.signerSpec.coinType === "607") {
-        const tonMnemonic = require("tonweb-mnemonic");
-        const words = process.env.UNSECURE_LOCAL_SEED!.split(" ");
+      const words = import.meta.env.VITE_UNSECURE_LOCAL_SEED!.split(" ");
+      // Convert mnemonic to seed using Bip39
+      const seed = await Bip39.mnemonicToSeed(words.join(" "));
 
-        const seed = await tonMnemonic.mnemonicToSeed(words);
-        this.ed25519KeyPair = nacl.sign.keyPair.fromSeed(seed);
+      if (DIRECT_SEED_CHAINS.includes(this.signerSpec.coinType)) {
+        // For chains that use direct seed (like TON)
+        // Convert seed (Uint8Array) to the format needed by nacl
+        const seedBytes = new Uint8Array(seed).slice(0, 32);
+        this.ed25519KeyPair = nacl.sign.keyPair.fromSeed(seedBytes);
       } else {
-        const words = process.env.UNSECURE_LOCAL_SEED!.split(" ");
-        const tonMnemonic = require("tonweb-mnemonic");
-        const seed = await tonMnemonic.mnemonicToSeed(words);
-
+        // For chains that follow SLIP-0010 (like Algorand)
         const hdPath = stringToPath(
           `m/44'/${this.signerSpec.coinType}'/0'/0'/0'`
         );
@@ -81,7 +98,7 @@ export class LocalSigner implements BaseSigner {
           seed,
           hdPath
         );
-        this.ed25519KeyPair = nacl.sign.keyPair.fromSeed(Buffer.from(privkey));
+        this.ed25519KeyPair = nacl.sign.keyPair.fromSeed(privkey);
       }
     }
     return this.ed25519KeyPair;
@@ -90,7 +107,7 @@ export class LocalSigner implements BaseSigner {
   private async getStarkPrivateKey(): Promise<string> {
     if (!this.starkPrivateKey) {
       const masterNode = ethers.HDNodeWallet.fromPhrase(
-        process.env.UNSECURE_LOCAL_SEED!
+        import.meta.env.VITE_UNSECURE_LOCAL_SEED!
       );
       const path = `44'/${this.signerSpec.coinType}'/0'/0/0`;
       const derived = masterNode.derivePath(path);
@@ -118,7 +135,7 @@ export class LocalSigner implements BaseSigner {
       }
       case AdamikCurve.ED25519: {
         const keyPair = await this.getEd25519KeyPair();
-        return Buffer.from(keyPair.publicKey).toString("hex");
+        return bytesToHex(keyPair.publicKey);
       }
       case AdamikCurve.STARK: {
         const privateKey = await this.getStarkPrivateKey();
@@ -129,10 +146,12 @@ export class LocalSigner implements BaseSigner {
     }
   }
 
-  private padTo32Bytes(input: string): Buffer {
+  private padTo32Bytes(input: string): Uint8Array {
     const hex = input.startsWith("0x") ? input.slice(2) : input;
-    const buffer = Buffer.from(hex.padStart(64, "0"), "hex");
-    return buffer;
+    const bytes = new Uint8Array(32);
+    const inputBytes = hexToBytes(hex.padStart(64, "0"));
+    bytes.set(inputBytes);
+    return bytes;
   }
 
   async signTransaction(encodedMessage: string): Promise<string> {
@@ -141,26 +160,23 @@ export class LocalSigner implements BaseSigner {
       this.signerName
     );
 
-    const messageBytes = Buffer.from(encodedMessage, "hex");
+    const messageBytes = hexToBytes(encodedMessage);
 
-    let messageHash: Buffer;
+    let messageHash: Uint8Array;
     switch (this.signerSpec.hashFunction) {
       case AdamikHashFunction.SHA256:
-        messageHash = Buffer.from(ethers.sha256(messageBytes).slice(2), "hex");
+        messageHash = hexToBytes(ethers.sha256(messageBytes).slice(2));
         break;
       case AdamikHashFunction.KECCAK256:
-        messageHash = Buffer.from(
-          ethers.keccak256(messageBytes).slice(2),
-          "hex"
-        );
+        messageHash = hexToBytes(ethers.keccak256(messageBytes).slice(2));
         break;
       case AdamikHashFunction.SHA512_256:
         throw new Error("SHA512_256 not implemented");
       case AdamikHashFunction.PEDERSEN: {
         const x = messageBytes;
-        const y = Buffer.from("00", "hex");
+        const y = new Uint8Array([0]);
         const pedersenHash = ec.starkCurve.pedersen(x, y);
-        messageHash = Buffer.from(pedersenHash.slice(2), "hex");
+        messageHash = hexToBytes(pedersenHash.slice(2));
         break;
       }
       default:
@@ -174,28 +190,37 @@ export class LocalSigner implements BaseSigner {
         const wallet = await this.getSecp256k1Wallet();
         const sig = wallet.signingKey.sign(messageHash);
 
-        return extractSignature(this.signerSpec.signatureFormat, {
-          r: sig.r.slice(2),
-          s: sig.s.slice(2),
-          v: sig.v.toString(16),
-        });
+        return extractSignature(
+          this.signerSpec.signatureFormat as AdamikSignatureFormat,
+          {
+            r: sig.r.slice(2),
+            s: sig.s.slice(2),
+            v: sig.v.toString(16),
+          }
+        );
       }
       case AdamikCurve.ED25519: {
         const keyPair = await this.getEd25519KeyPair();
         const signature = nacl.sign.detached(messageBytes, keyPair.secretKey);
 
-        return extractSignature(this.signerSpec.signatureFormat, {
-          r: Buffer.from(signature.slice(0, 32)).toString("hex"),
-          s: Buffer.from(signature.slice(32, 64)).toString("hex"),
-        });
+        return extractSignature(
+          this.signerSpec.signatureFormat as AdamikSignatureFormat,
+          {
+            r: bytesToHex(signature.slice(0, 32)),
+            s: bytesToHex(signature.slice(32, 64)),
+          }
+        );
       }
       case AdamikCurve.STARK: {
         const privateKey = await this.getStarkPrivateKey();
         const signature = ec.starkCurve.sign(messageHash, privateKey);
-        return extractSignature(this.signerSpec.signatureFormat, {
-          r: signature.r.toString(16),
-          s: signature.s.toString(16),
-        });
+        return extractSignature(
+          this.signerSpec.signatureFormat as AdamikSignatureFormat,
+          {
+            r: signature.r.toString(16),
+            s: signature.s.toString(16),
+          }
+        );
       }
       default:
         throw new Error(`Unsupported curve: ${this.signerSpec.curve}`);
