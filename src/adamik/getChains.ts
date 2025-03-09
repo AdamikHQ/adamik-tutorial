@@ -1,35 +1,39 @@
-import prompts from "prompts";
 import { AdamikChain } from "./types";
 
 export const adamikGetChains = async () => {
-  const fetchAllChains = await fetch(
-    `${process.env.ADAMIK_API_BASE_URL}/api/chains`,
-    {
+  try {
+    const apiKey = import.meta.env.VITE_ADAMIK_API_KEY;
+    const apiBaseUrl = import.meta.env.VITE_ADAMIK_API_BASE_URL;
+
+    if (!apiKey || !apiBaseUrl) {
+      throw new Error(
+        "Missing API configuration. Please check your environment variables."
+      );
+    }
+
+    const response = await fetch(`${apiBaseUrl}/api/chains`, {
       headers: {
-        Authorization: process.env.ADAMIK_API_KEY!,
+        Authorization: apiKey,
         "Content-Type": "application/json",
       },
+    });
+
+    if (!response.ok) {
+      throw new Error(`API request failed with status ${response.status}`);
     }
-  );
-  const chains: Record<string, AdamikChain> = (
-    (await fetchAllChains.json()) as { chains: Record<string, AdamikChain> }
-  ).chains;
 
-  const { chainId } = await prompts({
-    type: "autocomplete",
-    name: "chainId",
-    message: "Select a chain",
-    choices: Object.keys(chains).map((chain) => ({
-      title: `${chains[chain].name} (${chains[chain].ticker}) - ${chains[chain].signerSpec.curve} | ${chains[chain].signerSpec.hashFunction} | CoinType: ${chains[chain].signerSpec.coinType}`,
-      value: chain,
-    })),
-  });
+    const data = await response.json();
 
-  if (!chainId) {
-    throw new Error("No chain selected");
+    // Check if chains data exists
+    if (!data.chains) {
+      throw new Error("No chains data found in API response");
+    }
+
+    const chains: Record<string, AdamikChain> = data.chains;
+
+    return { chains };
+  } catch (error) {
+    console.error("Error fetching chains:", error);
+    throw error;
   }
-
-  const signerSpec = chains[chainId].signerSpec;
-
-  return { chains, chainId, signerSpec };
 };

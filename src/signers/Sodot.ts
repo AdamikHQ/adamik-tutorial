@@ -100,7 +100,6 @@ export class SodotSigner implements BaseSigner {
   }
 
   public async getPubkey(): Promise<string> {
-    // If we no keyids is provided, we generate a new keypair.
     if (this.keyIds.length === 0) {
       infoTerminal("Generating new keypair...", this.signerName);
       this.keyIds = await this.keygenVertex(
@@ -406,17 +405,23 @@ export class SodotSigner implements BaseSigner {
         }),
       }
     );
-    const pubkey = (await response.json()) as
-      | {
-          uncompressed: string;
-          compressed: string;
-        }
-      | { pubkey: string };
 
+    if (!response.ok) {
+      throw new Error(`Failed to derive pubkey: ${await response.text()}`);
+    }
+
+    const pubkey = await response.json();
+
+    // For ed25519 keys
     if ("pubkey" in pubkey) {
       return pubkey.pubkey;
     }
 
-    return pubkey.compressed;
+    // For secp256k1 keys (including Bitcoin)
+    if ("compressed" in pubkey) {
+      return pubkey.compressed;
+    }
+
+    throw new Error(`Unexpected pubkey format: ${JSON.stringify(pubkey)}`);
   }
 }
