@@ -9,10 +9,10 @@ const Index = () => {
   const [activeAnimation, setActiveAnimation] = useState(true);
   
   useEffect(() => {
-    // After component mount, start the animation sequence
+    // After component mount, start the animation sequence with a shorter delay
     const timer = setTimeout(() => {
       setActiveAnimation(false);
-    }, 2000);
+    }, 500); // Reduced from 2000ms to 500ms
     
     return () => clearTimeout(timer);
   }, []);
@@ -48,25 +48,24 @@ const Index = () => {
       
       {/* Main Content */}
       <main className="flex-grow flex flex-col items-center justify-center p-8">
-        <div className={`transition-all duration-1000 ease-in-out transform ${activeAnimation ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}>
-          <div className="max-w-4xl w-full mx-auto">
-            <div className="text-center mb-8 animate-slide-in opacity-0">
-              <h2 className="text-3xl font-bold tracking-tight mb-3">Interactive API Tutorial</h2>
-              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-                Learn how to use our API through an interactive terminal-based tutorial.
-                Type commands to explore features and see examples.
-              </p>
-            </div>
-            
-            <Terminal 
-              welcomeMessage="Welcome to the API Terminal. Type 'intro' to get started or 'help' to see available commands."
-              initialCommands={[]}
-              className="shadow-2xl"
-            />
-            
-            <div className="mt-8 text-sm text-center text-gray-500 animate-slide-in opacity-0 terminal-animation-delay-3">
-              Tip: Start with <code className="bg-gray-200 px-1.5 py-0.5 rounded">intro</code> to learn about the API or <code className="bg-gray-200 px-1.5 py-0.5 rounded">tutorial</code> for a guided walkthrough.
-            </div>
+        {/* Removed the conditional rendering based on animation state to ensure content is always visible */}
+        <div className="max-w-4xl w-full mx-auto">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold tracking-tight mb-3">Interactive API Tutorial</h2>
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Learn how to use our API through an interactive terminal-based tutorial.
+              Type commands to explore features and see examples.
+            </p>
+          </div>
+          
+          <Terminal 
+            welcomeMessage="Welcome to the API Terminal. Type 'intro' to get started or 'help' to see available commands."
+            initialCommands={["help"]} // Added a default command to show available commands
+            className="shadow-2xl"
+          />
+          
+          <div className="mt-8 text-sm text-center text-gray-500">
+            Tip: Start with <code className="bg-gray-200 px-1.5 py-0.5 rounded">intro</code> to learn about the API or <code className="bg-gray-200 px-1.5 py-0.5 rounded">tutorial</code> for a guided walkthrough.
           </div>
         </div>
       </main>
