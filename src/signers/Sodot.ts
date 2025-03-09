@@ -29,15 +29,15 @@ export class SodotSigner implements BaseSigner {
   // TODO: Make this configurable and extendable
   private SODOT_VERTICES = [
     {
-      url: "/sodot-vertex-0",
+      url: import.meta.env.VITE_SODOT_VERTEX_URL_0!,
       apiKey: import.meta.env.VITE_SODOT_VERTEX_API_KEY_0!,
     },
     {
-      url: "/sodot-vertex-1",
+      url: import.meta.env.VITE_SODOT_VERTEX_URL_1!,
       apiKey: import.meta.env.VITE_SODOT_VERTEX_API_KEY_1!,
     },
     {
-      url: "/sodot-vertex-2",
+      url: import.meta.env.VITE_SODOT_VERTEX_URL_2!,
       apiKey: import.meta.env.VITE_SODOT_VERTEX_API_KEY_2!,
     },
   ];
@@ -65,14 +65,29 @@ export class SodotSigner implements BaseSigner {
   }
 
   static isConfigValid(): boolean {
+    if (!import.meta.env.VITE_SODOT_VERTEX_URL_0) {
+      throw new Error(
+        "VITE_SODOT_VERTEX_URL_0 is not set in your .env.local file"
+      );
+    }
     if (!import.meta.env.VITE_SODOT_VERTEX_API_KEY_0) {
       throw new Error(
         "VITE_SODOT_VERTEX_API_KEY_0 is not set in your .env.local file"
       );
     }
+    if (!import.meta.env.VITE_SODOT_VERTEX_URL_1) {
+      throw new Error(
+        "VITE_SODOT_VERTEX_URL_1 is not set in your .env.local file"
+      );
+    }
     if (!import.meta.env.VITE_SODOT_VERTEX_API_KEY_1) {
       throw new Error(
         "VITE_SODOT_VERTEX_API_KEY_1 is not set in your .env.local file"
+      );
+    }
+    if (!import.meta.env.VITE_SODOT_VERTEX_URL_2) {
+      throw new Error(
+        "VITE_SODOT_VERTEX_URL_2 is not set in your .env.local file"
       );
     }
     if (!import.meta.env.VITE_SODOT_VERTEX_API_KEY_2) {

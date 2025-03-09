@@ -3,6 +3,7 @@ import { AdamikChain } from "../adamik/types";
 import { SodotSigner } from "../signers/Sodot";
 import { encodePubKeyToAddress } from "../adamik/encodePubkeyToAddress";
 import { getAccountState } from "../adamik/getAccountState";
+import { infoTerminal } from "./utils";
 
 // Define the structure for commands
 type CommandResult = {
@@ -496,15 +497,39 @@ export const executeCommand = async (input: string): Promise<CommandResult> => {
       try {
         // Create SodotSigner instance and generate pubkey
         const signer = new SodotSigner(chainId, chain.signerSpec);
+        infoTerminal(`Generating keys for ${chain.name}...`, "TERMINAL");
         const pubkey = await signer.getPubkey();
+        if (!pubkey) {
+          throw new Error("Failed to generate public key");
+        }
         workflowState.pubkey = pubkey;
 
         // Get address from pubkey
         const addressInfo = await encodePubKeyToAddress(pubkey, chainId);
+        if (!addressInfo || !addressInfo.address) {
+          throw new Error("Failed to generate address from public key");
+        }
         workflowState.address = addressInfo.address;
 
         // Fetch balance information
-        const balance = await getAccountState(chainId, addressInfo.address);
+        let balance;
+        try {
+          const balance = await getAccountState(chainId, addressInfo.address);
+        } catch (error) {
+          console.warn("Failed to fetch balance:", error);
+          balance = {
+            balances: {
+              native: {
+                available: "0",
+                total: "0",
+                unconfirmed: "0",
+              },
+              tokens: [],
+              staking: null,
+            },
+          };
+        }
+
         const formattedNativeBalance = (
           Number(balance.balances.native.available) /
           Math.pow(10, chain.decimals)
