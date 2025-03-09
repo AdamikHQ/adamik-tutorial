@@ -1,6 +1,6 @@
 // Simplified chain information for display purposes only
 // Full chain details will be fetched from the API when needed
-export const hardcodedChains: Record<string, { name: string; ticker: string }> =
+export const showroomChains: Record<string, { name: string; ticker: string }> =
   {
     bitcoin: {
       name: "Bitcoin",

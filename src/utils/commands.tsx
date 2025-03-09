@@ -5,7 +5,7 @@ import {
   resetWorkflowState,
   workflowState,
 } from "./terminalTypes";
-import { hardcodedChains } from "./hardcodedChains";
+import { showroomChains } from "./showRoomChains";
 import { SodotSigner } from "../signers/Sodot";
 import { encodePubKeyToAddress } from "../adamik/encodePubkeyToAddress";
 import { getAccountState } from "../adamik/getAccountState";
@@ -306,11 +306,11 @@ export const startCommand: Command = {
       // Store chains in session storage
       sessionStorage.setItem(
         "adamikChainIds",
-        JSON.stringify(Object.keys(hardcodedChains))
+        JSON.stringify(Object.keys(showroomChains))
       );
 
       // Format chains for display
-      const chainsList = Object.entries(hardcodedChains).map(
+      const chainsList = Object.entries(showroomChains).map(
         ([chainId, chain]) => ({
           id: chainId,
           name: chain.name,
