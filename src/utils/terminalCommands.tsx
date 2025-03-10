@@ -26,6 +26,7 @@ const commands = {
 const initialCommands = {
   help: helpCommand,
   start: startCommand,
+  clear: clearCommand,
 };
 
 // Main function to execute commands

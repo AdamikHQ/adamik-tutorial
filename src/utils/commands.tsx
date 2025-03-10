@@ -39,55 +39,106 @@ export const helpCommand: Command = {
             {showAllCommands ? (
               <>
                 <li className="mb-1">
-                  <strong className="bg-gray-200 text-black px-1.5 py-0.5 rounded font-medium">
-                    start
-                  </strong>{" "}
-                  - Launches an interactive flow to explore blockchain
+                  <span className="inline-flex items-center bg-gray-800 px-2 py-0.5 rounded mr-2">
+                    <span className="font-mono">
+                      <span className="text-purple-500">$</span>{" "}
+                      <span className="text-blue-500 font-bold">start</span>
+                    </span>
+                  </span>
+                  <span>
+                    - Launches an interactive flow to explore blockchain
+                  </span>
                 </li>
                 <li className="mb-1">
-                  <strong className="bg-gray-200 text-black px-1.5 py-0.5 rounded font-medium">
-                    help
-                  </strong>{" "}
-                  - Shows a list of available commands
+                  <span className="inline-flex items-center bg-gray-800 px-2 py-0.5 rounded mr-2">
+                    <span className="font-mono">
+                      <span className="text-purple-500">$</span>{" "}
+                      <span className="text-green-500 font-bold">help</span>
+                    </span>
+                  </span>
+                  <span>- Shows a list of available commands</span>
                 </li>
                 <li className="mb-1">
-                  <strong className="bg-gray-200 text-black px-1.5 py-0.5 rounded font-medium">
-                    getChains
-                  </strong>{" "}
-                  - Shows the complete list of chains supported by Adamik API
+                  <span className="inline-flex items-center bg-gray-800 px-2 py-0.5 rounded mr-2">
+                    <span className="font-mono">
+                      <span className="text-purple-500">$</span>{" "}
+                      <span className="text-yellow-500 font-bold">
+                        getChains
+                      </span>
+                    </span>
+                  </span>
+                  <span>
+                    - Shows the complete list of chains supported by Adamik API
+                  </span>
                 </li>
                 <li className="mb-1">
-                  <strong className="bg-gray-200 text-black px-1.5 py-0.5 rounded font-medium">
-                    chain
-                  </strong>{" "}
-                  - Shows detailed information about a specific chain
+                  <span className="inline-flex items-center bg-gray-800 px-2 py-0.5 rounded mr-2">
+                    <span className="font-mono">
+                      <span className="text-purple-500">$</span>{" "}
+                      <span className="text-cyan-500 font-bold">chain</span>
+                    </span>
+                  </span>
+                  <span>
+                    - Shows detailed information about a specific chain
+                  </span>
                 </li>
                 <li className="mb-1">
-                  <strong className="bg-gray-200 text-black px-1.5 py-0.5 rounded font-medium">
-                    clear
-                  </strong>{" "}
-                  - Clears the terminal
+                  <span className="inline-flex items-center bg-gray-800 px-2 py-0.5 rounded mr-2">
+                    <span className="font-mono">
+                      <span className="text-purple-500">$</span>{" "}
+                      <span className="text-red-500 font-bold">clear</span>
+                    </span>
+                  </span>
+                  <span>- Clears the terminal</span>
                 </li>
               </>
             ) : (
               <>
                 <li className="mb-1">
-                  <strong className="bg-gray-200 text-black px-1.5 py-0.5 rounded font-medium">
-                    start
-                  </strong>{" "}
-                  - Launches an interactive flow to explore blockchain
+                  <span className="inline-flex items-center bg-gray-800 px-2 py-0.5 rounded mr-2">
+                    <span className="font-mono">
+                      <span className="text-purple-500">$</span>{" "}
+                      <span className="text-blue-500 font-bold">start</span>
+                    </span>
+                  </span>
+                  <span>
+                    - Launches an interactive flow to explore blockchain
+                  </span>
                 </li>
                 <li className="mb-1">
-                  <strong className="bg-gray-200 text-black px-1.5 py-0.5 rounded font-medium">
-                    help
-                  </strong>{" "}
-                  - Shows a list of available commands
+                  <span className="inline-flex items-center bg-gray-800 px-2 py-0.5 rounded mr-2">
+                    <span className="font-mono">
+                      <span className="text-purple-500">$</span>{" "}
+                      <span className="text-green-500 font-bold">help</span>
+                    </span>
+                  </span>
+                  <span>- Shows a list of available commands</span>
+                </li>
+                <li className="mb-1">
+                  <span className="inline-flex items-center bg-gray-800 px-2 py-0.5 rounded mr-2">
+                    <span className="font-mono">
+                      <span className="text-purple-500">$</span>{" "}
+                      <span className="text-red-500 font-bold">clear</span>
+                    </span>
+                  </span>
+                  <span>- Clears the terminal</span>
                 </li>
               </>
             )}
           </ul>
+          {showAllCommands && (
+            <p className="text-medium text-gray-400 mt-3">
+              Type{" "}
+              <span className="font-mono">
+                <span className="text-purple-500">$</span>{" "}
+                <span className="text-cyan-500 font-bold">chain</span>{" "}
+                <span className="text-yellow-400">ethereum</span>
+              </span>{" "}
+              to view details about a specific chain
+            </p>
+          )}
           {!showAllCommands && (
-            <p className="mt-2 text-sm text-gray-400">
+            <p className="text-medium text-gray-400 mt-2">
               Note: More commands will be available after executing help.
             </p>
           )}
@@ -214,8 +265,13 @@ const renderChainDetails = (chainId: string, chain: AdamikChain) => {
         */}
       </div>
 
-      <p className="text-sm text-gray-400">
-        Use <code>start</code> to generate keys and addresses for this chain.
+      <p className="text-medium text-gray-400 mt-3">
+        Type{" "}
+        <span className="font-mono">
+          <span className="text-purple-500">$</span>{" "}
+          <span className="text-blue-500 font-bold">start</span>
+        </span>{" "}
+        to generate keys and addresses for this chain.
       </p>
     </div>
   );
@@ -256,9 +312,14 @@ export const getChainsCommand: Command = {
                 </div>
               ))}
             </div>
-            <p className="text-sm text-gray-400">
-              Use the <code>chain</code> command to view details about a
-              specific chain (e.g., <code>chain ethereum</code>)
+            <p className="text-medium text-gray-400 mt-3">
+              Type{" "}
+              <span className="font-mono">
+                <span className="text-purple-500">$</span>{" "}
+                <span className="text-cyan-500 font-bold">chain</span>{" "}
+                <span className="text-yellow-400">ethereum</span>
+              </span>{" "}
+              to view details about a specific chain
             </p>
           </div>
         ),
@@ -334,9 +395,10 @@ export const startCommand: Command = {
                 </div>
               ))}
             </div>
-            <p className="text-sm text-gray-400">
+            <p className="text-medium text-gray-400">
               Enter a chain ID in the terminal below (e.g.,{" "}
-              <code>ethereum</code>, <code>bitcoin</code>, etc.)
+              <span className="font-mono text-yellow-400">ethereum</span>,{" "}
+              <span className="font-mono text-yellow-400">bitcoin</span>, etc.)
             </p>
           </div>
         ),

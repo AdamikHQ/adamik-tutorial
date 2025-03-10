@@ -150,7 +150,7 @@ const About = () => {
 
       {/* Footer */}
       <footer className="w-full py-6 px-8 text-center text-sm text-gray-500">
-        © {new Date().getFullYear()} API Terminal. All rights reserved.
+        © {new Date().getFullYear()} Adamik Terminal. All rights reserved.
       </footer>
     </div>
   );

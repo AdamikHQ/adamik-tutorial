@@ -23,13 +23,20 @@ const Terminal: React.FC<TerminalProps> = ({
   welcomeMessage = (
     <span>
       Welcome to the API Terminal. Available commands:{" "}
-      <code className="bg-gray-200 text-black px-1.5 py-0.5 rounded font-medium">
-        help
-      </code>
+      <span className="font-mono">
+        <span className="text-purple-500">$</span>{" "}
+        <span className="text-green-500 font-bold">help</span>
+      </span>
       ,{" "}
-      <code className="bg-gray-200 text-black px-1.5 py-0.5 rounded font-medium">
-        start
-      </code>
+      <span className="font-mono">
+        <span className="text-purple-500">$</span>{" "}
+        <span className="text-blue-500 font-bold">start</span>
+      </span>
+      ,{" "}
+      <span className="font-mono">
+        <span className="text-purple-500">$</span>{" "}
+        <span className="text-red-500 font-bold">clear</span>
+      </span>
     </span>
   ),
   initialCommands = [],

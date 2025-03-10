@@ -24,7 +24,7 @@ const Index = () => {
           <div className="h-8 w-8 rounded-md bg-primary flex items-center justify-center">
             <span className="text-white font-semibold text-lg">&gt;_</span>
           </div>
-          <h1 className="text-xl font-medium">API Terminal</h1>
+          <h1 className="text-xl font-medium">Adamik Terminal</h1>
         </div>
 
         <nav className="flex items-center space-x-4">
@@ -63,13 +63,20 @@ const Index = () => {
             welcomeMessage={
               <span>
                 Welcome to the API Terminal. Available commands:{" "}
-                <code className="bg-gray-200 text-black px-1.5 py-0.5 rounded font-medium">
-                  help
-                </code>
+                <span className="font-mono">
+                  <span className="text-purple-500">$</span>{" "}
+                  <span className="text-green-500 font-bold">help</span>
+                </span>
                 ,{" "}
-                <code className="bg-gray-200 text-black px-1.5 py-0.5 rounded font-medium">
-                  start
-                </code>
+                <span className="font-mono">
+                  <span className="text-purple-500">$</span>{" "}
+                  <span className="text-blue-500 font-bold">start</span>
+                </span>
+                ,{" "}
+                <span className="font-mono">
+                  <span className="text-purple-500">$</span>{" "}
+                  <span className="text-red-500 font-bold">clear</span>
+                </span>
               </span>
             }
             className="shadow-2xl"
@@ -77,17 +84,28 @@ const Index = () => {
 
           <div className="mt-8 text-sm text-center text-gray-500">
             Tip: Type{" "}
-            <code className="bg-gray-200 px-1.5 py-0.5 rounded">help</code> to
-            see all available commands or{" "}
-            <code className="bg-gray-200 px-1.5 py-0.5 rounded">start</code> to
-            begin exploring blockchain networks.
+            <span className="font-mono">
+              <span className="text-purple-500">$</span>{" "}
+              <span className="text-green-500 font-bold">help</span>
+            </span>{" "}
+            to see all available commands,{" "}
+            <span className="font-mono">
+              <span className="text-purple-500">$</span>{" "}
+              <span className="text-blue-500 font-bold">start</span>
+            </span>{" "}
+            to begin exploring blockchain networks, or{" "}
+            <span className="font-mono">
+              <span className="text-purple-500">$</span>{" "}
+              <span className="text-red-500 font-bold">clear</span>
+            </span>{" "}
+            to clear the terminal.
           </div>
         </div>
       </main>
 
-      {/* Footer */}
+      {/* F ooter */}
       <footer className="w-full py-6 px-8 text-center text-sm text-gray-500">
-        © {new Date().getFullYear()} API Terminal. All rights reserved.
+        © {new Date().getFullYear()} Adamik Terminal. All rights reserved.
       </footer>
     </div>
   );
