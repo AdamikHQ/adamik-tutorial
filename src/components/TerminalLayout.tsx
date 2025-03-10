@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 interface TerminalLayoutProps {
   className?: string;
-  welcomeMessage?: string;
+  welcomeMessage?: React.ReactNode;
   initialCommands?: string[];
 }
 

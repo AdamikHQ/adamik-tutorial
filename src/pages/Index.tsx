@@ -37,7 +37,7 @@ const Index = () => {
           </Button>
           <Button
             variant="outline"
-            onClick={() => window.open("https://github.com", "_blank")}
+            onClick={() => window.open("https://github.com/AdamikHQ", "_blank")}
             className="text-sm font-medium"
           >
             Documentation
@@ -50,26 +50,37 @@ const Index = () => {
         <div className="w-full max-w-[1400px] mx-auto">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold tracking-tight mb-3">
-              Interactive API Tutorial
+              Adamik Terminal
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Learn how to use our API through an interactive terminal-based
-              tutorial. Type commands to explore features and see examples.
+              Learn how to use Adamik API through an interactive terminal-based
+              tutorial. <br />
+              Type commands to explore features and see examples.
             </p>
           </div>
 
           <TerminalLayout
-            welcomeMessage="Welcome to the API Terminal. Type 'help' to get started or 'intro' to learn more."
-            initialCommands={["help"]}
+            welcomeMessage={
+              <span>
+                Welcome to the API Terminal. Available commands:{" "}
+                <code className="bg-gray-200 text-black px-1.5 py-0.5 rounded font-medium">
+                  help
+                </code>
+                ,{" "}
+                <code className="bg-gray-200 text-black px-1.5 py-0.5 rounded font-medium">
+                  start
+                </code>
+              </span>
+            }
             className="shadow-2xl"
           />
 
           <div className="mt-8 text-sm text-center text-gray-500">
-            Tip: Start with{" "}
-            <code className="bg-gray-200 px-1.5 py-0.5 rounded">intro</code> to
-            learn about the API or{" "}
-            <code className="bg-gray-200 px-1.5 py-0.5 rounded">tutorial</code>{" "}
-            for a guided walkthrough.
+            Tip: Type{" "}
+            <code className="bg-gray-200 px-1.5 py-0.5 rounded">help</code> to
+            see all available commands or{" "}
+            <code className="bg-gray-200 px-1.5 py-0.5 rounded">start</code> to
+            begin exploring blockchain networks.
           </div>
         </div>
       </main>

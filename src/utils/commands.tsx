@@ -18,72 +18,98 @@ import { adamikGetChains } from "../adamik/getChains";
 export const helpCommand: Command = {
   name: "help",
   description: "Shows a list of available commands",
-  execute: (_args: string[] = []): CommandResult => ({
-    success: true,
-    output: (
-      <div>
-        <p className="mb-2">Available commands:</p>
-        <ul className="list-disc ml-4">
-          <li className="mb-1">
-            <strong>start</strong> - Launches an interactive flow to explore
-            blockchain
-          </li>
-          <li className="mb-1">
-            <strong>help</strong> - Shows a list of available commands
-          </li>
-          <li className="mb-1">
-            <strong>getChains</strong> - Shows the complete list of chains
-            supported by Adamik API
-          </li>
-          <li className="mb-1">
-            <strong>chain</strong> - Shows detailed information about a specific
-            chain
-          </li>
-          <li className="mb-1">
-            <strong>clear</strong> - Clears the terminal
-          </li>
-        </ul>
-      </div>
-    ),
-    type: "info",
-  }),
+  execute: (_args: string[] = []): CommandResult => {
+    // Check if help has been executed before
+    const helpExecuted = sessionStorage.getItem("helpExecuted") === "true";
+
+    // Check if a chain has been selected
+    const chainSelected =
+      workflowState.selectedChain !== null &&
+      workflowState.selectedChain !== undefined;
+
+    // Show all commands if either help has been executed or a chain has been selected
+    const showAllCommands = helpExecuted || chainSelected;
+
+    return {
+      success: true,
+      output: (
+        <div>
+          <p className="mb-2">Available commands:</p>
+          <ul className="list-disc ml-4">
+            {showAllCommands ? (
+              <>
+                <li className="mb-1">
+                  <strong className="bg-gray-200 text-black px-1.5 py-0.5 rounded font-medium">
+                    start
+                  </strong>{" "}
+                  - Launches an interactive flow to explore blockchain
+                </li>
+                <li className="mb-1">
+                  <strong className="bg-gray-200 text-black px-1.5 py-0.5 rounded font-medium">
+                    help
+                  </strong>{" "}
+                  - Shows a list of available commands
+                </li>
+                <li className="mb-1">
+                  <strong className="bg-gray-200 text-black px-1.5 py-0.5 rounded font-medium">
+                    getChains
+                  </strong>{" "}
+                  - Shows the complete list of chains supported by Adamik API
+                </li>
+                <li className="mb-1">
+                  <strong className="bg-gray-200 text-black px-1.5 py-0.5 rounded font-medium">
+                    chain
+                  </strong>{" "}
+                  - Shows detailed information about a specific chain
+                </li>
+                <li className="mb-1">
+                  <strong className="bg-gray-200 text-black px-1.5 py-0.5 rounded font-medium">
+                    clear
+                  </strong>{" "}
+                  - Clears the terminal
+                </li>
+              </>
+            ) : (
+              <>
+                <li className="mb-1">
+                  <strong className="bg-gray-200 text-black px-1.5 py-0.5 rounded font-medium">
+                    start
+                  </strong>{" "}
+                  - Launches an interactive flow to explore blockchain
+                </li>
+                <li className="mb-1">
+                  <strong className="bg-gray-200 text-black px-1.5 py-0.5 rounded font-medium">
+                    help
+                  </strong>{" "}
+                  - Shows a list of available commands
+                </li>
+              </>
+            )}
+          </ul>
+          {!showAllCommands && (
+            <p className="mt-2 text-sm text-gray-400">
+              Note: More commands will be available after executing help.
+            </p>
+          )}
+        </div>
+      ),
+      type: "info",
+    };
+  },
 };
 
 // Clear command
 export const clearCommand: Command = {
   name: "clear",
   description: "Clears the terminal",
-  execute: (_args: string[] = []): CommandResult => ({
-    success: true,
-    output: (
-      <div>
-        <p className="mb-2">Terminal cleared</p>
-        <p className="mb-2">Available commands:</p>
-        <ul className="list-disc ml-4">
-          <li className="mb-1">
-            <strong>start</strong> - Launches an interactive flow to explore
-            blockchain
-          </li>
-          <li className="mb-1">
-            <strong>help</strong> - Shows a list of available commands
-          </li>
-          <li className="mb-1">
-            <strong>getChains</strong> - Shows the complete list of chains
-            supported by Adamik API
-          </li>
-          <li className="mb-1">
-            <strong>chain</strong> - Shows detailed information about a specific
-            chain
-          </li>
-          <li className="mb-1">
-            <strong>clear</strong> - Clears the terminal
-          </li>
-        </ul>
-      </div>
-    ),
-    type: "success",
-    clearTerminal: true,
-  }),
+  execute: (_args: string[] = []): CommandResult => {
+    return {
+      success: true,
+      output: null,
+      type: "success",
+      clearTerminal: true,
+    };
+  },
 };
 
 // Chain command

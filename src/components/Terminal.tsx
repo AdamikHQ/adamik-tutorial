@@ -3,10 +3,11 @@ import CommandLine from "./CommandLine";
 import TerminalOutput from "./TerminalOutput";
 import { executeCommand } from "../utils/terminalCommands";
 import { cn } from "@/lib/utils";
+import { useApiLogs } from "../contexts/ApiLogsContext";
 
 interface TerminalProps {
   className?: string;
-  welcomeMessage?: string;
+  welcomeMessage?: React.ReactNode;
   initialCommands?: string[];
 }
 
@@ -19,7 +20,18 @@ interface CommandEntry {
 
 const Terminal: React.FC<TerminalProps> = ({
   className,
-  welcomeMessage = "Welcome to the API Terminal. Type 'help' to get started.",
+  welcomeMessage = (
+    <span>
+      Welcome to the API Terminal. Available commands:{" "}
+      <code className="bg-gray-200 text-black px-1.5 py-0.5 rounded font-medium">
+        help
+      </code>
+      ,{" "}
+      <code className="bg-gray-200 text-black px-1.5 py-0.5 rounded font-medium">
+        start
+      </code>
+    </span>
+  ),
   initialCommands = [],
 }) => {
   const [commandHistory, setCommandHistory] = useState<CommandEntry[]>([]);
@@ -27,9 +39,14 @@ const Terminal: React.FC<TerminalProps> = ({
   const [currentCommand, setCurrentCommand] = useState<string>("");
   const terminalRef = useRef<HTMLDivElement>(null);
   const commandCount = useRef<number>(0);
+  const apiLogs = useApiLogs();
+  const [showWelcomeMessage, setShowWelcomeMessage] = useState<boolean>(true);
 
   // Process initial commands on mount
   useEffect(() => {
+    // Reset the helpExecuted flag when the component mounts
+    sessionStorage.removeItem("helpExecuted");
+
     if (initialCommands.length > 0) {
       const delay = 500; // delay between commands in ms
 
@@ -51,10 +68,19 @@ const Terminal: React.FC<TerminalProps> = ({
   const handleCommandExecution = async (command: string) => {
     if (!command.trim()) return;
 
+    // Hide welcome message for all commands
+    setShowWelcomeMessage(false);
+
     const id = commandCount.current++;
     const result = await executeCommand(command);
 
     if (result.clearTerminal) {
+      // Clear the API logs if the clear command is executed
+      if (command.trim().toLowerCase() === "clear") {
+        apiLogs.clearLogs();
+        setShowWelcomeMessage(true); // Show the welcome message again after clear
+      }
+
       // Clear the terminal history but preserve the output from the clear command
       setCommandHistory([
         {
@@ -123,9 +149,14 @@ const Terminal: React.FC<TerminalProps> = ({
         ref={terminalRef}
         className="terminal-content flex-1 p-4 overflow-y-auto"
       >
-        <div className="animate-text-fade-in opacity-0 text-terminal-muted mb-2">
-          {welcomeMessage}
-        </div>
+        {showWelcomeMessage && (
+          <div
+            key="welcome-message"
+            className="animate-text-fade-in opacity-0 text-terminal-muted mb-2"
+          >
+            {welcomeMessage}
+          </div>
+        )}
 
         {commandHistory.map((entry) => (
           <div key={entry.id} className="mb-2 animate-text-fade-in opacity-0">

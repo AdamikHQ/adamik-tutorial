@@ -274,7 +274,15 @@ export const renderChainInfo = (
         </div>
       </div>
       <p className="mt-4">
-        Type <code>start</code> to select a different chain.
+        Type{" "}
+        <code className="bg-gray-200 text-black px-1.5 py-0.5 rounded font-medium">
+          start
+        </code>{" "}
+        to select a different chain or{" "}
+        <code className="bg-gray-200 text-black px-1.5 py-0.5 rounded font-medium">
+          clear
+        </code>{" "}
+        to clear the terminal.
       </p>
     </div>
   );

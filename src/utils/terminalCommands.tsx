@@ -22,6 +22,12 @@ const commands = {
   chain: chainCommand,
 };
 
+// Restricted initial commands
+const initialCommands = {
+  help: helpCommand,
+  start: startCommand,
+};
+
 // Main function to execute commands
 export const executeCommand = async (input: string): Promise<CommandResult> => {
   const args = input.trim().split(" ");
@@ -193,19 +199,50 @@ export const executeCommand = async (input: string): Promise<CommandResult> => {
     };
   }
 
-  const command = Object.values(commands).find(
+  // Check if help has been executed before
+  const helpExecuted = sessionStorage.getItem("helpExecuted") === "true";
+
+  // Check if a chain has been selected (completed the start flow)
+  const chainSelected =
+    workflowState.selectedChain !== null &&
+    workflowState.selectedChain !== undefined;
+
+  // If a chain has been selected, allow all commands even if help hasn't been executed
+  const availableCommands =
+    helpExecuted || chainSelected ? commands : initialCommands;
+
+  const command = Object.values(availableCommands).find(
     (cmd) => cmd.name.toLowerCase() === commandName
   );
 
   if (!command) {
-    return {
-      success: false,
-      output: `Command not found: ${commandName}. Type "help" to see available commands.`,
-      type: "error",
-    };
+    // If command not found in available commands
+    if (
+      !helpExecuted &&
+      !chainSelected &&
+      commandName !== "help" &&
+      commandName !== "start"
+    ) {
+      return {
+        success: false,
+        output: `Command not available. Only "help" and "start" commands are available initially. Type "help" to see all available commands.`,
+        type: "error",
+      };
+    } else {
+      return {
+        success: false,
+        output: `Command not found: ${commandName}. Type "help" to see available commands.`,
+        type: "error",
+      };
+    }
   }
 
   try {
+    // If executing help command, mark it as executed
+    if (commandName === "help") {
+      sessionStorage.setItem("helpExecuted", "true");
+    }
+
     const result = await command.execute(commandArgs);
 
     // Store the result if it's a chain selection step
