@@ -47,10 +47,9 @@ export const renderChainInfo = (
           </div>
         </div>
 
+        {/* Supported Features section - temporarily hidden
         <div className="mt-3">
-          <p className="mb-1">
-            <strong>Supported Features:</strong>
-          </p>
+          <p className="mb-1"><strong>Supported Features:</strong></p>
           <ul className="list-disc ml-4">
             {Object.entries(chain.supportedFeatures).map(
               ([category, features]) => (
@@ -62,6 +61,7 @@ export const renderChainInfo = (
             )}
           </ul>
         </div>
+        */}
       </div>
 
       <div className="bg-gray-800 p-4 rounded mb-4">

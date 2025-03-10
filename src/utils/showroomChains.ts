@@ -22,8 +22,8 @@ export const showroomChains: Record<string, { name: string; ticker: string }> =
       name: "Tron",
       ticker: "TRX",
     },
-    starknet: {
-      name: "Starknet",
-      ticker: "STRK",
+    optimism: {
+      name: "Optimism",
+      ticker: "OP",
     },
   };

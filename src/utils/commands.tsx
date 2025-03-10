@@ -5,7 +5,7 @@ import {
   resetWorkflowState,
   workflowState,
 } from "./terminalTypes";
-import { showroomChains } from "./showRoomChains";
+import { showroomChains } from "./showroomChains";
 import { SodotSigner } from "../signers/Sodot";
 import { encodePubKeyToAddress } from "../adamik/encodePubkeyToAddress";
 import { getAccountState } from "../adamik/getAccountState";
@@ -170,10 +170,9 @@ const renderChainDetails = (chainId: string, chain: AdamikChain) => {
           </div>
         </div>
 
+        {/* Supported Features section - temporarily hidden
         <div className="mt-3">
-          <p className="mb-1">
-            <strong>Supported Features:</strong>
-          </p>
+          <p className="mb-1"><strong>Supported Features:</strong></p>
           <ul className="list-disc ml-4">
             {Object.entries(chain.supportedFeatures).map(
               ([category, features]) => (
@@ -185,6 +184,7 @@ const renderChainDetails = (chainId: string, chain: AdamikChain) => {
             )}
           </ul>
         </div>
+        */}
       </div>
 
       <p className="text-sm text-gray-400">
