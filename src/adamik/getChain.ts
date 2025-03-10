@@ -1,12 +1,6 @@
 import { AdamikChain } from "./types";
-import {
-  useApiLogs,
-  logApiCall,
-  logApiResponse,
-} from "../contexts/ApiLogsContext";
-
-// Use the singleton instance from getAccountState.ts
-declare const apiLogsInstance: ReturnType<typeof useApiLogs> | null;
+import { logApiCall, logApiResponse } from "../contexts/ApiLogsContext";
+import { apiLogsInstance } from "./apiLogsManager";
 
 /**
  * Fetches information for a specific blockchain by its chainId
@@ -32,7 +26,7 @@ export const adamikGetChain = async (chainId: string): Promise<AdamikChain> => {
     const apiUrl = `${apiBaseUrl}/api/chains/${chainId}`;
     let logId = -1;
 
-    if (typeof apiLogsInstance !== "undefined" && apiLogsInstance) {
+    if (apiLogsInstance) {
       logId = logApiCall(apiLogsInstance, "Adamik", apiUrl, "GET");
     }
 
@@ -50,11 +44,7 @@ export const adamikGetChain = async (chainId: string): Promise<AdamikChain> => {
           : `API request failed with status ${response.status}`;
 
       // Log the error response
-      if (
-        typeof apiLogsInstance !== "undefined" &&
-        apiLogsInstance &&
-        logId !== -1
-      ) {
+      if (apiLogsInstance && logId !== -1) {
         logApiResponse(
           apiLogsInstance,
           logId,
@@ -73,11 +63,7 @@ export const adamikGetChain = async (chainId: string): Promise<AdamikChain> => {
       const errorMessage = `No chain data found for ${chainId}`;
 
       // Log the error response
-      if (
-        typeof apiLogsInstance !== "undefined" &&
-        apiLogsInstance &&
-        logId !== -1
-      ) {
+      if (apiLogsInstance && logId !== -1) {
         logApiResponse(
           apiLogsInstance,
           logId,
@@ -90,11 +76,7 @@ export const adamikGetChain = async (chainId: string): Promise<AdamikChain> => {
     }
 
     // Log the successful response
-    if (
-      typeof apiLogsInstance !== "undefined" &&
-      apiLogsInstance &&
-      logId !== -1
-    ) {
+    if (apiLogsInstance && logId !== -1) {
       logApiResponse(apiLogsInstance, logId, {
         status: response.status,
         data: data.chain,

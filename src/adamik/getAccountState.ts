@@ -1,16 +1,6 @@
 import { AdamikBalance } from "./types";
-import {
-  useApiLogs,
-  logApiCall,
-  logApiResponse,
-} from "../contexts/ApiLogsContext";
-
-// Create a singleton instance of the API logs hook
-let apiLogsInstance: ReturnType<typeof useApiLogs> | null = null;
-
-export const setApiLogsInstance = (instance: ReturnType<typeof useApiLogs>) => {
-  apiLogsInstance = instance;
-};
+import { logApiCall, logApiResponse } from "../contexts/ApiLogsContext";
+import { apiLogsInstance } from "./apiLogsManager";
 
 export const getAccountState = async (chainId: string, accountId: string) => {
   try {

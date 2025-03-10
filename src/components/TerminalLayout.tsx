@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import Terminal from "./Terminal";
 import ApiLogs from "./ApiLogs";
 import { useApiLogs } from "../contexts/ApiLogsContext";
-import { setApiLogsInstance } from "../adamik/getAccountState";
+import { setApiLogsInstance } from "../adamik/apiLogsManager";
 import { cn } from "@/lib/utils";
 
 interface TerminalLayoutProps {

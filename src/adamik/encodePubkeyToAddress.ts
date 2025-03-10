@@ -1,41 +1,117 @@
 import { AdamikAPIError, AdamikEncodePubkeyToAddressResponse } from "./types";
+import { logApiCall, logApiResponse } from "../contexts/ApiLogsContext";
+import { apiLogsInstance } from "./apiLogsManager";
 
 export const encodePubKeyToAddress = async (
   pubKey: string,
   chainId: string
 ) => {
-  const fetchPubkeyToAddresses = await fetch(
-    `${import.meta.env.VITE_ADAMIK_API_BASE_URL}/api/${chainId}/address/encode`,
-    {
+  try {
+    const apiBaseUrl = import.meta.env.VITE_ADAMIK_API_BASE_URL;
+    const apiKey = import.meta.env.VITE_ADAMIK_API_KEY;
+
+    // Log the API call
+    const apiUrl = `${apiBaseUrl}/api/${chainId}/address/encode`;
+    let logId = -1;
+
+    if (apiLogsInstance) {
+      logId = logApiCall(apiLogsInstance, "Adamik", apiUrl, "POST", {
+        pubkey: pubKey,
+      });
+    }
+
+    const response = await fetch(apiUrl, {
       method: "POST",
       headers: {
-        Authorization: import.meta.env.VITE_ADAMIK_API_KEY!,
+        Authorization: apiKey!,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         pubkey: pubKey,
       }),
+    });
+
+    if (!response.ok) {
+      const errorMessage = `API request failed with status ${response.status}`;
+
+      // Log the error response
+      if (apiLogsInstance && logId !== -1) {
+        logApiResponse(
+          apiLogsInstance,
+          logId,
+          { status: response.status, error: errorMessage },
+          true
+        );
+      }
+
+      throw new Error(errorMessage);
     }
-  );
 
-  const pubkeyToAddresses: AdamikAPIError<AdamikEncodePubkeyToAddressResponse> =
-    await fetchPubkeyToAddresses.json();
+    const pubkeyToAddresses: AdamikAPIError<AdamikEncodePubkeyToAddressResponse> =
+      await response.json();
 
-  if (pubkeyToAddresses.status && pubkeyToAddresses.status.errors.length > 0) {
-    throw new Error(pubkeyToAddresses.status.errors[0].message);
+    if (
+      pubkeyToAddresses.status &&
+      pubkeyToAddresses.status.errors.length > 0
+    ) {
+      const errorMessage = pubkeyToAddresses.status.errors[0].message;
+
+      // Log the error response
+      if (apiLogsInstance && logId !== -1) {
+        logApiResponse(
+          apiLogsInstance,
+          logId,
+          {
+            status: response.status,
+            error: errorMessage,
+            data: pubkeyToAddresses,
+          },
+          true
+        );
+      }
+
+      throw new Error(errorMessage);
+    }
+
+    const addresses = pubkeyToAddresses.addresses;
+
+    if (addresses.length === 0) {
+      const errorMessage = "No addresses found for the given public key";
+
+      // Log the error response
+      if (apiLogsInstance && logId !== -1) {
+        logApiResponse(
+          apiLogsInstance,
+          logId,
+          {
+            status: response.status,
+            error: errorMessage,
+            data: pubkeyToAddresses,
+          },
+          true
+        );
+      }
+
+      throw new Error(errorMessage);
+    }
+
+    // Log the successful response
+    if (apiLogsInstance && logId !== -1) {
+      logApiResponse(apiLogsInstance, logId, {
+        status: response.status,
+        data: pubkeyToAddresses,
+      });
+    }
+
+    // In browser context, we'll always use the first address
+    // This is typically the most common/default address format for the chain
+    return {
+      address: addresses[0].address,
+      type: addresses[0].type,
+      allAddresses: addresses,
+    };
+  } catch (error) {
+    console.error(`Error encoding pubkey to address:`, error);
+    throw error;
   }
-
-  const addresses = pubkeyToAddresses.addresses;
-
-  if (addresses.length === 0) {
-    throw new Error("No addresses found for the given public key");
-  }
-
-  // In browser context, we'll always use the first address
-  // This is typically the most common/default address format for the chain
-  return {
-    address: addresses[0].address,
-    type: addresses[0].type,
-    allAddresses: addresses,
-  };
 };

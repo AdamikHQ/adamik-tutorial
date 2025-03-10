@@ -3,6 +3,8 @@ import {
   AdamikHashFunction,
   AdamikSignerSpec,
 } from "../adamik/types";
+import { apiLogsInstance } from "../adamik/apiLogsManager";
+import { logApiCall, logApiResponse } from "../contexts/ApiLogsContext";
 import {
   errorTerminal,
   extractSignature,
@@ -188,20 +190,34 @@ export class SodotSigner implements BaseSigner {
   }
 
   private async createRoomWithVertex(vertexId: number, roomSize: number) {
-    const response = await fetch(
-      `${this.SODOT_VERTICES[vertexId].url}/create-room`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: this.SODOT_VERTICES[vertexId].apiKey,
-        },
-        body: JSON.stringify({
-          room_size: roomSize,
-        }),
-      }
-    );
+    const apiUrl = `${this.SODOT_VERTICES[vertexId].url}/create-room`;
+    const requestBody = { room_size: roomSize };
+    let logId = -1;
+
+    // Log the API call
+    if (apiLogsInstance) {
+      logId = logApiCall(apiLogsInstance, "Sodot", apiUrl, "POST", requestBody);
+    }
+
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: this.SODOT_VERTICES[vertexId].apiKey,
+      },
+      body: JSON.stringify(requestBody),
+    });
+
     const roomUuid = (await response.json()) as { room_uuid: string };
+
+    // Log the API response
+    if (apiLogsInstance && logId !== -1) {
+      logApiResponse(apiLogsInstance, logId, {
+        status: response.status,
+        data: roomUuid,
+      });
+    }
+
     return roomUuid.room_uuid;
   }
 
@@ -212,14 +228,32 @@ export class SodotSigner implements BaseSigner {
     key_id: string;
     keygen_id: string;
   }> {
-    return (await (
-      await fetch(`${this.SODOT_VERTICES[vertexId].url}/${curve}/create`, {
-        headers: { Authorization: this.SODOT_VERTICES[vertexId].apiKey },
-      })
-    ).json()) as {
+    const apiUrl = `${this.SODOT_VERTICES[vertexId].url}/${curve}/create`;
+    let logId = -1;
+
+    // Log the API call
+    if (apiLogsInstance) {
+      logId = logApiCall(apiLogsInstance, "Sodot", apiUrl, "GET");
+    }
+
+    const response = await fetch(apiUrl, {
+      headers: { Authorization: this.SODOT_VERTICES[vertexId].apiKey },
+    });
+
+    const result = (await response.json()) as {
       key_id: string;
       keygen_id: string;
     };
+
+    // Log the API response
+    if (apiLogsInstance && logId !== -1) {
+      logApiResponse(apiLogsInstance, logId, {
+        status: 200,
+        data: result,
+      });
+    }
+
+    return result;
   }
 
   // We use /ecdsa/keygen to generate the key share for this Vertex.
@@ -232,29 +266,55 @@ export class SodotSigner implements BaseSigner {
     othersKeygenIds: string[],
     curve: "ecdsa" | "ed25519"
   ) {
-    const response = await fetch(
-      `${this.SODOT_VERTICES[vertexId].url}/${curve}/keygen`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: this.SODOT_VERTICES[vertexId].apiKey,
-        },
-        body: JSON.stringify({
-          room_uuid: roomUuid,
-          key_id: keyId,
-          num_parties: n,
-          threshold: t,
-          others_keygen_ids: othersKeygenIds,
-        }),
-      }
-    );
+    const apiUrl = `${this.SODOT_VERTICES[vertexId].url}/${curve}/keygen`;
+    let logId = -1;
+
+    const requestBody = {
+      room_uuid: roomUuid,
+      key_id: keyId,
+      num_parties: n,
+      threshold: t,
+      others_keygen_ids: othersKeygenIds,
+    };
+
+    // Log the API call
+    if (apiLogsInstance) {
+      logId = logApiCall(apiLogsInstance, "Sodot", apiUrl, "POST", requestBody);
+    }
+
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: this.SODOT_VERTICES[vertexId].apiKey,
+      },
+      body: JSON.stringify(requestBody),
+    });
 
     if (response.status !== 200) {
       const error = await response.text();
+
+      // Log the error response
+      if (apiLogsInstance && logId !== -1) {
+        logApiResponse(
+          apiLogsInstance,
+          logId,
+          { status: response.status, error },
+          true
+        );
+      }
+
       throw new Error(
         `Failed to generate key for Vertex ${vertexId}: ${error}`
       );
+    }
+
+    // Log the successful response
+    if (apiLogsInstance && logId !== -1) {
+      logApiResponse(apiLogsInstance, logId, {
+        status: response.status,
+        data: { success: true },
+      });
     }
   }
 
@@ -297,6 +357,9 @@ export class SodotSigner implements BaseSigner {
     curve: "ecdsa" | "ed25519",
     hashMethod?: string
   ) {
+    const apiUrl = `${this.SODOT_VERTICES[vertexId].url}/${curve}/sign`;
+    let logId = -1;
+
     const body: any = {
       room_uuid: roomUuid,
       key_id: keyId,
@@ -308,28 +371,60 @@ export class SodotSigner implements BaseSigner {
       body.hash_algo = hashMethod;
     }
 
+    // Log the API call
+    if (apiLogsInstance) {
+      logId = logApiCall(apiLogsInstance, "Sodot", apiUrl, "POST", body);
+    }
+
     try {
-      const response = await fetch(
-        `${this.SODOT_VERTICES[vertexId].url}/${curve}/sign`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: this.SODOT_VERTICES[vertexId].apiKey,
-          },
-          body: JSON.stringify(body),
-        }
-      );
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: this.SODOT_VERTICES[vertexId].apiKey,
+        },
+        body: JSON.stringify(body),
+      });
       if (response.status !== 200) {
         const error = await response.text();
         console.log(error);
         console.log({ status: response.status });
+
+        // Log the error response
+        if (apiLogsInstance && logId !== -1) {
+          logApiResponse(
+            apiLogsInstance,
+            logId,
+            { status: response.status, error },
+            true
+          );
+        }
+
         return undefined;
       }
 
       const signature = (await response.json()) as SodotSignatureResponse;
+
+      // Log the successful response
+      if (apiLogsInstance && logId !== -1) {
+        logApiResponse(apiLogsInstance, logId, {
+          status: response.status,
+          data: signature,
+        });
+      }
+
       return signature;
     } catch (e) {
+      // Log the error
+      if (apiLogsInstance && logId !== -1) {
+        logApiResponse(
+          apiLogsInstance,
+          logId,
+          { status: 500, error: String(e) },
+          true
+        );
+      }
+
       errorTerminal(
         `Failed to sign message with Vertex ${vertexId}: ${e}`,
         this.signerName
@@ -391,26 +486,53 @@ export class SodotSigner implements BaseSigner {
     derivationPath: number[],
     curve: "ecdsa" | "ed25519"
   ) {
-    const response = await fetch(
-      `${this.SODOT_VERTICES[vertexId].url}/${curve}/derive-pubkey`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: this.SODOT_VERTICES[vertexId].apiKey,
-        },
-        body: JSON.stringify({
-          key_id: keyId,
-          derivation_path: Array.from(derivationPath),
-        }),
-      }
-    );
+    const apiUrl = `${this.SODOT_VERTICES[vertexId].url}/${curve}/derive-pubkey`;
+    let logId = -1;
+
+    const requestBody = {
+      key_id: keyId,
+      derivation_path: Array.from(derivationPath),
+    };
+
+    // Log the API call
+    if (apiLogsInstance) {
+      logId = logApiCall(apiLogsInstance, "Sodot", apiUrl, "POST", requestBody);
+    }
+
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: this.SODOT_VERTICES[vertexId].apiKey,
+      },
+      body: JSON.stringify(requestBody),
+    });
 
     if (!response.ok) {
-      throw new Error(`Failed to derive pubkey: ${await response.text()}`);
+      const errorMessage = await response.text();
+
+      // Log the error response
+      if (apiLogsInstance && logId !== -1) {
+        logApiResponse(
+          apiLogsInstance,
+          logId,
+          { status: response.status, error: errorMessage },
+          true
+        );
+      }
+
+      throw new Error(`Failed to derive pubkey: ${errorMessage}`);
     }
 
     const pubkey = await response.json();
+
+    // Log the successful response
+    if (apiLogsInstance && logId !== -1) {
+      logApiResponse(apiLogsInstance, logId, {
+        status: response.status,
+        data: pubkey,
+      });
+    }
 
     // For ed25519 keys
     if ("pubkey" in pubkey) {

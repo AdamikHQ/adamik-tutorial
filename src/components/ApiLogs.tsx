@@ -63,6 +63,21 @@ const ApiLogs: React.FC<ApiLogsProps> = ({ logs, className }) => {
     }
   };
 
+  const getMethodColor = (method: ApiLogEntry["method"]) => {
+    switch (method) {
+      case "GET":
+        return "bg-blue-600";
+      case "POST":
+        return "bg-green-600";
+      case "PUT":
+        return "bg-yellow-600";
+      case "DELETE":
+        return "bg-red-600";
+      default:
+        return "bg-gray-600";
+    }
+  };
+
   // Function to highlight chainId and account address in the endpoint
   const highlightEndpointParts = (endpoint: string) => {
     // Match pattern like /api/{chainId}/account/{address}/
@@ -85,6 +100,40 @@ const ApiLogs: React.FC<ApiLogsProps> = ({ logs, className }) => {
     }
 
     return endpoint;
+  };
+
+  // Function to get a descriptive title for the API call
+  const getApiCallDescription = (endpoint: string, method: string) => {
+    if (endpoint.includes("/api/chains") && !endpoint.includes("/chains/")) {
+      return "Fetching all blockchain networks";
+    }
+
+    if (endpoint.match(/\/api\/chains\/[^\/]+/)) {
+      const chainId = endpoint.split("/chains/")[1];
+      return `Fetching details for ${chainId} blockchain`;
+    }
+
+    if (endpoint.match(/\/api\/[^\/]+\/account\/[^\/]+\/state/)) {
+      const parts = endpoint.match(/\/api\/([^\/]+)\/account\/([^\/]+)\/state/);
+      if (parts) {
+        return `Fetching account state on ${parts[1]}`;
+      }
+    }
+
+    if (endpoint.includes("/address/encode")) {
+      const chainId = endpoint.match(/\/api\/([^\/]+)\/address\/encode/)?.[1];
+      return `Converting public key to address on ${chainId}`;
+    }
+
+    if (endpoint.includes("/encode")) {
+      return "Encoding transaction";
+    }
+
+    if (endpoint.includes("/broadcast")) {
+      return "Broadcasting transaction to network";
+    }
+
+    return "API Call";
   };
 
   return (
@@ -120,6 +169,21 @@ const ApiLogs: React.FC<ApiLogsProps> = ({ logs, className }) => {
                 expandedLogs[log.id] ? "border-l-blue-500" : ""
               )}
             >
+              {/* API Call Description with Method Badge */}
+              <div className="flex items-center gap-2 mb-3">
+                <span
+                  className={cn(
+                    "px-2 py-0.5 rounded text-xs font-bold text-white",
+                    getMethodColor(log.method)
+                  )}
+                >
+                  {log.method}
+                </span>
+                <span className="text-sm font-medium text-gray-200">
+                  {getApiCallDescription(log.endpoint, log.method)}
+                </span>
+              </div>
+
               {/* Basic information - always visible */}
               <div className="flex justify-between items-start mb-1">
                 <span
@@ -133,9 +197,6 @@ const ApiLogs: React.FC<ApiLogsProps> = ({ logs, className }) => {
               </div>
 
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-gray-300 font-mono text-sm font-semibold">
-                  {log.method}
-                </span>
                 <span className="text-gray-300 font-mono text-sm break-all">
                   {highlightEndpointParts(log.endpoint)}
                 </span>

@@ -12,6 +12,7 @@ import { getAccountState } from "../adamik/getAccountState";
 import { infoTerminal } from "./utils";
 import { AdamikChain } from "../adamik/types";
 import { adamikGetChain } from "../adamik/getChain";
+import { adamikGetChains } from "../adamik/getChains";
 
 // Help command
 export const helpCommand: Command = {
@@ -200,38 +201,11 @@ export const getChainsCommand: Command = {
   description: "Shows the complete list of chains supported by Adamik API",
   execute: async (_args: string[] = []): Promise<CommandResult> => {
     try {
-      const apiKey = import.meta.env.VITE_ADAMIK_API_KEY;
-      const apiBaseUrl = import.meta.env.VITE_ADAMIK_API_BASE_URL;
-
-      if (!apiKey || !apiBaseUrl) {
-        throw new Error(
-          "Missing API configuration. Please check your environment variables."
-        );
-      }
-
       // Show loading message
       console.log("Fetching chains from API...");
 
-      // Fetch chains from Adamik API
-      const response = await fetch(`${apiBaseUrl}/api/chains`, {
-        headers: {
-          Authorization: apiKey,
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      // Check if chains data exists
-      if (!data.chains) {
-        throw new Error("No chains data found in API response");
-      }
-
-      const chains = data.chains as Record<string, AdamikChain>;
+      // Use the adamikGetChains function which now includes API logging
+      const { chains } = await adamikGetChains();
 
       // Format chains for display
       const chainsList = Object.entries(chains).map(([chainId, chain]) => ({
