@@ -1,69 +1,76 @@
-# Welcome to your Lovable project
+# Adamik API Terminal Tutorial
 
-## Project info
+## Project Overview
 
-**URL**: https://lovable.dev/projects/525f7276-f0ad-4178-8200-bcf83764a7fe
+This interactive terminal-based application demonstrates how to interact with blockchain networks using the Adamik API and SODOT Multi-Party Computation (MPC) technology. The project provides a user-friendly interface for exploring various blockchain networks, generating cryptographic keys, creating addresses, and checking account balances.
 
-## How can I edit this code?
+## Features
 
-There are several ways of editing your application.
+- **Interactive Terminal Interface**: Explore blockchain networks through a command-line interface
+- **Multi-Party Computation (MPC)**: Generate secure cryptographic keys using SODOT technology
+- **Multi-Chain Support**: Works with Bitcoin, Ethereum, Optimism, and many other blockchain networks
+- **Address Generation**: Create addresses for different blockchain networks
+- **Balance Checking**: View account balances and token holdings
+- **API Call Logging**: Visualize API interactions in real-time
 
-**Use Lovable**
+## Available Commands
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/525f7276-f0ad-4178-8200-bcf83764a7fe) and start prompting.
+- **help** - Shows a list of available commands
+- **start** - Launches an interactive flow to explore blockchain networks
+- **getChains** - Shows the complete list of chains supported by Adamik API
+- **chain** - Shows detailed information about a specific chain
+- **clear** - Clears the terminal
 
-Changes made via Lovable will be committed automatically to this repo.
+## Getting Started
 
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+Follow these steps to run the project locally:
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
+# Step 1: Clone the repository
 git clone <YOUR_GIT_URL>
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Step 2: Navigate to the project directory
+cd adamik-tutorial
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Step 3: Install the necessary dependencies
+pnpm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+# Step 4: Create a .env.local file with your API keys
+# Step 4: Create a .env.local file with your SODOT vertex API keys
+# Example:
+# VITE_SODOT_VERTEX_URL_0=https://vertex-demo-0.sodot.dev
+# VITE_SODOT_VERTEX_API_KEY_0=your-api-key-0
+# VITE_SODOT_VERTEX_URL_1=https://vertex-demo-1.sodot.dev
+# VITE_SODOT_VERTEX_API_KEY_1=your-api-key-1
+# VITE_SODOT_VERTEX_URL_2=https://vertex-demo-2.sodot.dev
+# VITE_SODOT_VERTEX_API_KEY_2=your-api-key-2
+
+# Step 5: Start the development server
+pnpm dev
 ```
 
-**Edit a file directly in GitHub**
+## Technologies Used
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+This project is built with:
 
-**Use GitHub Codespaces**
+- **Vite**: Fast build tool and development server
+- **TypeScript**: Type-safe JavaScript
+- **React**: UI library for building interactive interfaces
+- **Tailwind CSS**: Utility-first CSS framework
+- **SODOT MPC**: Secure Multi-Party Computation for cryptographic operations
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## About SODOT MPC Technology
 
-## What technologies are used for this project?
+SODOT is a secure Multi-Party Computation (MPC) system that enables distributed key generation and signing. Unlike traditional wallets where a single entity controls the private key, SODOT splits cryptographic operations across multiple parties (vertices), enhancing security by ensuring no single party has access to the complete key.
 
-This project is built with .
+## CORS Configuration
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+The application includes a proxy configuration in `vite.config.ts` to handle CORS issues when connecting to SODOT vertices. This allows the frontend to communicate with the SODOT API without cross-origin restrictions.
 
-## How can I deploy this project?
+## Project Structure
 
-Simply open [Lovable](https://lovable.dev/projects/525f7276-f0ad-4178-8200-bcf83764a7fe) and click on Share -> Publish.
-
-## I want to use a custom domain - is that possible?
-
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+- `src/components`: React components including the Terminal interface
+- `src/utils`: Utility functions for terminal commands and rendering
+- `src/signers`: Implementation of the SODOT signer
+- `src/adamik`: API client for interacting with the Adamik API
+- `src/contexts`: React contexts for state management
