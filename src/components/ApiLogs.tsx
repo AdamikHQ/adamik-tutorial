@@ -1,5 +1,6 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { ChevronDown, ChevronRight } from "lucide-react";
 
 export interface ApiLogEntry {
   id: number;
@@ -20,6 +21,7 @@ interface ApiLogsProps {
 
 const ApiLogs: React.FC<ApiLogsProps> = ({ logs, className }) => {
   const logsRef = useRef<HTMLDivElement>(null);
+  const [expandedLogs, setExpandedLogs] = useState<Record<number, boolean>>({});
 
   // Auto scroll to bottom when new logs are added
   useEffect(() => {
@@ -27,6 +29,13 @@ const ApiLogs: React.FC<ApiLogsProps> = ({ logs, className }) => {
       logsRef.current.scrollTop = logsRef.current.scrollHeight;
     }
   }, [logs]);
+
+  const toggleExpand = (id: number) => {
+    setExpandedLogs((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
 
   const getStatusColor = (status: ApiLogEntry["status"]) => {
     switch (status) {
@@ -52,6 +61,30 @@ const ApiLogs: React.FC<ApiLogsProps> = ({ logs, className }) => {
       default:
         return "text-gray-400";
     }
+  };
+
+  // Function to highlight chainId and account address in the endpoint
+  const highlightEndpointParts = (endpoint: string) => {
+    // Match pattern like /api/{chainId}/account/{address}/
+    const regex = /\/api\/([^\/]+)\/account\/([^\/]+)\//;
+    const match = endpoint.match(regex);
+
+    if (match) {
+      const [fullMatch, chainId, address] = match;
+      const parts = endpoint.split(fullMatch);
+
+      return (
+        <>
+          {parts[0]}
+          /api/
+          <span className="highlight-chain">{chainId}</span>
+          /account/
+          <span className="highlight-address">{address}</span>/{parts[1]}
+        </>
+      );
+    }
+
+    return endpoint;
   };
 
   return (
@@ -82,52 +115,98 @@ const ApiLogs: React.FC<ApiLogsProps> = ({ logs, className }) => {
           logs.map((log) => (
             <div
               key={log.id}
-              className="mb-4 p-3 border-l-2 border-gray-700 animate-text-fade-in opacity-0"
+              className={cn(
+                "mb-4 p-3 border-l-2 border-gray-700 animate-text-fade-in opacity-0 bg-gray-900/50 rounded api-log-entry",
+                expandedLogs[log.id] ? "border-l-blue-500" : ""
+              )}
             >
+              {/* Basic information - always visible */}
               <div className="flex justify-between items-start mb-1">
                 <span
                   className={cn("font-bold", getProviderColor(log.provider))}
                 >
                   {log.provider}
                 </span>
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-gray-400">
                   {log.timestamp.toLocaleTimeString()}
                 </span>
               </div>
 
               <div className="flex items-center gap-2 mb-1">
-                <span className="text-gray-400 font-mono text-sm">
+                <span className="text-gray-300 font-mono text-sm font-semibold">
                   {log.method}
                 </span>
                 <span className="text-gray-300 font-mono text-sm break-all">
-                  {log.endpoint}
+                  {highlightEndpointParts(log.endpoint)}
                 </span>
               </div>
 
-              <div className={cn("text-sm", getStatusColor(log.status))}>
-                {log.status.toUpperCase()}
-                {log.message ? `: ${log.message}` : ""}
+              <div className="flex items-center justify-between">
+                <div
+                  className={cn(
+                    "text-sm font-semibold",
+                    getStatusColor(log.status)
+                  )}
+                >
+                  {log.status.toUpperCase()}
+                  {log.message ? `: ${log.message}` : ""}
+                </div>
+
+                {/* Expand/collapse button */}
+                <button
+                  onClick={() => toggleExpand(log.id)}
+                  className={cn(
+                    "flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors",
+                    expandedLogs[log.id]
+                      ? "text-blue-400 hover:text-blue-300"
+                      : "text-gray-400 hover:text-gray-300"
+                  )}
+                  aria-label={
+                    expandedLogs[log.id] ? "Collapse details" : "Expand details"
+                  }
+                >
+                  {expandedLogs[log.id] ? (
+                    <>
+                      <ChevronDown size={14} />
+                      <span>Hide details</span>
+                    </>
+                  ) : (
+                    <>
+                      <ChevronRight size={14} />
+                      <span>Show details</span>
+                    </>
+                  )}
+                </button>
               </div>
 
-              {log.request && (
-                <div className="mt-2">
-                  <div className="text-xs text-gray-500 mb-1">Request:</div>
-                  <pre className="bg-black p-2 rounded text-xs overflow-x-auto">
-                    {typeof log.request === "string"
-                      ? log.request
-                      : JSON.stringify(log.request, null, 2)}
-                  </pre>
-                </div>
-              )}
+              {/* Expandable details */}
+              {expandedLogs[log.id] && (
+                <div className="mt-3 space-y-3 border-t border-gray-700 pt-3">
+                  {log.request && (
+                    <div>
+                      <div className="text-xs text-gray-400 mb-1 font-semibold">
+                        Request:
+                      </div>
+                      <pre className="bg-gray-800 p-2 rounded text-xs overflow-x-auto text-gray-300">
+                        {typeof log.request === "string"
+                          ? log.request
+                          : JSON.stringify(log.request, null, 2)}
+                      </pre>
+                    </div>
+                  )}
 
-              {log.response && (
-                <div className="mt-2">
-                  <div className="text-xs text-gray-500 mb-1">Response:</div>
-                  <pre className="bg-black p-2 rounded text-xs overflow-x-auto">
-                    {typeof log.response === "string"
-                      ? log.response
-                      : JSON.stringify(log.response, null, 2)}
-                  </pre>
+                  {log.response && (
+                    <div>
+                      <div className="text-xs text-gray-400 mb-1 font-semibold">
+                        Response:
+                      </div>
+                      <pre className="bg-gray-800 p-2 rounded text-xs overflow-x-auto text-gray-300">
+                        {typeof log.response === "string"
+                          ? log.response
+                          : JSON.stringify(log.response, null, 2)}
+                      </pre>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

@@ -101,6 +101,23 @@
     @apply h-3 w-3 rounded-full inline-block;
   }
 
+  /* API Logs specific styles */
+  .api-log-entry {
+    @apply transition-all duration-200;
+  }
+
+  .api-log-entry pre {
+    @apply font-mono text-xs leading-relaxed;
+  }
+
+  .api-log-entry .highlight-chain {
+    @apply text-yellow-400 font-semibold;
+  }
+
+  .api-log-entry .highlight-address {
+    @apply text-green-400 font-semibold;
+  }
+
   /* Fixed animations */
   @keyframes cursor-blink {
     0%,
