@@ -383,9 +383,6 @@ export const startCommand: Command = {
         success: true,
         output: (
           <div>
-            <p className="mb-4 text-green-400 font-bold">
-              ✓ Successfully retrieved {chainsList.length} blockchain networks!
-            </p>
             <p className="mb-2">Please select a chain by entering its ID:</p>
             <div className="bg-gray-800 p-3 rounded mb-4">
               {chainsList.map((chain) => (

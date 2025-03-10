@@ -273,7 +273,7 @@ export const renderChainInfo = (
           )}
         </div>
       </div>
-      <p className="mt-4">
+      <p className="text-medium text-gray-400 mt-3">
         Type{" "}
         <span className="font-mono">
           <span className="text-purple-500">$</span>{" "}
