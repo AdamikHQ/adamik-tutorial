@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -49,8 +48,9 @@
   * {
     @apply border-border;
   }
-  
-  html, body {
+
+  html,
+  body {
     @apply h-full w-full;
   }
 
@@ -96,20 +96,32 @@
   .terminal-cursor {
     @apply inline-block w-2 h-5 bg-terminal-foreground align-middle animate-cursor-blink;
   }
-  
+
   .terminal-button {
-    @apply h-3 w-3 rounded-full;
+    @apply h-3 w-3 rounded-full inline-block;
   }
 
   /* Fixed animations */
   @keyframes cursor-blink {
-    0%, 49% { opacity: 1; }
-    50%, 100% { opacity: 0; }
+    0%,
+    49% {
+      opacity: 1;
+    }
+    50%,
+    100% {
+      opacity: 0;
+    }
   }
 
   @keyframes text-fade-in {
-    from { opacity: 0; transform: translateY(5px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(5px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   .animate-cursor-blink {

@@ -1,4 +1,12 @@
 import { AdamikChain } from "./types";
+import {
+  useApiLogs,
+  logApiCall,
+  logApiResponse,
+} from "../contexts/ApiLogsContext";
+
+// Use the singleton instance from getAccountState.ts
+declare const apiLogsInstance: ReturnType<typeof useApiLogs> | null;
 
 /**
  * Fetches information for a specific blockchain by its chainId
@@ -20,7 +28,15 @@ export const adamikGetChain = async (chainId: string): Promise<AdamikChain> => {
       throw new Error("Chain ID is required");
     }
 
-    const response = await fetch(`${apiBaseUrl}/api/chains/${chainId}`, {
+    // Log the API call
+    const apiUrl = `${apiBaseUrl}/api/chains/${chainId}`;
+    let logId = -1;
+
+    if (typeof apiLogsInstance !== "undefined" && apiLogsInstance) {
+      logId = logApiCall(apiLogsInstance, "Adamik", apiUrl, "GET");
+    }
+
+    const response = await fetch(apiUrl, {
       headers: {
         Authorization: apiKey,
         "Content-Type": "application/json",
@@ -28,17 +44,61 @@ export const adamikGetChain = async (chainId: string): Promise<AdamikChain> => {
     });
 
     if (!response.ok) {
-      if (response.status === 404) {
-        throw new Error(`Chain not found: ${chainId}`);
+      const errorMessage =
+        response.status === 404
+          ? `Chain not found: ${chainId}`
+          : `API request failed with status ${response.status}`;
+
+      // Log the error response
+      if (
+        typeof apiLogsInstance !== "undefined" &&
+        apiLogsInstance &&
+        logId !== -1
+      ) {
+        logApiResponse(
+          apiLogsInstance,
+          logId,
+          { status: response.status, error: errorMessage },
+          true
+        );
       }
-      throw new Error(`API request failed with status ${response.status}`);
+
+      throw new Error(errorMessage);
     }
 
     const data = await response.json();
 
     // Check if chain data exists
     if (!data.chain) {
-      throw new Error(`No chain data found for ${chainId}`);
+      const errorMessage = `No chain data found for ${chainId}`;
+
+      // Log the error response
+      if (
+        typeof apiLogsInstance !== "undefined" &&
+        apiLogsInstance &&
+        logId !== -1
+      ) {
+        logApiResponse(
+          apiLogsInstance,
+          logId,
+          { status: response.status, error: errorMessage },
+          true
+        );
+      }
+
+      throw new Error(errorMessage);
+    }
+
+    // Log the successful response
+    if (
+      typeof apiLogsInstance !== "undefined" &&
+      apiLogsInstance &&
+      logId !== -1
+    ) {
+      logApiResponse(apiLogsInstance, logId, {
+        status: response.status,
+        data: data.chain,
+      });
     }
 
     return data.chain as AdamikChain;
