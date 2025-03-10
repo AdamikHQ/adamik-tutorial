@@ -27,7 +27,7 @@ Follow these steps to run the project locally:
 
 ```sh
 # Step 1: Clone the repository
-git clone <YOUR_GIT_URL>
+git clone https://github.com/AdamikHQ/adamik-tutorial
 
 # Step 2: Navigate to the project directory
 cd adamik-tutorial
