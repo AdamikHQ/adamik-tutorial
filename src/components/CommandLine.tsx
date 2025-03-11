@@ -1,18 +1,19 @@
-
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect } from "react";
 
 interface CommandLineProps {
   value: string;
   onChange: (value: string) => void;
   onSubmit: (command: string) => void;
-  onKeyNavigation: (direction: 'up' | 'down') => void;
+  onKeyNavigation: (direction: "up" | "down" | "tab") => void;
+  suggestedCommand?: string;
 }
 
 const CommandLine: React.FC<CommandLineProps> = ({
   value,
   onChange,
   onSubmit,
-  onKeyNavigation
+  onKeyNavigation,
+  suggestedCommand,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -27,36 +28,49 @@ const CommandLine: React.FC<CommandLineProps> = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       e.preventDefault();
       onSubmit(value);
-    } else if (e.key === 'ArrowUp') {
+    } else if (e.key === "ArrowUp") {
       e.preventDefault();
-      onKeyNavigation('up');
-    } else if (e.key === 'ArrowDown') {
+      onKeyNavigation("up");
+    } else if (e.key === "ArrowDown") {
       e.preventDefault();
-      onKeyNavigation('down');
+      onKeyNavigation("down");
+    } else if (e.key === "Tab") {
+      e.preventDefault();
+      onKeyNavigation("tab");
     }
   };
 
   return (
-    <div 
-      ref={wrapperRef} 
+    <div
+      ref={wrapperRef}
       className="flex items-center mt-1 animate-text-fade-in opacity-0"
       onClick={handleClick}
     >
       <span className="terminal-prompt mr-2">$</span>
-      <input
-        ref={inputRef}
-        type="text"
-        className="command-input"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onKeyDown={handleKeyDown}
-        autoFocus
-        aria-label="Terminal command input"
-      />
-      <span className="terminal-cursor ml-px"></span>
+      <div className="relative flex-1">
+        <input
+          ref={inputRef}
+          type="text"
+          className="command-input w-full z-10 relative"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onKeyDown={handleKeyDown}
+          autoFocus
+          aria-label="Terminal command input"
+        />
+        {!value && suggestedCommand && (
+          <div className="absolute inset-0 flex items-center pointer-events-none pl-[2px]">
+            <span className="command-suggestion">{suggestedCommand}</span>
+            <div className="flex items-center ml-2">
+              <span className="tab-key-indicator">⇥</span>
+              <span className="command-suggestion-hint ml-1">Tab</span>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

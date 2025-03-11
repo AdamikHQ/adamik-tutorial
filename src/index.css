@@ -72,9 +72,11 @@
     @apply bg-gradient-to-r from-gray-800/80 to-gray-900/80 border-b border-gray-700/30;
   }
 
+  /* Command input styling */
   .command-input {
-    @apply bg-transparent border-none outline-none text-terminal-foreground font-mono w-full;
-    caret-color: transparent;
+    @apply bg-transparent outline-none text-white font-mono;
+    caret-color: #4ade80; /* Green cursor color */
+    caret-shape: block; /* Block cursor shape */
   }
 
   .terminal-prompt {
@@ -188,4 +190,26 @@
 .highlight-operation {
   color: #f472b6; /* pink-400 */
   font-weight: 600;
+}
+
+/* Command suggestion styling */
+.command-suggestion {
+  @apply text-gray-500 font-mono;
+  opacity: 0.85;
+}
+
+.command-suggestion-hint {
+  @apply text-gray-500 text-xs;
+  opacity: 0.8;
+}
+
+/* Tab key indicator */
+.tab-key-indicator {
+  @apply inline-flex items-center justify-center;
+  @apply text-gray-400 text-xs font-mono;
+  @apply border border-gray-600 rounded px-1;
+  @apply bg-gray-800;
+  height: 18px;
+  min-width: 18px;
+  opacity: 0.9;
 }

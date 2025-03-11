@@ -48,6 +48,8 @@ const Terminal: React.FC<TerminalProps> = ({
   const commandCount = useRef<number>(0);
   const apiLogs = useApiLogs();
   const [showWelcomeMessage, setShowWelcomeMessage] = useState<boolean>(true);
+  const [suggestedCommand, setSuggestedCommand] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Process initial commands on mount
   useEffect(() => {
@@ -69,6 +71,44 @@ const Terminal: React.FC<TerminalProps> = ({
   useEffect(() => {
     if (terminalRef.current) {
       terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
+    }
+  }, [commandHistory]);
+
+  // Focus input on mount and when clicking terminal
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  // Define the guided flow
+  const guidedFlow = [
+    "start",
+    "optimism",
+    "prepare-tx",
+    "sign-tx",
+    "broadcast-tx",
+  ];
+
+  // Determine the next suggested command based on command history
+  useEffect(() => {
+    if (commandHistory.length === 0) {
+      setSuggestedCommand("start");
+      return;
+    }
+
+    const lastCommand = commandHistory[commandHistory.length - 1].command;
+
+    // Find the current position in the guided flow
+    const currentIndex = guidedFlow.indexOf(lastCommand);
+
+    // If the last command is in our flow and not the last step, suggest the next one
+    if (currentIndex >= 0 && currentIndex < guidedFlow.length - 1) {
+      setSuggestedCommand(guidedFlow[currentIndex + 1]);
+    } else if (lastCommand === "clear") {
+      // If user cleared the terminal, suggest starting again
+      setSuggestedCommand("start");
+    } else {
+      // Default suggestion if we're off the guided path
+      setSuggestedCommand("help");
     }
   }, [commandHistory]);
 
@@ -113,7 +153,14 @@ const Terminal: React.FC<TerminalProps> = ({
     setCommandIndex(-1);
   };
 
-  const handleKeyNavigation = (direction: "up" | "down") => {
+  const handleKeyNavigation = (direction: "up" | "down" | "tab") => {
+    if (direction === "tab") {
+      if (suggestedCommand && !currentCommand) {
+        setCurrentCommand(suggestedCommand);
+      }
+      return;
+    }
+
     if (commandHistory.length === 0) return;
 
     if (direction === "up") {
@@ -136,12 +183,93 @@ const Terminal: React.FC<TerminalProps> = ({
     }
   };
 
+  const handleTerminalClick = () => {
+    inputRef.current?.focus();
+  };
+
+  const handleCommandSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!currentCommand.trim()) return;
+
+    // Add command to history
+    setCommandHistory((prev) => [
+      ...prev,
+      {
+        id: commandCount.current++,
+        command: currentCommand,
+        output: null,
+        type: "info",
+      },
+    ]);
+    setCommandIndex(-1);
+
+    // Execute command and get output
+    const output = await executeCommand(currentCommand);
+
+    // Add command and output to entries
+    setCommandHistory((prev) => [
+      ...prev,
+      {
+        id: commandCount.current++,
+        command: currentCommand,
+        output: output.output,
+        type: output.success ? "success" : output.type || "error",
+      },
+    ]);
+
+    setCurrentCommand("");
+  };
+
+  const handleCommandChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setCurrentCommand(e.target.value);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Handle Tab for auto-complete
+    if (e.key === "Tab") {
+      e.preventDefault();
+      if (suggestedCommand && !currentCommand) {
+        setCurrentCommand(suggestedCommand);
+      }
+      return;
+    }
+
+    // Handle up/down arrows for command history
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (commandIndex < commandHistory.length - 1) {
+        const newIndex = commandIndex + 1;
+        setCommandIndex(newIndex);
+        setCurrentCommand(
+          commandHistory[commandHistory.length - 1 - newIndex]?.command || ""
+        );
+      }
+    } else if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (commandIndex > 0) {
+        const newIndex = commandIndex - 1;
+        setCommandIndex(newIndex);
+        setCurrentCommand(
+          newIndex === -1
+            ? ""
+            : commandHistory[commandHistory.length - 1 - newIndex]?.command ||
+                ""
+        );
+      } else if (commandIndex === 0) {
+        setCommandIndex(-1);
+        setCurrentCommand("");
+      }
+    }
+  };
+
   return (
     <div
       className={cn(
         "terminal-window flex flex-col w-full h-full max-h-[80vh]",
         className
       )}
+      onClick={handleTerminalClick}
     >
       <div className="terminal-header flex items-center gap-2 px-4 py-3">
         <div className="terminal-button bg-red-500"></div>
@@ -180,6 +308,7 @@ const Terminal: React.FC<TerminalProps> = ({
           onChange={setCurrentCommand}
           onSubmit={handleCommandExecution}
           onKeyNavigation={handleKeyNavigation}
+          suggestedCommand={suggestedCommand}
         />
       </div>
     </div>

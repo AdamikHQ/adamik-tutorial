@@ -504,7 +504,8 @@ export const prepareTxCommand: Command = {
         from: workflowState.address,
         to: recipientAddress,
         value: amount,
-        nonce: Math.floor(Math.random() * 1000000).toString(), // Mock nonce for display
+        // Use type assertion to access the nonce from the response data
+        nonce: (encodedTransaction?.transaction?.data as any)?.nonce || "0",
       };
 
       return {
