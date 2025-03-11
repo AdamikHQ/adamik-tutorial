@@ -96,6 +96,41 @@ const Terminal: React.FC<TerminalProps> = ({
     }
 
     const lastCommand = commandHistory[commandHistory.length - 1].command;
+    const lastOutput = commandHistory[commandHistory.length - 1].output;
+
+    // Check if the last command was a chain selection
+    // We can detect this by checking if the last command is a valid chain ID
+    // from the list of available chains in sessionStorage
+    let isChainSelection = false;
+    const chainIdsJson = sessionStorage.getItem("adamikChainIds");
+    if (chainIdsJson) {
+      try {
+        const chainIds = JSON.parse(chainIdsJson);
+        isChainSelection = chainIds.includes(lastCommand);
+      } catch (e) {
+        console.error("Error parsing chainIds from sessionStorage:", e);
+      }
+    }
+
+    // Also check if we're in chain selection mode from the lastCommandResult
+    const lastCommandResultJson = sessionStorage.getItem("lastCommandResult");
+    const inChainSelectionMode = lastCommandResultJson
+      ? JSON.parse(lastCommandResultJson).chainSelection === true
+      : false;
+
+    // Check if the last output contains chain details, which would indicate
+    // a successful chain selection
+    const hasChainDetails =
+      lastOutput &&
+      typeof lastOutput === "object" &&
+      React.isValidElement(lastOutput) &&
+      lastOutput.props?.children?.some?.((child) =>
+        child?.props?.children?.some?.(
+          (grandchild) =>
+            typeof grandchild === "string" &&
+            (grandchild.includes("Address:") || grandchild.includes("Balance:"))
+        )
+      );
 
     // Find the current position in the guided flow
     const currentIndex = guidedFlow.indexOf(lastCommand);
@@ -106,9 +141,23 @@ const Terminal: React.FC<TerminalProps> = ({
     } else if (lastCommand === "clear") {
       // If user cleared the terminal, suggest starting again
       setSuggestedCommand("start");
+    } else if (lastCommand === "help") {
+      // After help command, suggest start as the next action
+      setSuggestedCommand("start");
+    } else if (lastCommand === "broadcast-tx") {
+      // After completing the flow with broadcast-tx, suggest starting a new cycle
+      setSuggestedCommand("start");
+    } else if (isChainSelection || hasChainDetails) {
+      // If the last command was a valid chain ID or the output shows chain details,
+      // suggest prepare-tx
+      setSuggestedCommand("prepare-tx");
+    } else if (inChainSelectionMode) {
+      // If we're in chain selection mode but the command wasn't a valid chain,
+      // keep suggesting chain selection (by not changing the suggestion)
+      // This allows users to try different chain IDs until they get a valid one
     } else {
-      // Default suggestion if we're off the guided path
-      setSuggestedCommand("help");
+      // Default suggestion for any other command
+      setSuggestedCommand("start");
     }
   }, [commandHistory]);
 

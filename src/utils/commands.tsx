@@ -751,25 +751,20 @@ export const broadcastTxCommand: Command = {
                 <span className="text-gray-500">Transaction Hash:</span>{" "}
                 <span className="font-mono">{txHash}</span>
               </p>
-              {explorerLink && (
-                <p className="text-gray-300 mb-1">
-                  <span className="text-gray-500">Explorer:</span>{" "}
-                  <a
-                    href={explorerLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-400 hover:underline"
-                  >
-                    View on {showroomChains[workflowState.selectedChain!]?.name}{" "}
-                    Explorer
-                  </a>
-                </p>
-              )}
             </div>
-            <p className="text-medium text-gray-400 mt-3">
-              You can view the transaction on a block explorer using the hash
-              above.
-            </p>
+            {explorerLink && (
+              <p className="text-medium text-gray-400 mt-3">
+                <a
+                  href={explorerLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-400 hover:underline"
+                >
+                  View on {showroomChains[workflowState.selectedChain!]?.name}{" "}
+                  Explorer
+                </a>
+              </p>
+            )}
           </div>
         ),
         type: "success",

@@ -11,6 +11,7 @@ This interactive terminal-based application demonstrates how to interact with bl
 - **Multi-Chain Support**: Works with Bitcoin, Ethereum, Optimism, and many other blockchain networks
 - **Address Generation**: Create addresses for different blockchain networks
 - **Balance Checking**: View account balances and token holdings
+- **Transaction Workflow**: Prepare, sign, and broadcast transactions
 - **API Call Logging**: Visualize API interactions in real-time
 
 ## Available Commands
@@ -19,7 +20,20 @@ This interactive terminal-based application demonstrates how to interact with bl
 - **start** - Launches an interactive flow to explore blockchain networks
 - **getChains** - Shows the complete list of chains supported by Adamik API
 - **chain** - Shows detailed information about a specific chain
+- **prepare-tx** - Prepare an unsigned transaction
+- **sign-tx** - Sign a prepared transaction
+- **broadcast-tx** - Broadcast a signed transaction to the network
 - **clear** - Clears the terminal
+
+## Guided Flow
+
+The application provides a guided workflow that takes you through the process of:
+
+1. Starting the application with `start`
+2. Selecting a blockchain network (e.g., `optimism`, `tron`, etc.)
+3. Preparing a transaction with `prepare-tx`
+4. Signing the transaction with `sign-tx`
+5. Broadcasting the transaction with `broadcast-tx`
 
 ## Getting Started
 
@@ -35,7 +49,6 @@ cd adamik-tutorial
 # Step 3: Install the necessary dependencies
 pnpm install
 
-# Step 4: Create a .env.local file with your API keys
 # Step 4: Create a .env.local file with your SODOT vertex API keys
 # Example:
 # VITE_SODOT_VERTEX_URL_0=https://vertex-demo-0.sodot.dev
