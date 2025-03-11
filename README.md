@@ -18,8 +18,6 @@ This interactive terminal-based application demonstrates how to interact with bl
 
 - **help** - Shows a list of available commands
 - **start** - Launches an interactive flow to explore blockchain networks
-- **getChains** - Shows the complete list of chains supported by Adamik API
-- **chain** - Shows detailed information about a specific chain
 - **prepare-tx** - Prepare an unsigned transaction
 - **sign-tx** - Sign a prepared transaction
 - **broadcast-tx** - Broadcast a signed transaction to the network
