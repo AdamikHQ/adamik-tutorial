@@ -384,7 +384,6 @@ export const startCommand: Command = {
         success: true,
         output: (
           <div>
-            <p className="mb-2">Please select a chain by entering its ID:</p>
             <div className="bg-gray-800 p-3 rounded mb-4">
               {chainsList.map((chain) => (
                 <div key={chain.id} className="mb-1">
@@ -394,9 +393,10 @@ export const startCommand: Command = {
               ))}
             </div>
             <p className="text-medium text-gray-400">
-              Enter a chain ID in the terminal below (e.g.,{" "}
-              <span className="font-mono text-yellow-400">ethereum</span>,{" "}
-              <span className="font-mono text-yellow-400">bitcoin</span>, etc.)
+              Enter a chain ID (e.g.,{" "}
+              <span className="font-mono text-yellow-400">optimism</span>,{" "}
+              <span className="font-mono text-yellow-400">ton</span>, etc.) to
+              fetch account details.
             </p>
           </div>
         ),

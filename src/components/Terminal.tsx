@@ -4,6 +4,7 @@ import TerminalOutput from "./TerminalOutput";
 import { executeCommand } from "../utils/terminalCommands";
 import { cn } from "@/lib/utils";
 import { useApiLogs } from "../contexts/ApiLogsContext";
+import { DEFAULT_WELCOME_MESSAGE } from "../constants/messages";
 
 interface TerminalProps {
   className?: string;
@@ -20,25 +21,7 @@ interface CommandEntry {
 
 const Terminal: React.FC<TerminalProps> = ({
   className,
-  welcomeMessage = (
-    <span>
-      Welcome to the API Terminal. Available commands:{" "}
-      <span className="font-mono">
-        <span className="text-purple-500">$</span>{" "}
-        <span className="text-green-500 font-bold">help</span>
-      </span>
-      ,{" "}
-      <span className="font-mono">
-        <span className="text-purple-500">$</span>{" "}
-        <span className="text-blue-500 font-bold">start</span>
-      </span>
-      ,{" "}
-      <span className="font-mono">
-        <span className="text-purple-500">$</span>{" "}
-        <span className="text-red-500 font-bold">clear</span>
-      </span>
-    </span>
-  ),
+  welcomeMessage = DEFAULT_WELCOME_MESSAGE,
   initialCommands = [],
 }) => {
   const [commandHistory, setCommandHistory] = useState<CommandEntry[]>([]);
@@ -325,7 +308,7 @@ const Terminal: React.FC<TerminalProps> = ({
         <div className="terminal-button bg-yellow-500"></div>
         <div className="terminal-button bg-green-500"></div>
         <div className="ml-4 text-xs text-gray-400 flex-1 text-center">
-          API Terminal
+          Adamik Terminal
         </div>
       </div>
 

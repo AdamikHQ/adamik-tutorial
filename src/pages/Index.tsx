@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import TerminalLayout from "@/components/TerminalLayout";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { DEFAULT_WELCOME_MESSAGE } from "../constants/messages";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -60,25 +61,7 @@ const Index = () => {
           </div>
 
           <TerminalLayout
-            welcomeMessage={
-              <span>
-                Welcome to the API Terminal. Available commands:{" "}
-                <span className="font-mono">
-                  <span className="text-purple-500">$</span>{" "}
-                  <span className="text-green-500 font-bold">help</span>
-                </span>
-                ,{" "}
-                <span className="font-mono">
-                  <span className="text-purple-500">$</span>{" "}
-                  <span className="text-blue-500 font-bold">start</span>
-                </span>
-                ,{" "}
-                <span className="font-mono">
-                  <span className="text-purple-500">$</span>{" "}
-                  <span className="text-red-500 font-bold">clear</span>
-                </span>
-              </span>
-            }
+            welcomeMessage={DEFAULT_WELCOME_MESSAGE}
             className="shadow-2xl"
           />
 
@@ -103,7 +86,7 @@ const Index = () => {
         </div>
       </main>
 
-      {/* F ooter */}
+      {/* Footer */}
       <footer className="w-full py-6 px-8 text-center text-sm text-gray-500">
         © {new Date().getFullYear()} Adamik Tutorial. All rights reserved.
       </footer>
