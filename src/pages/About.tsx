@@ -62,8 +62,8 @@ const About = () => {
                 developers understand blockchain networks and cryptographic
                 operations. Through a command-line interface, you can explore
                 different blockchains, generate cryptographic keys using SODOT
-                MPC technology, create blockchain addresses, and check account
-                balances across multiple networks.
+                MPC technology, create blockchain addresses, check account
+                balances, and execute transactions across multiple networks.
               </p>
             </div>
 
@@ -74,6 +74,9 @@ const About = () => {
                 <li>Multi-party computation (MPC) key generation with SODOT</li>
                 <li>Address derivation for multiple blockchain networks</li>
                 <li>Real-time account balance checking</li>
+                <li>
+                  Complete transaction workflow (prepare, sign, broadcast)
+                </li>
                 <li>API call logging and visualization</li>
                 <li>
                   Support for Bitcoin, Ethereum, Optimism, and other networks
@@ -110,10 +113,69 @@ const About = () => {
                 <code className="block text-sm text-gray-800 mb-1">
                   chain - Shows detailed information about a specific chain
                 </code>
+                <code className="block text-sm text-gray-800 mb-1">
+                  prepare-tx - Prepare an unsigned transaction
+                </code>
+                <code className="block text-sm text-gray-800 mb-1">
+                  sign-tx - Sign a prepared transaction
+                </code>
+                <code className="block text-sm text-gray-800 mb-1">
+                  broadcast-tx - Broadcast a signed transaction to the network
+                </code>
                 <code className="block text-sm text-gray-800">
                   clear - Clears the terminal
                 </code>
               </div>
+            </div>
+
+            <div>
+              <h3 className="text-xl font-semibold mb-3">Guided Workflow</h3>
+              <p className="text-gray-600 mb-3">
+                The terminal provides a guided workflow that takes you through
+                the complete process of blockchain interaction:
+              </p>
+              <ol className="list-decimal pl-5 space-y-1 text-gray-600">
+                <li>
+                  Starting the application with{" "}
+                  <code className="bg-gray-200 text-black px-1.5 py-0.5 rounded font-medium">
+                    start
+                  </code>
+                </li>
+                <li>
+                  Selecting a blockchain network (e.g.,{" "}
+                  <code className="bg-gray-200 text-black px-1.5 py-0.5 rounded font-medium">
+                    optimism
+                  </code>
+                  ,{" "}
+                  <code className="bg-gray-200 text-black px-1.5 py-0.5 rounded font-medium">
+                    tron
+                  </code>
+                  , etc.)
+                </li>
+                <li>
+                  Preparing a transaction with{" "}
+                  <code className="bg-gray-200 text-black px-1.5 py-0.5 rounded font-medium">
+                    prepare-tx
+                  </code>
+                </li>
+                <li>
+                  Signing the transaction with{" "}
+                  <code className="bg-gray-200 text-black px-1.5 py-0.5 rounded font-medium">
+                    sign-tx
+                  </code>
+                </li>
+                <li>
+                  Broadcasting the transaction with{" "}
+                  <code className="bg-gray-200 text-black px-1.5 py-0.5 rounded font-medium">
+                    broadcast-tx
+                  </code>
+                </li>
+              </ol>
+              <p className="text-gray-600 mt-3">
+                The terminal will suggest the next command in the workflow,
+                making it easy to follow along and learn the complete
+                transaction process.
+              </p>
             </div>
 
             <div>
