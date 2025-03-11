@@ -360,10 +360,23 @@ export class SodotSigner implements BaseSigner {
     const apiUrl = `${this.SODOT_VERTICES[vertexId].url}/${curve}/sign`;
     let logId = -1;
 
+    // Ensure the message is properly formatted
+    // If it's a JSON string, we need to escape it properly
+    let formattedMsg = msg;
+    try {
+      // Check if the message is a JSON string
+      JSON.parse(msg);
+      // If it is, we need to escape it
+      formattedMsg = JSON.stringify(msg);
+    } catch (e) {
+      // If it's not a JSON string, just remove the 0x prefix if present
+      formattedMsg = msg.replace("0x", "");
+    }
+
     const body: any = {
       room_uuid: roomUuid,
       key_id: keyId,
-      msg: msg.replace("0x", ""),
+      msg: formattedMsg,
       derivation_path: derivationPath,
     };
 

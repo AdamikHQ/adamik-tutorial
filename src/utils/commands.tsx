@@ -581,8 +581,25 @@ export const signTxCommand: Command = {
         workflowState.selectedChainData!.signerSpec
       );
 
-      // Encode the transaction (in a real app, this would be done properly)
-      const encodedTx = JSON.stringify(workflowState.transaction);
+      // Extract the encoded transaction data
+      let encodedTx = "";
+      if (
+        workflowState.transaction &&
+        workflowState.transaction.transaction &&
+        workflowState.transaction.transaction.encoded
+      ) {
+        // Extract just the encoded transaction string
+        encodedTx = workflowState.transaction.transaction.encoded;
+
+        // Ensure it has the 0x prefix (which will be removed by the signer)
+        if (!encodedTx.startsWith("0x")) {
+          encodedTx = "0x" + encodedTx;
+        }
+      } else {
+        throw new Error("Transaction is not properly encoded");
+      }
+
+      console.log("Encoded transaction for signing:", encodedTx);
 
       // Log API call for signing
       let logId = 0;
@@ -596,46 +613,59 @@ export const signTxCommand: Command = {
         );
       }
 
-      // Sign the transaction
-      const signature = await signer.signTransaction(encodedTx);
+      try {
+        // Sign the transaction
+        const signature = await signer.signTransaction(encodedTx);
 
-      // Log API response for signing
-      if (apiLogsInstance) {
-        logApiResponse(
-          apiLogsInstance,
-          logId,
-          JSON.stringify({ signature: signature.substring(0, 64) + "..." }),
-          false
-        );
-      }
+        // Log API response for signing
+        if (apiLogsInstance) {
+          logApiResponse(
+            apiLogsInstance,
+            logId,
+            JSON.stringify({ signature: signature.substring(0, 64) + "..." }),
+            false
+          );
+        }
 
-      // Store the signature in the workflow state
-      workflowState.signature = signature;
+        // Store the signature in the workflow state
+        workflowState.signature = signature;
 
-      return {
-        success: true,
-        output: (
-          <div>
-            <p className="text-green-500 mb-2">
-              Transaction signed successfully!
-            </p>
-            <div className="bg-gray-800 p-3 rounded mb-3">
-              <p className="text-gray-300 mb-1">
-                <span className="text-gray-500">Signature:</span>{" "}
-                <span className="font-mono text-xs break-all">
-                  {signature.substring(0, 64)}...
-                </span>
+        return {
+          success: true,
+          output: (
+            <div>
+              <p className="text-green-500 mb-2">
+                Transaction signed successfully!
+              </p>
+              <div className="bg-gray-800 p-3 rounded mb-3">
+                <p className="text-gray-300 mb-1">
+                  <span className="text-gray-500">Signature:</span>{" "}
+                  <span className="font-mono text-xs break-all">
+                    {signature.substring(0, 64)}...
+                  </span>
+                </p>
+              </div>
+              <p className="text-medium text-gray-400 mt-3">
+                Use the{" "}
+                <span className="text-blue-500 font-bold">broadcast-tx</span>{" "}
+                command to broadcast this transaction to the network.
               </p>
             </div>
-            <p className="text-medium text-gray-400 mt-3">
-              Use the{" "}
-              <span className="text-blue-500 font-bold">broadcast-tx</span>{" "}
-              command to broadcast this transaction to the network.
-            </p>
-          </div>
-        ),
-        type: "success",
-      };
+          ),
+          type: "success",
+        };
+      } catch (error) {
+        // If the API call fails, log the error and throw it
+        if (apiLogsInstance) {
+          logApiResponse(
+            apiLogsInstance,
+            logId,
+            JSON.stringify({ error: (error as Error).message }),
+            true
+          );
+        }
+        throw error;
+      }
     } catch (error) {
       return {
         success: false,
@@ -681,8 +711,24 @@ export const broadcastTxCommand: Command = {
       }
 
       const url = `${apiUrl}/api/${workflowState.selectedChain}/transaction/broadcast`;
+
+      // Extract the encoded transaction
+      let encodedTx = "";
+      if (
+        workflowState.transaction &&
+        workflowState.transaction.transaction &&
+        workflowState.transaction.transaction.encoded
+      ) {
+        encodedTx = workflowState.transaction.transaction.encoded;
+      } else {
+        throw new Error("Transaction is not properly encoded");
+      }
+
+      // Format the request body for broadcasting
       const body = {
-        transaction: workflowState.transaction,
+        transaction: {
+          encoded: encodedTx,
+        },
         signature: workflowState.signature,
       };
 
