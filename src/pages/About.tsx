@@ -13,7 +13,7 @@ const About = () => {
           <div className="h-8 w-8 rounded-md bg-primary flex items-center justify-center">
             <span className="text-white font-semibold text-lg">&gt;_</span>
           </div>
-          <h1 className="text-xl font-medium">API Terminal</h1>
+          <h1 className="text-xl font-medium">Adamik Tutorial</h1>
         </div>
 
         <nav className="flex items-center space-x-4">
@@ -44,7 +44,7 @@ const About = () => {
         <div className="max-w-3xl w-full mx-auto animate-text-fade-in opacity-0">
           <div className="text-center mb-10">
             <h2 className="text-3xl font-bold tracking-tight mb-3">
-              About API Terminal
+              About Adamik Tutorial
             </h2>
             <p className="text-lg text-gray-600">
               An interactive way to learn and explore blockchain networks
@@ -55,10 +55,10 @@ const About = () => {
           <div className="bg-white rounded-lg shadow-xl p-8 space-y-6">
             <div>
               <h3 className="text-xl font-semibold mb-3">
-                What is API Terminal?
+                What is Adamik Tutorial?
               </h3>
               <p className="text-gray-600">
-                API Terminal is an interactive learning tool designed to help
+                Adamik Tutorial is an interactive learning tool designed to help
                 developers understand blockchain networks and cryptographic
                 operations. Through a command-line interface, you can explore
                 different blockchains, generate cryptographic keys using SODOT
@@ -105,13 +105,6 @@ const About = () => {
                 </code>
                 <code className="block text-sm text-gray-800 mb-1">
                   start - Launches an interactive flow to explore blockchain
-                </code>
-                <code className="block text-sm text-gray-800 mb-1">
-                  getChains - Shows the complete list of chains supported by
-                  Adamik API
-                </code>
-                <code className="block text-sm text-gray-800 mb-1">
-                  chain - Shows detailed information about a specific chain
                 </code>
                 <code className="block text-sm text-gray-800 mb-1">
                   prepare-tx - Prepare an unsigned transaction
