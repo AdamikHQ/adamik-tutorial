@@ -1,5 +1,6 @@
-import prompts from "prompts";
-import { errorTerminal, infoTerminal } from "../utils";
+import { errorTerminal, infoTerminal } from "../utils/utils";
+import { apiLogsInstance } from "./apiLogsManager";
+import { logApiCall, logApiResponse } from "../contexts/ApiLogsContext";
 import {
   AdamikAPIError,
   AdamikBroadcastResponse,
@@ -11,17 +12,7 @@ export const broadcastTransaction = async (
   transactionEncodeResponse: AdamikTransactionEncodeResponse,
   signature: string
 ) => {
-  const { acceptBroadcast } = await prompts({
-    type: "confirm",
-    name: "acceptBroadcast",
-    message: "Do you wish to broadcast the transaction ?",
-    initial: true,
-  });
-
-  if (!acceptBroadcast) {
-    infoTerminal("Transaction not broadcasted.");
-    return;
-  }
+  infoTerminal("Broadcasting transaction...", "Adamik");
 
   // Prepare to broadcast the signed transaction
   const broadcastRequestBody = {
@@ -32,25 +23,76 @@ export const broadcastTransaction = async (
     },
   };
 
-  // Broadcast the transaction using Adamik API
-  const broadcastResponse = await fetch(
-    `${process.env.ADAMIK_API_BASE_URL}/api/${chainId}/transaction/broadcast`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: process.env.ADAMIK_API_KEY!,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(broadcastRequestBody),
-    }
-  );
+  // Log API call
+  let logId = 0;
+  if (apiLogsInstance) {
+    const apiUrl =
+      import.meta.env.VITE_ADAMIK_API_URL || "https://api-staging.adamik.io";
+    const url = `${apiUrl}/api/${chainId}/transaction/broadcast`;
+
+    logId = logApiCall(
+      apiLogsInstance,
+      "Adamik",
+      url,
+      "POST",
+      JSON.stringify(broadcastRequestBody)
+    );
+  }
 
   try {
+    const apiUrl =
+      import.meta.env.VITE_ADAMIK_API_URL || "https://api-staging.adamik.io";
+    const apiKey = import.meta.env.VITE_ADAMIK_API_KEY;
+
+    if (!apiKey) {
+      throw new Error("ADAMIK API key is not set");
+    }
+
+    // Broadcast the transaction using Adamik API
+    const broadcastResponse = await fetch(
+      `${apiUrl}/api/${chainId}/transaction/broadcast`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: apiKey,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(broadcastRequestBody),
+      }
+    );
+
     const result =
       (await broadcastResponse.json()) as AdamikAPIError<AdamikBroadcastResponse>;
 
+    // Log API response
+    if (apiLogsInstance) {
+      logApiResponse(
+        apiLogsInstance,
+        logId,
+        JSON.stringify(result),
+        result.status?.errors?.length > 0
+      );
+    }
+
+    if (result.status?.errors?.length > 0) {
+      errorTerminal("Transaction broadcast failed:", "Adamik");
+      infoTerminal(JSON.stringify(result, null, 2), "Adamik");
+      throw new Error(
+        result.status.errors[0].message || "Transaction broadcast failed"
+      );
+    }
+
     return result;
-  } catch (e: any) {
-    errorTerminal(e.message, "Adamik");
+  } catch (error) {
+    // If the API call fails, log the error
+    if (apiLogsInstance) {
+      logApiResponse(
+        apiLogsInstance,
+        logId,
+        JSON.stringify({ error: (error as Error).message }),
+        true
+      );
+    }
+    throw error;
   }
 };

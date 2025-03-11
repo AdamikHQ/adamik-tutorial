@@ -16,6 +16,7 @@ import { adamikGetChains } from "../adamik/getChains";
 import { apiLogsInstance } from "../adamik/apiLogsManager";
 import { logApiCall, logApiResponse } from "../contexts/ApiLogsContext";
 import { encodeTransaction } from "../adamik/encodeTransaction";
+import { broadcastTransaction } from "../adamik/broadcastTransaction";
 
 // Help command
 export const helpCommand: Command = {
@@ -701,119 +702,77 @@ export const broadcastTxCommand: Command = {
     }
 
     try {
-      // Prepare the API call to broadcast the transaction
-      const apiUrl =
-        import.meta.env.VITE_ADAMIK_API_URL || "https://api-staging.adamik.io";
-      const apiKey = import.meta.env.VITE_ADAMIK_API_KEY;
+      // Use the broadcastTransaction function to broadcast the transaction
+      const result = await broadcastTransaction(
+        workflowState.selectedChain!,
+        workflowState.transaction,
+        workflowState.signature
+      );
 
-      if (!apiKey) {
-        throw new Error("ADAMIK API key is not set");
-      }
+      // Get the transaction hash from the response
+      const txHash =
+        result?.hash || "0x" + Math.random().toString(16).substring(2, 42);
 
-      const url = `${apiUrl}/api/${workflowState.selectedChain}/transaction/broadcast`;
+      // Store the transaction hash in the workflow state
+      workflowState.txHash = txHash;
 
-      // Extract the encoded transaction
-      let encodedTx = "";
-      if (
-        workflowState.transaction &&
-        workflowState.transaction.transaction &&
-        workflowState.transaction.transaction.encoded
-      ) {
-        encodedTx = workflowState.transaction.transaction.encoded;
-      } else {
-        throw new Error("Transaction is not properly encoded");
-      }
+      // Get the explorer URL for the current chain
+      const explorerUrl =
+        showroomChains[workflowState.selectedChain!]?.explorerUrl;
 
-      // Format the request body for broadcasting
-      const body = {
-        transaction: {
-          encoded: encodedTx,
-        },
-        signature: workflowState.signature,
-      };
+      // For Ethereum-based chains, we need to keep the 0x prefix
+      // For other chains like Cosmos, we need to remove it
+      const isEthereumBased = [
+        "ethereum",
+        "optimism",
+        "arbitrum",
+        "polygon",
+        "avalanche",
+        "binance",
+      ].includes(workflowState.selectedChain!);
+      const formattedTxHash = isEthereumBased
+        ? txHash
+        : txHash.replace("0x", "");
 
-      // Log API call for broadcasting
-      let logId = 0;
-      if (apiLogsInstance) {
-        logId = logApiCall(
-          apiLogsInstance,
-          "Adamik",
-          url,
-          "POST",
-          JSON.stringify(body)
-        );
-      }
+      const explorerLink = explorerUrl
+        ? `${explorerUrl}${formattedTxHash}`
+        : null;
 
-      try {
-        // Make the actual API call to broadcast the transaction
-        const response = await fetch(url, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: apiKey,
-          },
-          body: JSON.stringify(body),
-        });
-
-        const data = await response.json();
-
-        // Log API response
-        if (apiLogsInstance) {
-          logApiResponse(
-            apiLogsInstance,
-            logId,
-            JSON.stringify(data),
-            !response.ok
-          );
-        }
-
-        if (!response.ok) {
-          throw new Error(
-            data.message ||
-              `Failed to broadcast transaction: ${response.statusText}`
-          );
-        }
-
-        // Get the transaction hash from the response
-        const txHash =
-          data.txHash || "0x" + Math.random().toString(16).substring(2, 42);
-
-        // Store the transaction hash in the workflow state
-        workflowState.txHash = txHash;
-
-        return {
-          success: true,
-          output: (
-            <div>
-              <p className="text-green-500 mb-2">
-                Transaction broadcast successfully!
+      return {
+        success: true,
+        output: (
+          <div>
+            <p className="text-green-500 mb-2">
+              Transaction broadcast successfully!
+            </p>
+            <div className="bg-gray-800 p-3 rounded mb-3">
+              <p className="text-gray-300 mb-1">
+                <span className="text-gray-500">Transaction Hash:</span>{" "}
+                <span className="font-mono">{txHash}</span>
               </p>
-              <div className="bg-gray-800 p-3 rounded mb-3">
+              {explorerLink && (
                 <p className="text-gray-300 mb-1">
-                  <span className="text-gray-500">Transaction Hash:</span>{" "}
-                  <span className="font-mono">{txHash}</span>
+                  <span className="text-gray-500">Explorer:</span>{" "}
+                  <a
+                    href={explorerLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-400 hover:underline"
+                  >
+                    View on {showroomChains[workflowState.selectedChain!]?.name}{" "}
+                    Explorer
+                  </a>
                 </p>
-              </div>
-              <p className="text-medium text-gray-400 mt-3">
-                You can view the transaction on a block explorer using the hash
-                above.
-              </p>
+              )}
             </div>
-          ),
-          type: "success",
-        };
-      } catch (error) {
-        // If the API call fails, log the error and throw it
-        if (apiLogsInstance) {
-          logApiResponse(
-            apiLogsInstance,
-            logId,
-            JSON.stringify({ error: (error as Error).message }),
-            true
-          );
-        }
-        throw error;
-      }
+            <p className="text-medium text-gray-400 mt-3">
+              You can view the transaction on a block explorer using the hash
+              above.
+            </p>
+          </div>
+        ),
+        type: "success",
+      };
     } catch (error) {
       return {
         success: false,
