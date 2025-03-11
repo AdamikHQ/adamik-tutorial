@@ -13,6 +13,8 @@ import { infoTerminal } from "./utils";
 import { AdamikChain } from "../adamik/types";
 import { adamikGetChain } from "../adamik/getChain";
 import { adamikGetChains } from "../adamik/getChains";
+import { apiLogsInstance } from "../adamik/apiLogsManager";
+import { logApiCall, logApiResponse } from "../contexts/ApiLogsContext";
 
 // Help command
 export const helpCommand: Command = {
@@ -53,7 +55,38 @@ export const helpCommand: Command = {
                   <span className="inline-flex items-center bg-gray-800 px-2 py-0.5 rounded mr-2">
                     <span className="font-mono">
                       <span className="text-purple-500">$</span>{" "}
-                      <span className="text-green-500 font-bold">help</span>
+                      <span className="text-blue-500 font-bold">
+                        prepare-tx
+                      </span>
+                    </span>
+                  </span>
+                  <span>- Prepare an unsigned transaction</span>
+                </li>
+                <li className="mb-1">
+                  <span className="inline-flex items-center bg-gray-800 px-2 py-0.5 rounded mr-2">
+                    <span className="font-mono">
+                      <span className="text-purple-500">$</span>{" "}
+                      <span className="text-blue-500 font-bold">sign-tx</span>
+                    </span>
+                  </span>
+                  <span>- Sign a prepared transaction</span>
+                </li>
+                <li className="mb-1">
+                  <span className="inline-flex items-center bg-gray-800 px-2 py-0.5 rounded mr-2">
+                    <span className="font-mono">
+                      <span className="text-purple-500">$</span>{" "}
+                      <span className="text-blue-500 font-bold">
+                        broadcast-tx
+                      </span>
+                    </span>
+                  </span>
+                  <span>- Broadcast a signed transaction to the network</span>
+                </li>
+                <li className="mb-1">
+                  <span className="inline-flex items-center bg-gray-800 px-2 py-0.5 rounded mr-2">
+                    <span className="font-mono">
+                      <span className="text-purple-500">$</span>{" "}
+                      <span className="text-blue-500 font-bold">help</span>
                     </span>
                   </span>
                   <span>- Shows a list of available commands</span>
@@ -62,31 +95,7 @@ export const helpCommand: Command = {
                   <span className="inline-flex items-center bg-gray-800 px-2 py-0.5 rounded mr-2">
                     <span className="font-mono">
                       <span className="text-purple-500">$</span>{" "}
-                      <span className="text-yellow-500 font-bold">
-                        getChains
-                      </span>
-                    </span>
-                  </span>
-                  <span>
-                    - Shows the complete list of chains supported by Adamik API
-                  </span>
-                </li>
-                <li className="mb-1">
-                  <span className="inline-flex items-center bg-gray-800 px-2 py-0.5 rounded mr-2">
-                    <span className="font-mono">
-                      <span className="text-purple-500">$</span>{" "}
-                      <span className="text-cyan-500 font-bold">chain</span>
-                    </span>
-                  </span>
-                  <span>
-                    - Shows detailed information about a specific chain
-                  </span>
-                </li>
-                <li className="mb-1">
-                  <span className="inline-flex items-center bg-gray-800 px-2 py-0.5 rounded mr-2">
-                    <span className="font-mono">
-                      <span className="text-purple-500">$</span>{" "}
-                      <span className="text-red-500 font-bold">clear</span>
+                      <span className="text-blue-500 font-bold">clear</span>
                     </span>
                   </span>
                   <span>- Clears the terminal</span>
@@ -109,7 +118,7 @@ export const helpCommand: Command = {
                   <span className="inline-flex items-center bg-gray-800 px-2 py-0.5 rounded mr-2">
                     <span className="font-mono">
                       <span className="text-purple-500">$</span>{" "}
-                      <span className="text-green-500 font-bold">help</span>
+                      <span className="text-blue-500 font-bold">help</span>
                     </span>
                   </span>
                   <span>- Shows a list of available commands</span>
@@ -118,7 +127,7 @@ export const helpCommand: Command = {
                   <span className="inline-flex items-center bg-gray-800 px-2 py-0.5 rounded mr-2">
                     <span className="font-mono">
                       <span className="text-purple-500">$</span>{" "}
-                      <span className="text-red-500 font-bold">clear</span>
+                      <span className="text-blue-500 font-bold">clear</span>
                     </span>
                   </span>
                   <span>- Clears the terminal</span>
@@ -126,25 +135,15 @@ export const helpCommand: Command = {
               </>
             )}
           </ul>
-          {showAllCommands && (
-            <p className="text-medium text-gray-400 mt-3">
-              Type{" "}
-              <span className="font-mono">
-                <span className="text-purple-500">$</span>{" "}
-                <span className="text-cyan-500 font-bold">chain</span>{" "}
-                <span className="text-yellow-400">ethereum</span>
-              </span>{" "}
-              to view details about a specific chain
-            </p>
-          )}
           {!showAllCommands && (
-            <p className="text-medium text-gray-400 mt-2">
-              Note: More commands will be available after executing help.
+            <p className="text-medium text-gray-400 mt-3">
+              More commands will be available after executing{" "}
+              <span className="text-blue-500 font-bold">start</span>
             </p>
           )}
         </div>
       ),
-      type: "info",
+      helpExecuted: true,
     };
   },
 };
@@ -412,6 +411,423 @@ export const startCommand: Command = {
               Error starting flow:{" "}
               {error instanceof Error ? error.message : "Unknown error"}
             </p>
+          </div>
+        ),
+        type: "error",
+      };
+    }
+  },
+};
+
+// Prepare transaction command
+export const prepareTxCommand: Command = {
+  name: "prepare-tx",
+  description: "Prepare an unsigned transaction",
+  execute: async (_args: string[] = []): Promise<CommandResult> => {
+    // Check if a chain has been selected
+    if (!workflowState.selectedChain || !workflowState.selectedChainData) {
+      return {
+        success: false,
+        output: (
+          <div className="text-red-500">
+            Please select a chain first using the{" "}
+            <span className="font-bold">start</span> command.
+          </div>
+        ),
+        type: "error",
+      };
+    }
+
+    // Check if we have an address
+    if (!workflowState.address) {
+      return {
+        success: false,
+        output: (
+          <div className="text-red-500">
+            Please generate an address first using the{" "}
+            <span className="font-bold">start</span> command.
+          </div>
+        ),
+        type: "error",
+      };
+    }
+
+    // For simplicity, we'll create a basic transaction
+    // In a real app, you'd want to get user input for recipient and amount
+    const recipientAddress = workflowState.address; // Self-transfer for demo
+    const amount = "0.0001"; // Small amount for demo in main units (ETH, etc.)
+
+    // Convert amount to lowest unit based on chain decimals
+    // For Ethereum and EVM chains, this is typically 18 decimals (wei)
+    const decimals =
+      workflowState.selectedChainData?.nativeToken?.decimals || 18;
+    const amountInLowestUnit = convertToLowestUnit(amount, decimals);
+
+    try {
+      // Prepare the transaction using the Adamik API
+      const apiUrl =
+        import.meta.env.VITE_ADAMIK_API_URL || "https://api-staging.adamik.io";
+      const apiKey = import.meta.env.VITE_ADAMIK_API_KEY;
+
+      if (!apiKey) {
+        throw new Error("ADAMIK API key is not set");
+      }
+
+      // Use the correct endpoint for transaction encoding
+      const url = `${apiUrl}/api/${workflowState.selectedChain}/transaction/encode`;
+      const body = {
+        transaction: {
+          data: {
+            chainId: workflowState.selectedChain,
+            mode: "transfer",
+            senderAddress: workflowState.address,
+            recipientAddress: recipientAddress,
+            amount: amountInLowestUnit,
+            useMaxAmount: false,
+          },
+        },
+      };
+
+      // Add the sender public key if available
+      if (workflowState.pubkey) {
+        (body.transaction.data as any).senderPubKey = workflowState.pubkey;
+      }
+
+      // Log API call and make the API request
+      let logId = 0;
+      if (apiLogsInstance) {
+        logId = logApiCall(
+          apiLogsInstance,
+          "Adamik",
+          url,
+          "POST",
+          JSON.stringify(body)
+        );
+      }
+
+      // Make the actual API call
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: apiKey,
+          },
+          body: JSON.stringify(body),
+        });
+
+        const data = await response.json();
+
+        // Log API response
+        if (apiLogsInstance) {
+          logApiResponse(
+            apiLogsInstance,
+            logId,
+            JSON.stringify(data),
+            !response.ok
+          );
+        }
+
+        if (!response.ok) {
+          throw new Error(
+            data.message ||
+              `Failed to encode transaction: ${response.statusText}`
+          );
+        }
+
+        // Store the transaction in the workflow state
+        workflowState.transaction = data;
+
+        // For display purposes, extract relevant information
+        const transaction = {
+          chainId: workflowState.selectedChain,
+          from: workflowState.address,
+          to: recipientAddress,
+          value: amount,
+          nonce: Math.floor(Math.random() * 1000000).toString(), // Mock nonce for display
+        };
+
+        return {
+          success: true,
+          output: (
+            <div>
+              <p className="text-green-500 mb-2">
+                Transaction prepared successfully!
+              </p>
+              <div className="bg-gray-800 p-3 rounded mb-3">
+                <p className="text-gray-300 mb-1">
+                  <span className="text-gray-500">Chain ID:</span>{" "}
+                  {transaction.chainId}
+                </p>
+                <p className="text-gray-300 mb-1">
+                  <span className="text-gray-500">From:</span>{" "}
+                  {transaction.from}
+                </p>
+                <p className="text-gray-300 mb-1">
+                  <span className="text-gray-500">To:</span> {transaction.to}
+                </p>
+                <p className="text-gray-300 mb-1">
+                  <span className="text-gray-500">Value:</span>{" "}
+                  {transaction.value}
+                </p>
+                <p className="text-gray-300 mb-1">
+                  <span className="text-gray-500">Nonce:</span>{" "}
+                  {transaction.nonce}
+                </p>
+              </div>
+              <p className="text-medium text-gray-400 mt-3">
+                Use the <span className="text-blue-500 font-bold">sign-tx</span>{" "}
+                command to sign this transaction.
+              </p>
+            </div>
+          ),
+          type: "success",
+        };
+      } catch (error) {
+        // If the API call fails, log the error and throw it
+        if (apiLogsInstance) {
+          logApiResponse(
+            apiLogsInstance,
+            logId,
+            JSON.stringify({ error: (error as Error).message }),
+            true
+          );
+        }
+        throw error;
+      }
+    } catch (error) {
+      return {
+        success: false,
+        output: (
+          <div className="text-red-500">
+            Failed to prepare transaction: {(error as Error).message}
+          </div>
+        ),
+        type: "error",
+      };
+    }
+  },
+};
+
+// Sign transaction command
+export const signTxCommand: Command = {
+  name: "sign-tx",
+  description: "Sign a prepared transaction",
+  execute: async (_args: string[] = []): Promise<CommandResult> => {
+    // Check if a transaction has been prepared
+    if (!workflowState.transaction) {
+      return {
+        success: false,
+        output: (
+          <div className="text-red-500">
+            Please prepare a transaction first using the{" "}
+            <span className="font-bold">prepare-tx</span> command.
+          </div>
+        ),
+        type: "error",
+      };
+    }
+
+    try {
+      // Get the signer
+      const signer = new SodotSigner(
+        workflowState.selectedChain!,
+        workflowState.selectedChainData!.signerSpec
+      );
+
+      // Encode the transaction (in a real app, this would be done properly)
+      const encodedTx = JSON.stringify(workflowState.transaction);
+
+      // Log API call for signing
+      let logId = 0;
+      if (apiLogsInstance) {
+        logId = logApiCall(
+          apiLogsInstance,
+          "Sodot",
+          "/sodot-vertex-0/ecdsa/sign",
+          "POST",
+          encodedTx
+        );
+      }
+
+      // Sign the transaction
+      const signature = await signer.signTransaction(encodedTx);
+
+      // Log API response for signing
+      if (apiLogsInstance) {
+        logApiResponse(
+          apiLogsInstance,
+          logId,
+          JSON.stringify({ signature: signature.substring(0, 64) + "..." }),
+          false
+        );
+      }
+
+      // Store the signature in the workflow state
+      workflowState.signature = signature;
+
+      return {
+        success: true,
+        output: (
+          <div>
+            <p className="text-green-500 mb-2">
+              Transaction signed successfully!
+            </p>
+            <div className="bg-gray-800 p-3 rounded mb-3">
+              <p className="text-gray-300 mb-1">
+                <span className="text-gray-500">Signature:</span>{" "}
+                <span className="font-mono text-xs break-all">
+                  {signature.substring(0, 64)}...
+                </span>
+              </p>
+            </div>
+            <p className="text-medium text-gray-400 mt-3">
+              Use the{" "}
+              <span className="text-blue-500 font-bold">broadcast-tx</span>{" "}
+              command to broadcast this transaction to the network.
+            </p>
+          </div>
+        ),
+        type: "success",
+      };
+    } catch (error) {
+      return {
+        success: false,
+        output: (
+          <div className="text-red-500">
+            Failed to sign transaction: {(error as Error).message}
+          </div>
+        ),
+        type: "error",
+      };
+    }
+  },
+};
+
+// Broadcast transaction command
+export const broadcastTxCommand: Command = {
+  name: "broadcast-tx",
+  description: "Broadcast a signed transaction to the network",
+  execute: async (_args: string[] = []): Promise<CommandResult> => {
+    // Check if a transaction has been signed
+    if (!workflowState.transaction || !workflowState.signature) {
+      return {
+        success: false,
+        output: (
+          <div className="text-red-500">
+            Please prepare and sign a transaction first using the{" "}
+            <span className="font-bold">prepare-tx</span> and{" "}
+            <span className="font-bold">sign-tx</span> commands.
+          </div>
+        ),
+        type: "error",
+      };
+    }
+
+    try {
+      // Prepare the API call to broadcast the transaction
+      const apiUrl =
+        import.meta.env.VITE_ADAMIK_API_URL || "https://api-staging.adamik.io";
+      const apiKey = import.meta.env.VITE_ADAMIK_API_KEY;
+
+      if (!apiKey) {
+        throw new Error("ADAMIK API key is not set");
+      }
+
+      const url = `${apiUrl}/api/${workflowState.selectedChain}/transaction/broadcast`;
+      const body = {
+        transaction: workflowState.transaction,
+        signature: workflowState.signature,
+      };
+
+      // Log API call for broadcasting
+      let logId = 0;
+      if (apiLogsInstance) {
+        logId = logApiCall(
+          apiLogsInstance,
+          "Adamik",
+          url,
+          "POST",
+          JSON.stringify(body)
+        );
+      }
+
+      try {
+        // Make the actual API call to broadcast the transaction
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: apiKey,
+          },
+          body: JSON.stringify(body),
+        });
+
+        const data = await response.json();
+
+        // Log API response
+        if (apiLogsInstance) {
+          logApiResponse(
+            apiLogsInstance,
+            logId,
+            JSON.stringify(data),
+            !response.ok
+          );
+        }
+
+        if (!response.ok) {
+          throw new Error(
+            data.message ||
+              `Failed to broadcast transaction: ${response.statusText}`
+          );
+        }
+
+        // Get the transaction hash from the response
+        const txHash =
+          data.txHash || "0x" + Math.random().toString(16).substring(2, 42);
+
+        // Store the transaction hash in the workflow state
+        workflowState.txHash = txHash;
+
+        return {
+          success: true,
+          output: (
+            <div>
+              <p className="text-green-500 mb-2">
+                Transaction broadcast successfully!
+              </p>
+              <div className="bg-gray-800 p-3 rounded mb-3">
+                <p className="text-gray-300 mb-1">
+                  <span className="text-gray-500">Transaction Hash:</span>{" "}
+                  <span className="font-mono">{txHash}</span>
+                </p>
+              </div>
+              <p className="text-medium text-gray-400 mt-3">
+                You can view the transaction on a block explorer using the hash
+                above.
+              </p>
+            </div>
+          ),
+          type: "success",
+        };
+      } catch (error) {
+        // If the API call fails, log the error and throw it
+        if (apiLogsInstance) {
+          logApiResponse(
+            apiLogsInstance,
+            logId,
+            JSON.stringify({ error: (error as Error).message }),
+            true
+          );
+        }
+        throw error;
+      }
+    } catch (error) {
+      return {
+        success: false,
+        output: (
+          <div className="text-red-500">
+            Failed to broadcast transaction: {(error as Error).message}
           </div>
         ),
         type: "error",

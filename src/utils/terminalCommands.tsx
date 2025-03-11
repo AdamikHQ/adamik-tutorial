@@ -2,9 +2,10 @@ import { CommandResult, workflowState } from "./terminalTypes";
 import {
   helpCommand,
   clearCommand,
-  getChainsCommand,
   startCommand,
-  chainCommand,
+  prepareTxCommand,
+  signTxCommand,
+  broadcastTxCommand,
 } from "./commands";
 import { SodotSigner } from "../signers/Sodot";
 import { encodePubKeyToAddress } from "../adamik/encodePubkeyToAddress";
@@ -17,9 +18,10 @@ import { adamikGetChain } from "../adamik/getChain";
 const commands = {
   help: helpCommand,
   clear: clearCommand,
-  getChains: getChainsCommand,
   start: startCommand,
-  chain: chainCommand,
+  "prepare-tx": prepareTxCommand,
+  "sign-tx": signTxCommand,
+  "broadcast-tx": broadcastTxCommand,
 };
 
 // Restricted initial commands
@@ -43,9 +45,7 @@ export const executeCommand = async (input: string): Promise<CommandResult> => {
       parsedResult.chainSelection &&
       commandName !== "help" &&
       commandName !== "start" &&
-      commandName !== "clear" &&
-      commandName !== "getchains" &&
-      commandName !== "chain"
+      commandName !== "clear"
     ) {
       // User is selecting a chain
       const chainId = commandName;

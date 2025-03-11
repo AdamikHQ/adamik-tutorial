@@ -8,6 +8,7 @@ export type CommandResult = {
   type?: "success" | "error" | "info";
   chainSelection?: boolean;
   clearTerminal?: boolean;
+  helpExecuted?: boolean;
 };
 
 // Track the current state of the workflow
