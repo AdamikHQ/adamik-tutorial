@@ -15,6 +15,7 @@ import { adamikGetChain } from "../adamik/getChain";
 import { adamikGetChains } from "../adamik/getChains";
 import { apiLogsInstance } from "../adamik/apiLogsManager";
 import { logApiCall, logApiResponse } from "../contexts/ApiLogsContext";
+import { encodeTransaction } from "../adamik/encodeTransaction";
 
 // Help command
 export const helpCommand: Command = {
@@ -419,6 +420,26 @@ export const startCommand: Command = {
   },
 };
 
+// Helper function to convert from main unit to smallest unit
+const convertToSmallestUnit = (amount: string, decimals: number): string => {
+  // Remove any commas from the amount
+  const cleanAmount = amount.replace(/,/g, "");
+
+  // Split the amount into whole and fractional parts
+  const parts = cleanAmount.split(".");
+  let wholePart = parts[0];
+  let fractionalPart = parts[1] || "";
+
+  // Pad the fractional part with zeros if needed
+  fractionalPart = fractionalPart.padEnd(decimals, "0");
+
+  // Trim the fractional part if it's too long
+  fractionalPart = fractionalPart.substring(0, decimals);
+
+  // Combine the parts and remove leading zeros
+  return (wholePart + fractionalPart).replace(/^0+/, "") || "0";
+};
+
 // Prepare transaction command
 export const prepareTxCommand: Command = {
   name: "prepare-tx",
@@ -459,142 +480,67 @@ export const prepareTxCommand: Command = {
 
     // Convert amount to lowest unit based on chain decimals
     // For Ethereum and EVM chains, this is typically 18 decimals (wei)
-    const decimals =
-      workflowState.selectedChainData?.nativeToken?.decimals || 18;
-    const amountInLowestUnit = convertToLowestUnit(amount, decimals);
+    const decimals = 18; // Default to 18 decimals for EVM chains
+    const amountInLowestUnit = convertToSmallestUnit(amount, decimals);
 
     try {
-      // Prepare the transaction using the Adamik API
-      const apiUrl =
-        import.meta.env.VITE_ADAMIK_API_URL || "https://api-staging.adamik.io";
-      const apiKey = import.meta.env.VITE_ADAMIK_API_KEY;
+      // Use the encodeTransaction function to prepare the transaction
+      const encodedTransaction = await encodeTransaction({
+        chainId: workflowState.selectedChain,
+        senderAddress: workflowState.address,
+        recipientAddress: recipientAddress,
+        amount: amountInLowestUnit,
+        mode: "transfer",
+        pubkey: workflowState.pubkey,
+      });
 
-      if (!apiKey) {
-        throw new Error("ADAMIK API key is not set");
-      }
+      // Store the transaction in the workflow state
+      workflowState.transaction = encodedTransaction;
 
-      // Use the correct endpoint for transaction encoding
-      const url = `${apiUrl}/api/${workflowState.selectedChain}/transaction/encode`;
-      const body = {
-        transaction: {
-          data: {
-            chainId: workflowState.selectedChain,
-            mode: "transfer",
-            senderAddress: workflowState.address,
-            recipientAddress: recipientAddress,
-            amount: amountInLowestUnit,
-            useMaxAmount: false,
-          },
-        },
+      // For display purposes, extract relevant information
+      const transaction = {
+        chainId: workflowState.selectedChain,
+        from: workflowState.address,
+        to: recipientAddress,
+        value: amount,
+        nonce: Math.floor(Math.random() * 1000000).toString(), // Mock nonce for display
       };
 
-      // Add the sender public key if available
-      if (workflowState.pubkey) {
-        (body.transaction.data as any).senderPubKey = workflowState.pubkey;
-      }
-
-      // Log API call and make the API request
-      let logId = 0;
-      if (apiLogsInstance) {
-        logId = logApiCall(
-          apiLogsInstance,
-          "Adamik",
-          url,
-          "POST",
-          JSON.stringify(body)
-        );
-      }
-
-      // Make the actual API call
-      try {
-        const response = await fetch(url, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: apiKey,
-          },
-          body: JSON.stringify(body),
-        });
-
-        const data = await response.json();
-
-        // Log API response
-        if (apiLogsInstance) {
-          logApiResponse(
-            apiLogsInstance,
-            logId,
-            JSON.stringify(data),
-            !response.ok
-          );
-        }
-
-        if (!response.ok) {
-          throw new Error(
-            data.message ||
-              `Failed to encode transaction: ${response.statusText}`
-          );
-        }
-
-        // Store the transaction in the workflow state
-        workflowState.transaction = data;
-
-        // For display purposes, extract relevant information
-        const transaction = {
-          chainId: workflowState.selectedChain,
-          from: workflowState.address,
-          to: recipientAddress,
-          value: amount,
-          nonce: Math.floor(Math.random() * 1000000).toString(), // Mock nonce for display
-        };
-
-        return {
-          success: true,
-          output: (
-            <div>
-              <p className="text-green-500 mb-2">
-                Transaction prepared successfully!
+      return {
+        success: true,
+        output: (
+          <div>
+            <p className="text-green-500 mb-2">
+              Transaction prepared successfully!
+            </p>
+            <div className="bg-gray-800 p-3 rounded mb-3">
+              <p className="text-gray-300 mb-1">
+                <span className="text-gray-500">Chain ID:</span>{" "}
+                {transaction.chainId}
               </p>
-              <div className="bg-gray-800 p-3 rounded mb-3">
-                <p className="text-gray-300 mb-1">
-                  <span className="text-gray-500">Chain ID:</span>{" "}
-                  {transaction.chainId}
-                </p>
-                <p className="text-gray-300 mb-1">
-                  <span className="text-gray-500">From:</span>{" "}
-                  {transaction.from}
-                </p>
-                <p className="text-gray-300 mb-1">
-                  <span className="text-gray-500">To:</span> {transaction.to}
-                </p>
-                <p className="text-gray-300 mb-1">
-                  <span className="text-gray-500">Value:</span>{" "}
-                  {transaction.value}
-                </p>
-                <p className="text-gray-300 mb-1">
-                  <span className="text-gray-500">Nonce:</span>{" "}
-                  {transaction.nonce}
-                </p>
-              </div>
-              <p className="text-medium text-gray-400 mt-3">
-                Use the <span className="text-blue-500 font-bold">sign-tx</span>{" "}
-                command to sign this transaction.
+              <p className="text-gray-300 mb-1">
+                <span className="text-gray-500">From:</span> {transaction.from}
+              </p>
+              <p className="text-gray-300 mb-1">
+                <span className="text-gray-500">To:</span> {transaction.to}
+              </p>
+              <p className="text-gray-300 mb-1">
+                <span className="text-gray-500">Value:</span>{" "}
+                {transaction.value}
+              </p>
+              <p className="text-gray-300 mb-1">
+                <span className="text-gray-500">Nonce:</span>{" "}
+                {transaction.nonce}
               </p>
             </div>
-          ),
-          type: "success",
-        };
-      } catch (error) {
-        // If the API call fails, log the error and throw it
-        if (apiLogsInstance) {
-          logApiResponse(
-            apiLogsInstance,
-            logId,
-            JSON.stringify({ error: (error as Error).message }),
-            true
-          );
-        }
-        throw error;
-      }
+            <p className="text-medium text-gray-400 mt-3">
+              Use the <span className="text-blue-500 font-bold">sign-tx</span>{" "}
+              command to sign this transaction.
+            </p>
+          </div>
+        ),
+        type: "success",
+      };
     } catch (error) {
       return {
         success: false,
