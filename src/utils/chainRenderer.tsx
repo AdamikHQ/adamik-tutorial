@@ -19,9 +19,9 @@ export const renderChainInfo = (
         <p className="text-green-400 font-bold">
           ✓ Chain information retrieved
         </p>
-        <p className="text-green-400 font-bold">✓ Public keys generated!</p>
+        <p className="text-green-400 font-bold">✓ Public keys generated</p>
         <p className="text-green-400 font-bold">
-          ✓ Address for {chain.name} retrieved!
+          ✓ Address for {chain.name} retrieved
         </p>
       </div>
 
