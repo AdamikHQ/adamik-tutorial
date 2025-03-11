@@ -12,6 +12,7 @@ export interface ApiLogEntry {
   response?: any;
   status: "pending" | "success" | "error";
   message?: string;
+  operation?: string; // Optional field for operation name
 }
 
 interface ApiLogsProps {
@@ -80,6 +81,25 @@ const ApiLogs: React.FC<ApiLogsProps> = ({ logs, className }) => {
 
   // Function to highlight chainId and account address in the endpoint
   const highlightEndpointParts = (endpoint: string) => {
+    // Handle SODOT endpoints
+    if (endpoint.includes("/sodot-vertex")) {
+      // Match pattern like /sodot-vertex-{vertexId}/{curve}/{operation}
+      const regex = /\/sodot-vertex-(\d+)\/([^\/]+)\/([^\/]+)/;
+      const match = endpoint.match(regex);
+
+      if (match) {
+        const [fullMatch, vertexId, curve, operation] = match;
+        return (
+          <>
+            /sodot-vertex-
+            <span className="highlight-chain">{vertexId}</span>/
+            <span className="highlight-address">{curve}</span>/
+            <span className="highlight-operation">{operation}</span>
+          </>
+        );
+      }
+    }
+
     // Match pattern like /api/{chainId}/account/{address}/
     const regex = /\/api\/([^\/]+)\/account\/([^\/]+)\//;
     const match = endpoint.match(regex);
@@ -99,11 +119,54 @@ const ApiLogs: React.FC<ApiLogsProps> = ({ logs, className }) => {
       );
     }
 
+    // Match pattern like /api/{chainId}/transaction/
+    const txRegex = /\/api\/([^\/]+)\/transaction\/([^\/]+)/;
+    const txMatch = endpoint.match(txRegex);
+
+    if (txMatch) {
+      const [fullMatch, chainId, operation] = txMatch;
+      return (
+        <>
+          /api/
+          <span className="highlight-chain">{chainId}</span>
+          /transaction/
+          <span className="highlight-operation">{operation}</span>
+        </>
+      );
+    }
+
     return endpoint;
   };
 
   // Function to get a descriptive title for the API call
-  const getApiCallDescription = (endpoint: string, method: string) => {
+  const getApiCallDescription = (log: ApiLogEntry) => {
+    // If operation is provided, use it
+    if (log.operation) {
+      return log.operation;
+    }
+
+    const { endpoint, method } = log;
+
+    // Handle SODOT API calls
+    if (endpoint.includes("/sodot-vertex")) {
+      if (endpoint.includes("/derive-pubkey")) {
+        return "Derive Public Key";
+      }
+      if (endpoint.includes("/sign")) {
+        return "Sign Transaction";
+      }
+      if (endpoint.includes("/keygen-init")) {
+        return "Initialize Key Generation";
+      }
+      if (endpoint.includes("/keygen")) {
+        return "Generate Key";
+      }
+      if (endpoint.includes("/create-room")) {
+        return "Create Signing Room";
+      }
+    }
+
+    // Handle Adamik API calls
     if (endpoint.includes("/api/chains") && !endpoint.includes("/chains/")) {
       return "Fetching all blockchain networks";
     }
@@ -125,11 +188,11 @@ const ApiLogs: React.FC<ApiLogsProps> = ({ logs, className }) => {
       return `Converting public key to address on ${chainId}`;
     }
 
-    if (endpoint.includes("/encode")) {
+    if (endpoint.includes("/transaction/encode")) {
       return "Encoding transaction";
     }
 
-    if (endpoint.includes("/broadcast")) {
+    if (endpoint.includes("/transaction/broadcast")) {
       return "Broadcasting transaction to network";
     }
 
@@ -180,7 +243,7 @@ const ApiLogs: React.FC<ApiLogsProps> = ({ logs, className }) => {
                   {log.method}
                 </span>
                 <span className="text-sm font-medium text-gray-200">
-                  {getApiCallDescription(log.endpoint, log.method)}
+                  {getApiCallDescription(log)}
                 </span>
               </div>
 
@@ -196,10 +259,8 @@ const ApiLogs: React.FC<ApiLogsProps> = ({ logs, className }) => {
                 </span>
               </div>
 
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-gray-300 font-mono text-sm break-all">
-                  {highlightEndpointParts(log.endpoint)}
-                </span>
+              <div className="text-xs text-gray-400 mb-2">
+                {highlightEndpointParts(log.endpoint)}
               </div>
 
               <div className="flex items-center justify-between">

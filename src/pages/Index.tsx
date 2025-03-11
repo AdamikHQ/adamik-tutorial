@@ -50,11 +50,11 @@ const Index = () => {
         <div className="w-full max-w-[1400px] mx-auto">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold tracking-tight mb-3">
-              Adamik Terminal
+              60+ Blockchain, All in One Place
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Learn how to use Adamik API through an interactive terminal-based
-              tutorial. <br />
+              Learn how to use Adamik + Sodot through an interactive
+              terminal-based tutorial. <br />
               Type commands to explore features and see examples.
             </p>
           </div>
@@ -105,7 +105,7 @@ const Index = () => {
 
       {/* F ooter */}
       <footer className="w-full py-6 px-8 text-center text-sm text-gray-500">
-        © {new Date().getFullYear()} Adamik Terminal. All rights reserved.
+        © {new Date().getFullYear()} Adamik Tutorial. All rights reserved.
       </footer>
     </div>
   );

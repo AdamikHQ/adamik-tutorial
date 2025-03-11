@@ -173,3 +173,19 @@
     text-wrap: balance;
   }
 }
+
+/* Add styles for API logs highlighting */
+.highlight-chain {
+  color: #60a5fa; /* blue-400 */
+  font-weight: 600;
+}
+
+.highlight-address {
+  color: #34d399; /* green-400 */
+  font-weight: 600;
+}
+
+.highlight-operation {
+  color: #f472b6; /* pink-400 */
+  font-weight: 600;
+}

@@ -196,7 +196,14 @@ export class SodotSigner implements BaseSigner {
 
     // Log the API call
     if (apiLogsInstance) {
-      logId = logApiCall(apiLogsInstance, "Sodot", apiUrl, "POST", requestBody);
+      logId = logApiCall(
+        apiLogsInstance,
+        "Sodot",
+        apiUrl,
+        "POST",
+        requestBody,
+        "Create Signing Room"
+      );
     }
 
     const response = await fetch(apiUrl, {
@@ -233,7 +240,14 @@ export class SodotSigner implements BaseSigner {
 
     // Log the API call
     if (apiLogsInstance) {
-      logId = logApiCall(apiLogsInstance, "Sodot", apiUrl, "GET");
+      logId = logApiCall(
+        apiLogsInstance,
+        "Sodot",
+        apiUrl,
+        "GET",
+        undefined,
+        "Initialize Key Generation"
+      );
     }
 
     const response = await fetch(apiUrl, {
@@ -279,7 +293,14 @@ export class SodotSigner implements BaseSigner {
 
     // Log the API call
     if (apiLogsInstance) {
-      logId = logApiCall(apiLogsInstance, "Sodot", apiUrl, "POST", requestBody);
+      logId = logApiCall(
+        apiLogsInstance,
+        "Sodot",
+        apiUrl,
+        "POST",
+        requestBody,
+        "Generate Key"
+      );
     }
 
     const response = await fetch(apiUrl, {
@@ -386,7 +407,14 @@ export class SodotSigner implements BaseSigner {
 
     // Log the API call
     if (apiLogsInstance) {
-      logId = logApiCall(apiLogsInstance, "Sodot", apiUrl, "POST", body);
+      logId = logApiCall(
+        apiLogsInstance,
+        "Sodot",
+        apiUrl,
+        "POST",
+        body,
+        "Sign Transaction"
+      );
     }
 
     try {
@@ -509,7 +537,14 @@ export class SodotSigner implements BaseSigner {
 
     // Log the API call
     if (apiLogsInstance) {
-      logId = logApiCall(apiLogsInstance, "Sodot", apiUrl, "POST", requestBody);
+      logId = logApiCall(
+        apiLogsInstance,
+        "Sodot",
+        apiUrl,
+        "POST",
+        requestBody,
+        "Derive Public Key"
+      );
     }
 
     const response = await fetch(apiUrl, {

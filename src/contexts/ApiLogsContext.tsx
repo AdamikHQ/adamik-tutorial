@@ -60,7 +60,8 @@ export const logApiCall = (
   provider: ApiLogEntry["provider"],
   endpoint: string,
   method: ApiLogEntry["method"],
-  request?: any
+  request?: any,
+  operation?: string
 ) => {
   return useApiLogsHook.addLog({
     provider,
@@ -68,6 +69,7 @@ export const logApiCall = (
     method,
     request,
     status: "pending",
+    operation,
   });
 };
 

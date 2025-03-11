@@ -49,12 +49,7 @@ export const showroomChains: Record<
     ticker: "AVAX",
     explorerUrl: "https://snowtrace.io/tx/",
   },
-  solana: {
-    name: "Solana",
-    ticker: "SOL",
-    explorerUrl: "https://explorer.solana.com/tx/",
-  },
-  binance: {
+  bsc: {
     name: "BNB Chain",
     ticker: "BNB",
     explorerUrl: "https://bscscan.com/tx/",
