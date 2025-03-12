@@ -29,18 +29,13 @@ const VerticalProgressIndicator: React.FC<VerticalProgressIndicatorProps> = ({
   };
 
   return (
-    <div
-      className={cn(
-        "vertical-progress-indicator rounded-lg bg-white shadow-sm border border-gray-200 p-4",
-        className
-      )}
-    >
-      <h3 className="text-sm font-semibold text-gray-800 mb-4">
+    <div className={cn("vertical-progress-indicator", className)}>
+      <h3 className="text-sm font-semibold text-gray-700 mb-4">
         Tutorial Progress
       </h3>
       <div className="flex flex-col space-y-6 relative">
         {/* Vertical line connecting steps */}
-        <div className="absolute left-2.5 top-3 bottom-3 w-0.5 bg-gray-200"></div>
+        <div className="absolute left-2.5 top-3 bottom-3 w-0.5 bg-gray-300"></div>
 
         {steps.map((step, index) => {
           const isActive = index === currentStep;
@@ -55,7 +50,7 @@ const VerticalProgressIndicator: React.FC<VerticalProgressIndicatorProps> = ({
                     ? "bg-yellow-500 border-2 border-yellow-400 ring-2 ring-yellow-100"
                     : isCompleted
                     ? "bg-green-500 border-2 border-green-400"
-                    : "bg-gray-100 border-2 border-gray-200"
+                    : "bg-gray-200 border-2 border-gray-300"
                 }`}
               >
                 {isCompleted && (
