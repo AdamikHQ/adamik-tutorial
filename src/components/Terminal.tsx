@@ -22,16 +22,7 @@ interface CommandEntry {
   type: "success" | "error" | "info";
 }
 
-// Define the guided flow steps
-export const guidedFlowSteps = [
-  "Start the tutorial",
-  "Select a blockchain",
-  "Prepare a transaction",
-  "Sign the transaction",
-  "Broadcast the transaction",
-];
-
-// Define more detailed step descriptions for the progress indicator
+// Define the complete flow with commands and descriptions
 export const guidedFlowStepsWithDescriptions = [
   { command: "start", description: "Start the tutorial" },
   { command: "chain-selection", description: "Select a blockchain" },
@@ -39,6 +30,11 @@ export const guidedFlowStepsWithDescriptions = [
   { command: "sign-tx", description: "Sign the transaction" },
   { command: "broadcast-tx", description: "Broadcast the transaction" },
 ];
+
+// Derive the simple array of step descriptions when needed
+export const guidedFlowSteps = guidedFlowStepsWithDescriptions.map(
+  (step) => step.description
+);
 
 const Terminal: React.FC<TerminalProps> = ({
   className,
@@ -95,13 +91,13 @@ const Terminal: React.FC<TerminalProps> = ({
     }
   }, [sodotConfigChecked]);
 
-  // Define the guided flow
+  // Define the guided flow commands (with special case for chain selection)
   const guidedFlow = [
-    "start",
+    guidedFlowStepsWithDescriptions[0].command, // start
     "optimism", // Default chain, but any chain selection should continue the flow
-    "prepare-tx",
-    "sign-tx",
-    "broadcast-tx",
+    guidedFlowStepsWithDescriptions[2].command, // prepare-tx
+    guidedFlowStepsWithDescriptions[3].command, // sign-tx
+    guidedFlowStepsWithDescriptions[4].command, // broadcast-tx
   ];
 
   // Determine the next suggested command based on command history

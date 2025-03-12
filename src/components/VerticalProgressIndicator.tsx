@@ -30,12 +30,12 @@ const VerticalProgressIndicator: React.FC<VerticalProgressIndicatorProps> = ({
 
   return (
     <div className={cn("vertical-progress-indicator", className)}>
-      <h3 className="text-sm font-semibold text-gray-700 mb-4">
+      <h3 className="text-sm font-semibold text-gray-700 mb-3">
         Tutorial Progress
       </h3>
-      <div className="flex flex-col space-y-6 relative">
+      <div className="flex flex-col space-y-4 lg:space-y-5 relative">
         {/* Vertical line connecting steps */}
-        <div className="absolute left-2.5 top-3 bottom-3 w-0.5 bg-gray-300"></div>
+        <div className="absolute left-2 top-3 bottom-3 w-0.5 bg-gray-300"></div>
 
         {steps.map((step, index) => {
           const isActive = index === currentStep;
@@ -45,9 +45,9 @@ const VerticalProgressIndicator: React.FC<VerticalProgressIndicatorProps> = ({
             <div key={index} className="flex items-start relative z-10">
               {/* Circle indicator */}
               <div
-                className={`w-5 h-5 rounded-full flex items-center justify-center mr-3 ${
+                className={`w-4 h-4 lg:w-5 lg:h-5 rounded-full flex items-center justify-center mr-2 ${
                   isActive
-                    ? "bg-yellow-500 border-2 border-yellow-400 ring-2 ring-yellow-100"
+                    ? "bg-yellow-500 border-2 border-yellow-400 ring-1 ring-yellow-100"
                     : isCompleted
                     ? "bg-green-500 border-2 border-green-400"
                     : "bg-gray-200 border-2 border-gray-300"
@@ -56,7 +56,7 @@ const VerticalProgressIndicator: React.FC<VerticalProgressIndicatorProps> = ({
                 {isCompleted && (
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-2.5 w-2.5 text-white"
+                    className="h-2 w-2 text-white"
                     viewBox="0 0 20 20"
                     fill="currentColor"
                   >
@@ -68,34 +68,36 @@ const VerticalProgressIndicator: React.FC<VerticalProgressIndicatorProps> = ({
                   </svg>
                 )}
                 {isActive && (
-                  <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                  <div className="w-1 h-1 lg:w-1.5 lg:h-1.5 bg-white rounded-full"></div>
                 )}
               </div>
 
               {/* Step description */}
               <div className="flex flex-col">
-                <span
-                  className={`text-xs font-semibold ${
-                    isActive
-                      ? "text-yellow-600"
-                      : isCompleted
-                      ? "text-green-600"
-                      : "text-gray-500"
-                  }`}
-                >
-                  Step {index + 1}
-                </span>
-                <span
-                  className={`text-xs ${
-                    isActive
-                      ? "text-yellow-600 font-medium"
-                      : isCompleted
-                      ? "text-green-600"
-                      : "text-gray-500"
-                  }`}
-                >
-                  {getStepDescription(step, index)}
-                </span>
+                <div className="flex items-center">
+                  <span
+                    className={`text-xs font-semibold ${
+                      isActive
+                        ? "text-yellow-600"
+                        : isCompleted
+                        ? "text-green-600"
+                        : "text-gray-500"
+                    }`}
+                  >
+                    {index + 1}.
+                  </span>
+                  <span
+                    className={`text-xs ml-1 font-medium ${
+                      isActive
+                        ? "text-yellow-600"
+                        : isCompleted
+                        ? "text-green-600"
+                        : "text-gray-500"
+                    }`}
+                  >
+                    {getStepDescription(step, index)}
+                  </span>
+                </div>
               </div>
             </div>
           );

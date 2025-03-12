@@ -51,7 +51,7 @@ const Index = () => {
         <div className="w-full max-w-[1400px] mx-auto">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold tracking-tight mb-3">
-              60+ Blockchain, All in One Place
+              Sodot Multi Chain Demo, powered by Adamik API
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               Leverage Sodot MPC technology and interact with more than 60+
