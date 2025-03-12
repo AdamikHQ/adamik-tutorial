@@ -63,30 +63,28 @@ const HorizontalProgressIndicator: React.FC<
         </div>
       </div>
 
-      {/* Step indicators with descriptions */}
-      <div className="hidden sm:flex justify-between mt-4">
+      {/* Step indicators with descriptions - grid layout for better alignment */}
+      <div className="hidden sm:grid grid-cols-5 gap-2 mt-4">
         {steps.map((step, index) => {
           const isActive = index === currentStep;
           const isCompleted = index < currentStep;
 
           return (
-            <div
-              key={index}
-              className="flex flex-col items-center"
-              style={{ width: `${100 / steps.length}%`, maxWidth: "120px" }}
-            >
-              {/* Step description above the indicator */}
-              <span
-                className={`text-xs text-center mb-2 line-clamp-2 ${
-                  isActive
-                    ? "text-yellow-600 font-medium"
-                    : isCompleted
-                    ? "text-green-600"
-                    : "text-gray-500"
-                }`}
-              >
-                {getStepDescription(step, index)}
-              </span>
+            <div key={index} className="flex flex-col items-center">
+              {/* Step description with fixed height */}
+              <div className="h-10 flex items-center justify-center mb-2 w-full">
+                <span
+                  className={`text-xs text-center line-clamp-2 ${
+                    isActive
+                      ? "text-yellow-600 font-medium"
+                      : isCompleted
+                      ? "text-green-600"
+                      : "text-gray-500"
+                  }`}
+                >
+                  {getStepDescription(step, index)}
+                </span>
+              </div>
 
               {/* Step indicator */}
               <div
@@ -135,17 +133,13 @@ const HorizontalProgressIndicator: React.FC<
       </div>
 
       {/* Simplified step indicators for very small screens */}
-      <div className="flex sm:hidden justify-between mt-4">
+      <div className="grid sm:hidden grid-cols-5 gap-1 mt-4">
         {steps.map((step, index) => {
           const isActive = index === currentStep;
           const isCompleted = index < currentStep;
 
           return (
-            <div
-              key={index}
-              className="flex flex-col items-center"
-              style={{ width: `${100 / steps.length}%` }}
-            >
+            <div key={index} className="flex flex-col items-center">
               <div
                 className={`w-4 h-4 rounded-full flex items-center justify-center mb-1 ${
                   isActive
