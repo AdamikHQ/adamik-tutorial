@@ -114,11 +114,31 @@ const Terminal: React.FC<TerminalProps> = ({
 
     const lastCommand = commandHistory[commandHistory.length - 1].command;
     const lastOutput = commandHistory[commandHistory.length - 1].output;
+    const lastType = commandHistory[commandHistory.length - 1].type;
+
+    // Don't update flow step for commands that are still processing
+    if (
+      lastOutput &&
+      typeof lastOutput === "object" &&
+      React.isValidElement(lastOutput) &&
+      lastOutput.props?.children === "Processing command..."
+    ) {
+      return;
+    }
 
     // Helper function to update suggested command and flow step together
     const updateSuggestion = (command: string, flowStep: number) => {
       setSuggestedCommand(command);
-      setCurrentFlowStep(flowStep);
+      // Only update the flow step if it's not a regression (going back to a lower step)
+      // unless it's a clear command or we're starting over
+      if (
+        flowStep >= currentFlowStep ||
+        command === "start" ||
+        lastCommand === "clear" ||
+        lastCommand === "broadcast-tx"
+      ) {
+        setCurrentFlowStep(flowStep);
+      }
     };
 
     // Check if the last command was a chain selection
@@ -176,6 +196,12 @@ const Terminal: React.FC<TerminalProps> = ({
     } else if (lastCommand === "broadcast-tx") {
       // After completing the flow with broadcast-tx, suggest starting a new cycle
       updateSuggestion("start", 0); // Start is the current step (yellow)
+    } else if (lastCommand === "prepare-tx" && lastType === "success") {
+      // After prepare-tx, suggest sign-tx
+      updateSuggestion("sign-tx", 3); // sign-tx is the current step (yellow)
+    } else if (lastCommand === "sign-tx" && lastType === "success") {
+      // After sign-tx, suggest broadcast-tx
+      updateSuggestion("broadcast-tx", 4); // broadcast-tx is the current step (yellow)
     } else if (hasChainDetails) {
       // If the output shows chain details, suggest prepare-tx
       updateSuggestion("prepare-tx", 2); // prepare-tx is the current step (yellow)
@@ -185,23 +211,24 @@ const Terminal: React.FC<TerminalProps> = ({
     } else if (currentIndex >= 0 && currentIndex < guidedFlow.length - 1) {
       // If the last command is in our flow and not the last step, suggest the next one
       const nextCommand = guidedFlow[currentIndex + 1];
-      let nextFlowStep = 0; // Default to start
+      let nextFlowStep = currentFlowStep; // Keep the current flow step by default
 
       // Update the flow step based on the last command
-      if (lastCommand === "start") {
+      if (lastCommand === "start" && lastType === "success") {
         nextFlowStep = 1; // Chain selection is the current step (yellow)
-      } else if (lastCommand === "prepare-tx") {
+      } else if (lastCommand === "prepare-tx" && lastType === "success") {
         nextFlowStep = 3; // Sign-tx is the current step (yellow)
-      } else if (lastCommand === "sign-tx") {
+      } else if (lastCommand === "sign-tx" && lastType === "success") {
         nextFlowStep = 4; // Broadcast-tx is the current step (yellow)
       }
 
       updateSuggestion(nextCommand, nextFlowStep);
     } else {
       // Default suggestion for any other command
-      updateSuggestion("start", 0); // Start is the current step (yellow)
+      // Don't change the flow step here to prevent resetting
+      setSuggestedCommand("start");
     }
-  }, [commandHistory]);
+  }, [commandHistory, currentFlowStep]);
 
   // Update the current flow step based on the command
   const updateCurrentFlowStep = (command: string) => {
@@ -247,8 +274,14 @@ const Terminal: React.FC<TerminalProps> = ({
       }
     }
 
-    // Only update if the step has changed
-    if (newStep !== currentFlowStep) {
+    // Only update if the step has changed and is not a regression (going back to a lower step)
+    // unless it's a clear command or we're starting over
+    if (
+      newStep !== currentFlowStep &&
+      (newStep >= currentFlowStep ||
+        command === "clear" ||
+        command === "broadcast-tx")
+    ) {
       setCurrentFlowStep(newStep);
       // Call the onProgressUpdate callback if provided
       if (onProgressUpdate) {
@@ -283,8 +316,43 @@ const Terminal: React.FC<TerminalProps> = ({
             type: result.success ? "success" : result.type || "error",
           },
         ]);
+
+        // Reset the flow step to 0 (start)
+        setCurrentFlowStep(0);
+        if (onProgressUpdate) {
+          onProgressUpdate(0);
+        }
       }
     } else {
+      // Immediately update the flow step based on the command being executed
+      // This ensures the progress indicator updates right after the user presses enter
+      if (command === "start") {
+        setCurrentFlowStep(0);
+        if (onProgressUpdate) {
+          onProgressUpdate(0);
+        }
+      } else if (Object.keys(showroomChains).includes(command)) {
+        setCurrentFlowStep(1);
+        if (onProgressUpdate) {
+          onProgressUpdate(1);
+        }
+      } else if (command === "prepare-tx") {
+        setCurrentFlowStep(2);
+        if (onProgressUpdate) {
+          onProgressUpdate(2);
+        }
+      } else if (command === "sign-tx") {
+        setCurrentFlowStep(3);
+        if (onProgressUpdate) {
+          onProgressUpdate(3);
+        }
+      } else if (command === "broadcast-tx") {
+        setCurrentFlowStep(4);
+        if (onProgressUpdate) {
+          onProgressUpdate(4);
+        }
+      }
+
       // Add the command to history immediately with a loading state
       setCommandHistory((prev) => [
         ...prev,
@@ -322,9 +390,26 @@ const Terminal: React.FC<TerminalProps> = ({
             onProgressUpdate(2);
           }
         }, 500); // Small delay to ensure the UI updates properly
-      } else {
-        // For other commands, update the flow step based on the command
-        updateCurrentFlowStep(command);
+      }
+      // Special handling for prepare-tx command - directly update the flow step to 3 (sign-tx)
+      else if (command === "prepare-tx" && result.success) {
+        // Update to step 3 (sign-tx is the next step)
+        setTimeout(() => {
+          setCurrentFlowStep(3);
+          if (onProgressUpdate) {
+            onProgressUpdate(3);
+          }
+        }, 500); // Small delay to ensure the UI updates properly
+      }
+      // Special handling for sign-tx command - directly update the flow step to 4 (broadcast-tx)
+      else if (command === "sign-tx" && result.success) {
+        // Update to step 4 (broadcast-tx is the next step)
+        setTimeout(() => {
+          setCurrentFlowStep(4);
+          if (onProgressUpdate) {
+            onProgressUpdate(4);
+          }
+        }, 500); // Small delay to ensure the UI updates properly
       }
     }
 

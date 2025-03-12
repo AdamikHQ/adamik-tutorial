@@ -54,9 +54,8 @@ const Index = () => {
               60+ Blockchain, All in One Place
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Learn how to use Adamik + Sodot through an interactive
-              terminal-based tutorial. <br />
-              Type commands to explore features and see examples.
+              Leverage Sodot MPC technology and interact with more than 60+
+              blockchains
             </p>
           </div>
 
