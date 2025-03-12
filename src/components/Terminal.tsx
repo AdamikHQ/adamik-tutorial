@@ -139,17 +139,8 @@ const Terminal = ({
       }
     };
 
-    // Check if the last command was a chain selection
-    let isChainSelection = false;
-    const chainIdsJson = sessionStorage.getItem("adamikChainIds");
-    if (chainIdsJson) {
-      try {
-        const chainIds = JSON.parse(chainIdsJson);
-        isChainSelection = chainIds.includes(lastCommand);
-      } catch (e) {
-        console.error("Error parsing chainIds from sessionStorage:", e);
-      }
-    }
+    // Check if the last command was a chain selection - use direct check with showroomChains
+    let isChainSelection = Object.keys(showroomChains).includes(lastCommand);
 
     // Also check if we're in chain selection mode from the lastCommandResult
     const lastCommandResultJson = sessionStorage.getItem("lastCommandResult");
@@ -203,6 +194,12 @@ const Terminal = ({
     } else if (lastCommand === "sign-tx" && lastType === "success") {
       // After sign-tx, suggest broadcast-tx
       updateSuggestion("broadcast-tx", 4); // broadcast-tx is the current step (yellow)
+    } else if (
+      Object.keys(showroomChains).includes(lastCommand) &&
+      lastType === "success"
+    ) {
+      // After successful chain selection, suggest prepare-tx
+      updateSuggestion("prepare-tx", 2); // prepare-tx is the current step (yellow)
     } else if (hasChainDetails) {
       // If the output shows chain details, suggest prepare-tx
       updateSuggestion("prepare-tx", 2); // prepare-tx is the current step (yellow)
@@ -397,6 +394,9 @@ const Terminal = ({
           if (onProgressUpdate) {
             onProgressUpdate(2);
           }
+
+          // Explicitly set the suggested command to prepare-tx
+          setSuggestedCommand("prepare-tx");
         }, 500); // Small delay to ensure the UI updates properly
       }
       // Special handling for prepare-tx command - directly update the flow step to 3 (sign-tx)
@@ -433,47 +433,15 @@ const Terminal = ({
       // After broadcast-tx, suggest explore-chains
       if (command === "broadcast-tx" && result.success) {
         setTimeout(() => {
-          setCommandHistory((prev) => [
-            ...prev,
-            {
-              id: Date.now(),
-              command: "",
-              output: (
-                <div className="mt-2">
-                  <p>
-                    🎉 Congratulations! You've successfully broadcast a
-                    transaction.
-                  </p>
-                  <p className="mt-2">
-                    Next, try exploring all supported chains with:
-                  </p>
-                  <p className="font-bold mt-1">explore-chains</p>
-                </div>
-              ),
-              type: "success",
-            },
-          ]);
           updateCurrentFlowStep("explore-chains");
+          setSuggestedCommand("explore-chains");
         }, 1000);
       }
 
       // After explore-chains, suggest restarting the tutorial
       if (command === "explore-chains" && result.success) {
         setTimeout(() => {
-          setCommandHistory((prev) => [
-            ...prev,
-            {
-              id: Date.now(),
-              command: "",
-              output: (
-                <div className="mt-2">
-                  <p>🎉 You've completed the tutorial! To restart, type:</p>
-                  <p className="font-bold mt-1">start</p>
-                </div>
-              ),
-              type: "success",
-            },
-          ]);
+          setSuggestedCommand("start");
         }, 1000);
       }
     }
