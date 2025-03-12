@@ -8,7 +8,7 @@ interface ProgressStep {
 
 interface VerticalProgressIndicatorProps {
   currentStep: number;
-  steps: ProgressStep[];
+  steps: ProgressStep[] | string[];
   className?: string;
 }
 
@@ -17,6 +17,17 @@ const VerticalProgressIndicator: React.FC<VerticalProgressIndicatorProps> = ({
   steps,
   className,
 }) => {
+  // Helper function to get step description
+  const getStepDescription = (
+    step: ProgressStep | string,
+    index: number
+  ): string => {
+    if (typeof step === "string") {
+      return step;
+    }
+    return step.description;
+  };
+
   return (
     <div
       className={cn(
@@ -88,7 +99,7 @@ const VerticalProgressIndicator: React.FC<VerticalProgressIndicatorProps> = ({
                       : "text-gray-500"
                   }`}
                 >
-                  {step.description}
+                  {getStepDescription(step, index)}
                 </span>
               </div>
             </div>

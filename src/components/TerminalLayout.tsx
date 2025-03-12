@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Terminal, { guidedFlowSteps } from "./Terminal";
+import Terminal, { guidedFlowStepsWithDescriptions } from "./Terminal";
 import ApiLogs from "./ApiLogs";
 import { useApiLogs } from "../contexts/ApiLogsContext";
 import { setApiLogsInstance } from "../adamik/apiLogsManager";
@@ -26,22 +26,19 @@ const TerminalLayout: React.FC<TerminalLayoutProps> = ({
   }, [apiLogs]);
 
   return (
-    <div
-      className={cn(
-        "flex flex-col md:flex-row items-start w-full max-w-[1600px] mx-auto px-4 md:px-6 py-4",
-        className
-      )}
-    >
-      {/* Vertical Progress Indicator - positioned outside the terminal structure */}
-      <div className="hidden md:block w-44 lg:w-48 pr-4 self-start sticky top-6 mb-6 md:mb-0">
-        <VerticalProgressIndicator
-          currentStep={currentStep}
-          steps={guidedFlowSteps}
-        />
+    <div className="relative">
+      {/* Tutorial Progress Indicator - positioned absolutely to the left */}
+      <div className="hidden md:block absolute left-[-12rem] lg:left-[-13rem] top-0 w-44 lg:w-48">
+        <div className="sticky top-6">
+          <VerticalProgressIndicator
+            currentStep={currentStep}
+            steps={guidedFlowStepsWithDescriptions}
+          />
+        </div>
       </div>
 
-      {/* Terminal and API Logs - full width container */}
-      <div className="flex-1 w-full">
+      {/* Main Terminal Container - full width */}
+      <div className={cn("w-full mx-auto", className)}>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
           <Terminal
             welcomeMessage={welcomeMessage}

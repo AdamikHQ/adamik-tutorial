@@ -22,10 +22,19 @@ interface CommandEntry {
   type: "success" | "error" | "info";
 }
 
-// Define the guided flow steps with descriptions
+// Define the guided flow steps
 export const guidedFlowSteps = [
+  "Start the tutorial",
+  "Select a blockchain",
+  "Prepare a transaction",
+  "Sign the transaction",
+  "Broadcast the transaction",
+];
+
+// Define more detailed step descriptions for the progress indicator
+export const guidedFlowStepsWithDescriptions = [
   { command: "start", description: "Start the tutorial" },
-  { command: "chain-selection", description: "Select a blockchain" }, // Generic step for any chain
+  { command: "chain-selection", description: "Select a blockchain" },
   { command: "prepare-tx", description: "Prepare a transaction" },
   { command: "sign-tx", description: "Sign the transaction" },
   { command: "broadcast-tx", description: "Broadcast the transaction" },
@@ -153,7 +162,6 @@ const Terminal: React.FC<TerminalProps> = ({
       currentIndex = guidedFlow.indexOf("optimism");
       // Chain selection completed, next is prepare-tx (step 2)
       updateSuggestion("prepare-tx", 2); // prepare-tx is the current step (yellow)
-      return;
     }
 
     // Special case handling
@@ -192,6 +200,33 @@ const Terminal: React.FC<TerminalProps> = ({
       updateSuggestion("start", 0); // Start is the current step (yellow)
     }
   }, [commandHistory]);
+
+  // Update the current flow step based on the command
+  const updateCurrentFlowStep = (command: string) => {
+    let newStep = currentFlowStep;
+
+    // Determine the step based on the command
+    if (command === "start") {
+      newStep = 0; // Start step
+    } else if (Object.keys(showroomChains).includes(command)) {
+      newStep = 1; // Chain selection step
+    } else if (command === "prepare-tx") {
+      newStep = 2; // Prepare transaction step
+    } else if (command === "sign-tx") {
+      newStep = 3; // Sign transaction step
+    } else if (command === "broadcast-tx") {
+      newStep = 4; // Broadcast transaction step
+    }
+
+    // Only update if the step has changed
+    if (newStep !== currentFlowStep) {
+      setCurrentFlowStep(newStep);
+      // Call the onProgressUpdate callback if provided
+      if (onProgressUpdate) {
+        onProgressUpdate(newStep);
+      }
+    }
+  };
 
   const handleCommandExecution = async (command: string) => {
     if (!command.trim()) return;
@@ -232,6 +267,9 @@ const Terminal: React.FC<TerminalProps> = ({
 
     setCurrentCommand("");
     setCommandIndex(-1);
+
+    // Update the current flow step based on the command
+    updateCurrentFlowStep(command);
   };
 
   const handleConfigChecked = () => {
@@ -347,6 +385,13 @@ const Terminal: React.FC<TerminalProps> = ({
       }
     }
   };
+
+  // Call onProgressUpdate when component mounts
+  useEffect(() => {
+    if (onProgressUpdate) {
+      onProgressUpdate(currentFlowStep);
+    }
+  }, [onProgressUpdate, currentFlowStep]);
 
   return (
     <div
