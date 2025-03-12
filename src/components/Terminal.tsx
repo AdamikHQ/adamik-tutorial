@@ -12,6 +12,7 @@ interface TerminalProps {
   className?: string;
   welcomeMessage?: React.ReactNode;
   initialCommands?: string[];
+  onProgressUpdate?: (currentStep: number) => void;
 }
 
 interface CommandEntry {
@@ -22,7 +23,7 @@ interface CommandEntry {
 }
 
 // Define the guided flow steps with descriptions
-const guidedFlowSteps = [
+export const guidedFlowSteps = [
   { command: "start", description: "Start the tutorial" },
   { command: "chain-selection", description: "Select a blockchain" }, // Generic step for any chain
   { command: "prepare-tx", description: "Prepare a transaction" },
@@ -34,6 +35,7 @@ const Terminal: React.FC<TerminalProps> = ({
   className,
   welcomeMessage = DEFAULT_WELCOME_MESSAGE,
   initialCommands = [],
+  onProgressUpdate,
 }) => {
   const [commandHistory, setCommandHistory] = useState<CommandEntry[]>([]);
   const [commandIndex, setCommandIndex] = useState<number>(-1);
@@ -46,6 +48,13 @@ const Terminal: React.FC<TerminalProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const [sodotConfigChecked, setSodotConfigChecked] = useState<boolean>(false);
   const [currentFlowStep, setCurrentFlowStep] = useState<number>(0); // Start is the current step (yellow)
+
+  // Notify parent component when progress changes
+  useEffect(() => {
+    if (onProgressUpdate) {
+      onProgressUpdate(currentFlowStep);
+    }
+  }, [currentFlowStep, onProgressUpdate]);
 
   // Process initial commands on mount
   useEffect(() => {
@@ -339,48 +348,6 @@ const Terminal: React.FC<TerminalProps> = ({
     }
   };
 
-  // Render progress indicator
-  const renderProgressIndicator = () => {
-    // Always show the progress indicator
-    return (
-      <div className="progress-indicator mb-4 mt-2 px-2">
-        <div className="text-xs text-gray-400 mb-1">Tutorial Progress:</div>
-        <div className="flex space-x-1">
-          {guidedFlowSteps.map((step, index) => {
-            // Current step is yellow, completed steps are green
-            const isActive = index === currentFlowStep;
-            const isCompleted = index < currentFlowStep;
-
-            return (
-              <div key={index} className="flex flex-col items-center flex-1">
-                <div
-                  className={`h-1 w-full rounded-full ${
-                    isActive
-                      ? "bg-yellow-500"
-                      : isCompleted
-                      ? "bg-green-500"
-                      : "bg-gray-700"
-                  }`}
-                />
-                <div
-                  className={`text-xs mt-1 ${
-                    isActive
-                      ? "text-yellow-500 font-bold"
-                      : isCompleted
-                      ? "text-green-500"
-                      : "text-gray-500"
-                  }`}
-                >
-                  {step.description}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div
       className={cn(
@@ -414,8 +381,6 @@ const Terminal: React.FC<TerminalProps> = ({
             {welcomeMessage}
           </div>
         )}
-
-        {sodotConfigChecked && renderProgressIndicator()}
 
         {commandHistory.map((entry) => (
           <div key={entry.id} className="mb-2 animate-text-fade-in opacity-0">
