@@ -31,8 +31,33 @@ const initialCommands = {
   clear: clearCommand,
 };
 
+// Function to update terminal output with progress
+const updateTerminalWithProgress = (
+  commandId: number,
+  setCommandHistory: React.Dispatch<React.SetStateAction<any[]>>,
+  output: React.ReactNode
+) => {
+  setCommandHistory((prev) => {
+    const updatedHistory = [...prev];
+    const commandIndex = updatedHistory.findIndex(
+      (cmd) => cmd.id === commandId
+    );
+    if (commandIndex !== -1) {
+      updatedHistory[commandIndex] = {
+        ...updatedHistory[commandIndex],
+        output,
+      };
+    }
+    return updatedHistory;
+  });
+};
+
 // Main function to execute commands
-export const executeCommand = async (input: string): Promise<CommandResult> => {
+export const executeCommand = async (
+  input: string,
+  commandId?: number,
+  setCommandHistory?: React.Dispatch<React.SetStateAction<any[]>>
+): Promise<CommandResult> => {
   const args = input.trim().split(" ");
   const commandName = args[0].toLowerCase();
   const commandArgs = args.slice(1);
@@ -79,7 +104,23 @@ export const executeCommand = async (input: string): Promise<CommandResult> => {
       }
 
       try {
-        // Fetch chain details from API
+        // Initial output - starting the process
+        let currentOutput = (
+          <div>
+            <p className="text-gray-400">Processing chain selection...</p>
+          </div>
+        );
+
+        // Update terminal if we have the setter function
+        if (commandId && setCommandHistory) {
+          updateTerminalWithProgress(
+            commandId,
+            setCommandHistory,
+            currentOutput
+          );
+        }
+
+        // Step 1: Fetch chain details from API
         console.log(`Fetching chain information for ${chainId}...`);
         const chain = await adamikGetChain(chainId);
 
@@ -87,7 +128,27 @@ export const executeCommand = async (input: string): Promise<CommandResult> => {
         workflowState.selectedChain = chainId;
         workflowState.selectedChainData = chain;
 
-        // Create SodotSigner instance and generate pubkey
+        // Update output with chain info retrieved
+        currentOutput = (
+          <div>
+            <div className="mb-6 space-y-2">
+              <p className="text-green-400 font-bold">
+                ✓ Chain information retrieved
+              </p>
+            </div>
+          </div>
+        );
+
+        // Update terminal if we have the setter function
+        if (commandId && setCommandHistory) {
+          updateTerminalWithProgress(
+            commandId,
+            setCommandHistory,
+            currentOutput
+          );
+        }
+
+        // Step 2: Create SodotSigner instance and generate pubkey
         const signer = new SodotSigner(chainId, chain.signerSpec);
         infoTerminal(`Generating keys for ${chain.name}...`, "TERMINAL");
         const pubkey = await signer.getPubkey();
@@ -96,12 +157,61 @@ export const executeCommand = async (input: string): Promise<CommandResult> => {
         }
         workflowState.pubkey = pubkey;
 
-        // Get address from pubkey
+        // Update output with pubkey generated
+        currentOutput = (
+          <div>
+            <div className="mb-6 space-y-2">
+              <p className="text-green-400 font-bold">
+                ✓ Chain information retrieved
+              </p>
+              <p className="text-green-400 font-bold">
+                ✓ Public keys generated
+              </p>
+            </div>
+          </div>
+        );
+
+        // Update terminal if we have the setter function
+        if (commandId && setCommandHistory) {
+          updateTerminalWithProgress(
+            commandId,
+            setCommandHistory,
+            currentOutput
+          );
+        }
+
+        // Step 3: Get address from pubkey
         const addressInfo = await encodePubKeyToAddress(pubkey, chainId);
         if (!addressInfo || !addressInfo.address) {
           throw new Error("Failed to generate address from public key");
         }
         workflowState.address = addressInfo.address;
+
+        // Update output with address retrieved
+        currentOutput = (
+          <div>
+            <div className="mb-6 space-y-2">
+              <p className="text-green-400 font-bold">
+                ✓ Chain information retrieved
+              </p>
+              <p className="text-green-400 font-bold">
+                ✓ Public keys generated
+              </p>
+              <p className="text-green-400 font-bold">
+                ✓ Address for {chain.name} retrieved
+              </p>
+            </div>
+          </div>
+        );
+
+        // Update terminal if we have the setter function
+        if (commandId && setCommandHistory) {
+          updateTerminalWithProgress(
+            commandId,
+            setCommandHistory,
+            currentOutput
+          );
+        }
 
         // For Bitcoin, we need to select which address format to use for balance
         let addressToCheck = addressInfo.address;

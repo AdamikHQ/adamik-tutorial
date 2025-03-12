@@ -235,34 +235,54 @@ const Terminal: React.FC<TerminalProps> = ({
     setShowWelcomeMessage(false);
 
     const id = commandCount.current++;
-    const result = await executeCommand(command);
 
-    if (result.clearTerminal) {
-      // Clear the API logs if the clear command is executed
-      if (command.trim().toLowerCase() === "clear") {
+    // For clear command, we don't need progressive updates
+    if (command.trim().toLowerCase() === "clear") {
+      const result = await executeCommand(command);
+
+      if (result.clearTerminal) {
+        // Clear the API logs if the clear command is executed
         apiLogs.clearLogs();
         setShowWelcomeMessage(true); // Show the welcome message again after clear
-      }
 
-      // Clear the terminal history but preserve the output from the clear command
-      setCommandHistory([
-        {
-          id,
-          command,
-          output: result.output,
-          type: result.success ? "success" : result.type || "error",
-        },
-      ]);
+        // Clear the terminal history but preserve the output from the clear command
+        setCommandHistory([
+          {
+            id,
+            command,
+            output: result.output,
+            type: result.success ? "success" : result.type || "error",
+          },
+        ]);
+      }
     } else {
+      // Add the command to history immediately with a loading state
       setCommandHistory((prev) => [
         ...prev,
         {
           id,
           command,
-          output: result.output,
-          type: result.success ? "success" : result.type || "error",
+          output: <p className="text-gray-400">Processing command...</p>,
+          type: "info",
         },
       ]);
+
+      // Execute the command with the ID and setCommandHistory for progressive updates
+      const result = await executeCommand(command, id, setCommandHistory);
+
+      // Update the final result
+      setCommandHistory((prev) => {
+        const updatedHistory = [...prev];
+        const commandIndex = updatedHistory.findIndex((cmd) => cmd.id === id);
+        if (commandIndex !== -1) {
+          updatedHistory[commandIndex] = {
+            ...updatedHistory[commandIndex],
+            output: result.output,
+            type: result.success ? "success" : result.type || "error",
+          };
+        }
+        return updatedHistory;
+      });
     }
 
     setCurrentCommand("");
