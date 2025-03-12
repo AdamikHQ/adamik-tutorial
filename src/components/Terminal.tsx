@@ -149,7 +149,8 @@ const Terminal: React.FC<TerminalProps> = ({
         child?.props?.children?.some?.(
           (grandchild) =>
             typeof grandchild === "string" &&
-            (grandchild.includes("Address:") || grandchild.includes("Balance:"))
+            (grandchild.includes("Address for") ||
+              grandchild.includes("Account Information"))
         )
       );
 
@@ -158,10 +159,11 @@ const Terminal: React.FC<TerminalProps> = ({
 
     // If the last command was a chain selection, find the index of the default chain
     // in the guided flow and use that as the current index
-    if (isChainSelection) {
+    if (isChainSelection && hasChainDetails) {
       currentIndex = guidedFlow.indexOf("optimism");
       // Chain selection completed, next is prepare-tx (step 2)
       updateSuggestion("prepare-tx", 2); // prepare-tx is the current step (yellow)
+      return; // Exit early to prevent other logic from overriding
     }
 
     // Special case handling
@@ -216,6 +218,33 @@ const Terminal: React.FC<TerminalProps> = ({
       newStep = 3; // Sign transaction step
     } else if (command === "broadcast-tx") {
       newStep = 4; // Broadcast transaction step
+    }
+
+    // Check if the command is a chain selection and we have chain details
+    // This indicates a successful chain selection with all steps completed
+    if (Object.keys(showroomChains).includes(command)) {
+      // Check if we have the chain details in the output
+      const lastCommandEntry = commandHistory[commandHistory.length - 1];
+      if (lastCommandEntry && lastCommandEntry.output) {
+        const output = lastCommandEntry.output;
+        const hasChainDetails =
+          output &&
+          typeof output === "object" &&
+          React.isValidElement(output) &&
+          output.props?.children?.some?.((child) =>
+            child?.props?.children?.some?.(
+              (grandchild) =>
+                typeof grandchild === "string" &&
+                (grandchild.includes("Address for") ||
+                  grandchild.includes("Chain information retrieved"))
+            )
+          );
+
+        if (hasChainDetails) {
+          // If we have chain details, we should move to step 2 (Prepare transaction)
+          newStep = 2;
+        }
+      }
     }
 
     // Only update if the step has changed
@@ -283,13 +312,24 @@ const Terminal: React.FC<TerminalProps> = ({
         }
         return updatedHistory;
       });
+
+      // Special handling for chain selection commands
+      if (Object.keys(showroomChains).includes(command) && result.success) {
+        // If this was a successful chain selection, update the flow step to prepare-tx (step 2)
+        setTimeout(() => {
+          setCurrentFlowStep(2);
+          if (onProgressUpdate) {
+            onProgressUpdate(2);
+          }
+        }, 500); // Small delay to ensure the UI updates properly
+      } else {
+        // For other commands, update the flow step based on the command
+        updateCurrentFlowStep(command);
+      }
     }
 
     setCurrentCommand("");
     setCommandIndex(-1);
-
-    // Update the current flow step based on the command
-    updateCurrentFlowStep(command);
   };
 
   const handleConfigChecked = () => {

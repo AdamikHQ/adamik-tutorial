@@ -25,10 +25,16 @@ const TerminalLayout: React.FC<TerminalLayoutProps> = ({
     setApiLogsInstance(apiLogs);
   }, [apiLogs]);
 
+  // Handle progress updates from the Terminal component
+  const handleProgressUpdate = (step: number) => {
+    console.log("Progress update:", step);
+    setCurrentStep(step);
+  };
+
   return (
     <div className="relative">
       {/* Tutorial Progress Indicator - positioned absolutely to the left */}
-      <div className="hidden md:block absolute left-[-12rem] lg:left-[-13rem] top-0 w-44 lg:w-48">
+      <div className="hidden md:block absolute left-[-12rem] lg:left-[-13rem] top-6 w-44 lg:w-48">
         <div className="sticky top-6">
           <VerticalProgressIndicator
             currentStep={currentStep}
@@ -44,7 +50,7 @@ const TerminalLayout: React.FC<TerminalLayoutProps> = ({
             welcomeMessage={welcomeMessage}
             initialCommands={initialCommands}
             className="h-[80vh]"
-            onProgressUpdate={setCurrentStep}
+            onProgressUpdate={handleProgressUpdate}
           />
           <ApiLogs logs={apiLogs.logs} className="h-[80vh]" />
         </div>
