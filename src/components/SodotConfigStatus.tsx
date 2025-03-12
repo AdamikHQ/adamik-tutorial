@@ -6,19 +6,19 @@ import {
 } from "../constants/messages";
 import { SodotSigner } from "../signers/Sodot";
 
-interface SodotConnectionStatusProps {
-  onConnectionChecked: () => void;
+interface SodotConfigStatusProps {
+  onConfigChecked: () => void;
 }
 
-const SodotConnectionStatus: React.FC<SodotConnectionStatusProps> = ({
-  onConnectionChecked,
+const SodotConfigStatus: React.FC<SodotConfigStatusProps> = ({
+  onConfigChecked,
 }) => {
-  const [status, setStatus] = useState<"checking" | "connected" | "error">(
+  const [status, setStatus] = useState<"checking" | "verified" | "error">(
     "checking"
   );
 
   useEffect(() => {
-    const checkSodotConnection = async () => {
+    const checkSodotConfig = async () => {
       try {
         // Check if SODOT configuration is valid
         const isValid = SodotSigner.isConfigValid();
@@ -26,31 +26,31 @@ const SodotConnectionStatus: React.FC<SodotConnectionStatusProps> = ({
         if (isValid) {
           // Wait a moment to show the checking message (for UX purposes)
           await new Promise((resolve) => setTimeout(resolve, 1000));
-          setStatus("connected");
+          setStatus("verified");
         } else {
           setStatus("error");
         }
       } catch (error) {
-        console.error("SODOT connection check failed:", error);
+        console.error("SODOT configuration check failed:", error);
         setStatus("error");
       } finally {
         // Wait a moment before triggering the callback
         setTimeout(() => {
-          onConnectionChecked();
+          onConfigChecked();
         }, 1500);
       }
     };
 
-    checkSodotConnection();
-  }, [onConnectionChecked]);
+    checkSodotConfig();
+  }, [onConfigChecked]);
 
   return (
     <div className="animate-text-fade-in opacity-0 text-terminal-muted mb-2">
       {status === "checking" && SODOT_CHECKING_MESSAGE}
-      {status === "connected" && SODOT_CONNECTED_MESSAGE}
+      {status === "verified" && SODOT_CONNECTED_MESSAGE}
       {status === "error" && SODOT_ERROR_MESSAGE}
     </div>
   );
 };
 
-export default SodotConnectionStatus;
+export default SodotConfigStatus;

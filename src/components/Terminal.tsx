@@ -5,7 +5,7 @@ import { executeCommand } from "../utils/terminalCommands";
 import { cn } from "@/lib/utils";
 import { useApiLogs } from "../contexts/ApiLogsContext";
 import { DEFAULT_WELCOME_MESSAGE } from "../constants/messages";
-import SodotConnectionStatus from "./SodotConnectionStatus";
+import SodotConfigStatus from "./SodotConfigStatus";
 
 interface TerminalProps {
   className?: string;
@@ -34,15 +34,14 @@ const Terminal: React.FC<TerminalProps> = ({
   const [showWelcomeMessage, setShowWelcomeMessage] = useState<boolean>(true);
   const [suggestedCommand, setSuggestedCommand] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
-  const [sodotConnectionChecked, setSodotConnectionChecked] =
-    useState<boolean>(false);
+  const [sodotConfigChecked, setSodotConfigChecked] = useState<boolean>(false);
 
   // Process initial commands on mount
   useEffect(() => {
     // Reset the helpExecuted flag when the component mounts
     sessionStorage.removeItem("helpExecuted");
 
-    if (initialCommands.length > 0 && sodotConnectionChecked) {
+    if (initialCommands.length > 0 && sodotConfigChecked) {
       const delay = 500; // delay between commands in ms
 
       initialCommands.forEach((cmd, index) => {
@@ -51,21 +50,21 @@ const Terminal: React.FC<TerminalProps> = ({
         }, delay * (index + 1));
       });
     }
-  }, [initialCommands, sodotConnectionChecked]);
+  }, [initialCommands, sodotConfigChecked]);
 
   // Auto scroll to bottom when new commands are added
   useEffect(() => {
     if (terminalRef.current) {
       terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
     }
-  }, [commandHistory, sodotConnectionChecked]);
+  }, [commandHistory, sodotConfigChecked]);
 
   // Focus input on mount and when clicking terminal
   useEffect(() => {
-    if (sodotConnectionChecked) {
+    if (sodotConfigChecked) {
       inputRef.current?.focus();
     }
-  }, [sodotConnectionChecked]);
+  }, [sodotConfigChecked]);
 
   // Define the guided flow
   const guidedFlow = [
@@ -190,8 +189,8 @@ const Terminal: React.FC<TerminalProps> = ({
     setCommandIndex(-1);
   };
 
-  const handleConnectionChecked = () => {
-    setSodotConnectionChecked(true);
+  const handleConfigChecked = () => {
+    setSodotConfigChecked(true);
   };
 
   const handleKeyNavigation = (direction: "up" | "down" | "tab") => {
@@ -325,13 +324,11 @@ const Terminal: React.FC<TerminalProps> = ({
         ref={terminalRef}
         className="terminal-content flex-1 p-4 overflow-y-auto"
       >
-        {!sodotConnectionChecked && (
-          <SodotConnectionStatus
-            onConnectionChecked={handleConnectionChecked}
-          />
+        {!sodotConfigChecked && (
+          <SodotConfigStatus onConfigChecked={handleConfigChecked} />
         )}
 
-        {sodotConnectionChecked && showWelcomeMessage && (
+        {sodotConfigChecked && showWelcomeMessage && (
           <div
             key="welcome-message"
             className="animate-text-fade-in opacity-0 text-terminal-muted mb-2"
@@ -350,7 +347,7 @@ const Terminal: React.FC<TerminalProps> = ({
           </div>
         ))}
 
-        {sodotConnectionChecked && (
+        {sodotConfigChecked && (
           <CommandLine
             value={currentCommand}
             onChange={setCurrentCommand}

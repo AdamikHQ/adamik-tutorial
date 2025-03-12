@@ -21,15 +21,15 @@ export const DEFAULT_WELCOME_MESSAGE = (
 );
 
 export const SODOT_CHECKING_MESSAGE = (
-  <span className="text-yellow-400">Verifying SODOT connection...</span>
+  <span className="text-yellow-400">Verifying SODOT configuration...</span>
 );
 
 export const SODOT_CONNECTED_MESSAGE = (
-  <span className="text-green-400">✓ SODOT connected</span>
+  <span className="text-green-400">✓ SODOT configuration verified</span>
 );
 
 export const SODOT_ERROR_MESSAGE = (
   <span className="text-red-400">
-    ✗ SODOT connection failed. Some features may not work properly.
+    ✗ SODOT configuration invalid. Some features may not work properly.
   </span>
 );
