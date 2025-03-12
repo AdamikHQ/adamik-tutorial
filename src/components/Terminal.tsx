@@ -28,7 +28,7 @@ export const guidedFlowStepsWithDescriptions = [
   { command: "chain-selection", description: "Select a blockchain" },
   { command: "prepare-tx", description: "Prepare a transaction" },
   { command: "sign-tx", description: "Sign the transaction" },
-  { command: "broadcast-tx", description: "Broadcast the transaction" },
+  { command: "broadcast-tx", description: "Broadcast transaction" },
 ];
 
 // Derive the simple array of step descriptions when needed

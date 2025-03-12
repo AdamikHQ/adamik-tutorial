@@ -72,7 +72,7 @@ const HorizontalProgressIndicator: React.FC<
           return (
             <div key={index} className="flex flex-col items-center">
               {/* Step description with fixed height */}
-              <div className="h-10 flex items-center justify-center mb-2 w-full">
+              <div className="h-10 flex items-center justify-center mb-2 w-full px-1">
                 <span
                   className={`text-xs text-center line-clamp-2 ${
                     isActive
