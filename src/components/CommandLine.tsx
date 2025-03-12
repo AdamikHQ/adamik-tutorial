@@ -8,6 +8,27 @@ interface CommandLineProps {
   suggestedCommand?: string;
 }
 
+// Command descriptions for better context
+const commandDescriptions: Record<string, string> = {
+  start: "Begin the tutorial and explore available chains",
+  "prepare-tx": "Prepare a transaction for the selected chain",
+  "sign-tx": "Sign the prepared transaction",
+  "broadcast-tx": "Broadcast the signed transaction to the network",
+  help: "Show available commands",
+  clear: "Clear the terminal",
+  // Add chain-specific descriptions
+  optimism: "Select Optimism blockchain",
+  ethereum: "Select Ethereum blockchain",
+  bitcoin: "Select Bitcoin blockchain",
+  tron: "Select Tron blockchain",
+  polygon: "Select Polygon blockchain",
+  arbitrum: "Select Arbitrum blockchain",
+  avalanche: "Select Avalanche blockchain",
+  bsc: "Select BNB Chain",
+  cosmoshub: "Select Cosmos Hub blockchain",
+  ton: "Select TON blockchain",
+};
+
 const CommandLine: React.FC<CommandLineProps> = ({
   value,
   onChange,
@@ -43,6 +64,11 @@ const CommandLine: React.FC<CommandLineProps> = ({
     }
   };
 
+  // Get the description for the suggested command
+  const suggestionDescription = suggestedCommand
+    ? commandDescriptions[suggestedCommand] || `Run ${suggestedCommand} command`
+    : "";
+
   return (
     <div
       ref={wrapperRef}
@@ -67,6 +93,11 @@ const CommandLine: React.FC<CommandLineProps> = ({
             <div className="flex items-center ml-2">
               <span className="tab-key-indicator">⇥</span>
               <span className="command-suggestion-hint ml-1">Tab</span>
+              {suggestionDescription && (
+                <span className="command-description ml-2 text-gray-500">
+                  - {suggestionDescription}
+                </span>
+              )}
             </div>
           </div>
         )}

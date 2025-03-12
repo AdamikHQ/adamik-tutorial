@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { useApiLogs } from "../contexts/ApiLogsContext";
 import { DEFAULT_WELCOME_MESSAGE } from "../constants/messages";
 import SodotConfigStatus from "./SodotConfigStatus";
+import { showroomChains } from "../utils/showroomChains";
 
 interface TerminalProps {
   className?: string;
@@ -19,6 +20,15 @@ interface CommandEntry {
   output: React.ReactNode;
   type: "success" | "error" | "info";
 }
+
+// Define the guided flow steps with descriptions
+const guidedFlowSteps = [
+  { command: "start", description: "Start the tutorial" },
+  { command: "chain-selection", description: "Select a blockchain" }, // Generic step for any chain
+  { command: "prepare-tx", description: "Prepare a transaction" },
+  { command: "sign-tx", description: "Sign the transaction" },
+  { command: "broadcast-tx", description: "Broadcast the transaction" },
+];
 
 const Terminal: React.FC<TerminalProps> = ({
   className,
@@ -35,6 +45,7 @@ const Terminal: React.FC<TerminalProps> = ({
   const [suggestedCommand, setSuggestedCommand] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const [sodotConfigChecked, setSodotConfigChecked] = useState<boolean>(false);
+  const [currentFlowStep, setCurrentFlowStep] = useState<number>(0); // Start is the current step (yellow)
 
   // Process initial commands on mount
   useEffect(() => {
@@ -69,7 +80,7 @@ const Terminal: React.FC<TerminalProps> = ({
   // Define the guided flow
   const guidedFlow = [
     "start",
-    "optimism",
+    "optimism", // Default chain, but any chain selection should continue the flow
     "prepare-tx",
     "sign-tx",
     "broadcast-tx",
@@ -79,15 +90,20 @@ const Terminal: React.FC<TerminalProps> = ({
   useEffect(() => {
     if (commandHistory.length === 0) {
       setSuggestedCommand("start");
+      setCurrentFlowStep(0); // Start is the current step (yellow)
       return;
     }
 
     const lastCommand = commandHistory[commandHistory.length - 1].command;
     const lastOutput = commandHistory[commandHistory.length - 1].output;
 
+    // Helper function to update suggested command and flow step together
+    const updateSuggestion = (command: string, flowStep: number) => {
+      setSuggestedCommand(command);
+      setCurrentFlowStep(flowStep);
+    };
+
     // Check if the last command was a chain selection
-    // We can detect this by checking if the last command is a valid chain ID
-    // from the list of available chains in sessionStorage
     let isChainSelection = false;
     const chainIdsJson = sessionStorage.getItem("adamikChainIds");
     if (chainIdsJson) {
@@ -120,31 +136,51 @@ const Terminal: React.FC<TerminalProps> = ({
       );
 
     // Find the current position in the guided flow
-    const currentIndex = guidedFlow.indexOf(lastCommand);
+    let currentIndex = guidedFlow.indexOf(lastCommand);
 
-    // If the last command is in our flow and not the last step, suggest the next one
-    if (currentIndex >= 0 && currentIndex < guidedFlow.length - 1) {
-      setSuggestedCommand(guidedFlow[currentIndex + 1]);
-    } else if (lastCommand === "clear") {
+    // If the last command was a chain selection, find the index of the default chain
+    // in the guided flow and use that as the current index
+    if (isChainSelection) {
+      currentIndex = guidedFlow.indexOf("optimism");
+      // Chain selection completed, next is prepare-tx (step 2)
+      updateSuggestion("prepare-tx", 2); // prepare-tx is the current step (yellow)
+      return;
+    }
+
+    // Special case handling
+    if (lastCommand === "clear") {
       // If user cleared the terminal, suggest starting again
-      setSuggestedCommand("start");
+      updateSuggestion("start", 0); // Start is the current step (yellow)
     } else if (lastCommand === "help") {
       // After help command, suggest start as the next action
-      setSuggestedCommand("start");
+      updateSuggestion("start", 0); // Start is the current step (yellow)
     } else if (lastCommand === "broadcast-tx") {
       // After completing the flow with broadcast-tx, suggest starting a new cycle
-      setSuggestedCommand("start");
-    } else if (isChainSelection || hasChainDetails) {
-      // If the last command was a valid chain ID or the output shows chain details,
-      // suggest prepare-tx
-      setSuggestedCommand("prepare-tx");
+      updateSuggestion("start", 0); // Start is the current step (yellow)
+    } else if (hasChainDetails) {
+      // If the output shows chain details, suggest prepare-tx
+      updateSuggestion("prepare-tx", 2); // prepare-tx is the current step (yellow)
     } else if (inChainSelectionMode) {
-      // If we're in chain selection mode but the command wasn't a valid chain,
-      // keep suggesting chain selection (by not changing the suggestion)
-      // This allows users to try different chain IDs until they get a valid one
+      // If we're in chain selection mode, suggest the default chain
+      updateSuggestion("optimism", 1); // Chain selection is the current step (yellow)
+    } else if (currentIndex >= 0 && currentIndex < guidedFlow.length - 1) {
+      // If the last command is in our flow and not the last step, suggest the next one
+      const nextCommand = guidedFlow[currentIndex + 1];
+      let nextFlowStep = 0; // Default to start
+
+      // Update the flow step based on the last command
+      if (lastCommand === "start") {
+        nextFlowStep = 1; // Chain selection is the current step (yellow)
+      } else if (lastCommand === "prepare-tx") {
+        nextFlowStep = 3; // Sign-tx is the current step (yellow)
+      } else if (lastCommand === "sign-tx") {
+        nextFlowStep = 4; // Broadcast-tx is the current step (yellow)
+      }
+
+      updateSuggestion(nextCommand, nextFlowStep);
     } else {
       // Default suggestion for any other command
-      setSuggestedCommand("start");
+      updateSuggestion("start", 0); // Start is the current step (yellow)
     }
   }, [commandHistory]);
 
@@ -303,6 +339,48 @@ const Terminal: React.FC<TerminalProps> = ({
     }
   };
 
+  // Render progress indicator
+  const renderProgressIndicator = () => {
+    // Always show the progress indicator
+    return (
+      <div className="progress-indicator mb-4 mt-2 px-2">
+        <div className="text-xs text-gray-400 mb-1">Tutorial Progress:</div>
+        <div className="flex space-x-1">
+          {guidedFlowSteps.map((step, index) => {
+            // Current step is yellow, completed steps are green
+            const isActive = index === currentFlowStep;
+            const isCompleted = index < currentFlowStep;
+
+            return (
+              <div key={index} className="flex flex-col items-center flex-1">
+                <div
+                  className={`h-1 w-full rounded-full ${
+                    isActive
+                      ? "bg-yellow-500"
+                      : isCompleted
+                      ? "bg-green-500"
+                      : "bg-gray-700"
+                  }`}
+                />
+                <div
+                  className={`text-xs mt-1 ${
+                    isActive
+                      ? "text-yellow-500 font-bold"
+                      : isCompleted
+                      ? "text-green-500"
+                      : "text-gray-500"
+                  }`}
+                >
+                  {step.description}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div
       className={cn(
@@ -336,6 +414,8 @@ const Terminal: React.FC<TerminalProps> = ({
             {welcomeMessage}
           </div>
         )}
+
+        {sodotConfigChecked && renderProgressIndicator()}
 
         {commandHistory.map((entry) => (
           <div key={entry.id} className="mb-2 animate-text-fade-in opacity-0">
