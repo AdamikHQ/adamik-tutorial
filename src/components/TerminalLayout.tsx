@@ -19,14 +19,19 @@ const TerminalLayout: React.FC<TerminalLayoutProps> = ({
   initialCommands,
 }) => {
   const apiLogs = useApiLogs();
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState<number>(0);
+
+  // Convert the guidedFlowStepsWithDescriptions to the format expected by the progress indicators
+  const progressSteps = guidedFlowStepsWithDescriptions.map((item) => ({
+    command: item.step,
+    description: item.description,
+  }));
 
   // Initialize the API logs instance
   useEffect(() => {
     setApiLogsInstance(apiLogs);
   }, [apiLogs]);
 
-  // Handle progress updates from the Terminal component
   const handleProgressUpdate = (step: number) => {
     console.log("Progress update:", step);
     setCurrentStep(step);
@@ -39,7 +44,7 @@ const TerminalLayout: React.FC<TerminalLayoutProps> = ({
         <div className="sticky top-6">
           <VerticalProgressIndicator
             currentStep={currentStep}
-            steps={guidedFlowStepsWithDescriptions}
+            steps={progressSteps}
           />
         </div>
       </div>
@@ -50,7 +55,7 @@ const TerminalLayout: React.FC<TerminalLayoutProps> = ({
         <div className="lg:hidden mb-6 px-4 md:px-6">
           <HorizontalProgressIndicator
             currentStep={currentStep}
-            steps={guidedFlowStepsWithDescriptions}
+            steps={progressSteps}
           />
         </div>
 
@@ -58,10 +63,10 @@ const TerminalLayout: React.FC<TerminalLayoutProps> = ({
         <div className={cn("w-full mx-auto", className)}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
             <Terminal
+              onProgressUpdate={handleProgressUpdate}
+              className="h-[80vh]"
               welcomeMessage={welcomeMessage}
               initialCommands={initialCommands}
-              className="h-[80vh]"
-              onProgressUpdate={handleProgressUpdate}
             />
             <ApiLogs logs={apiLogs.logs} className="h-[80vh]" />
           </div>

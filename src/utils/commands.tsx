@@ -782,3 +782,96 @@ export const broadcastTxCommand: Command = {
     }
   },
 };
+
+// ExploreChains command
+export const exploreChainsCommand: Command = {
+  name: "explore-chains",
+  description: "Explore all supported chains",
+  execute: async (_args: string[] = []): Promise<CommandResult> => {
+    try {
+      // Show loading message
+      console.log("Fetching chains from API...");
+
+      // Use the adamikGetChains function which now includes API logging
+      const { chains } = await adamikGetChains();
+
+      // Format chains for display
+      const chainsList = Object.entries(chains).map(([chainId, chain]) => ({
+        id: chainId,
+        name: chain.name,
+        ticker: chain.ticker,
+      }));
+
+      return {
+        success: true,
+        output: (
+          <div>
+            <p className="mb-4 text-green-400 font-bold">
+              ✓ Successfully retrieved {chainsList.length} blockchain networks!
+            </p>
+            <p className="mb-2">Available chains:</p>
+            <div className="bg-gray-800 p-3 rounded mb-4 max-h-60 overflow-y-auto">
+              {chainsList.map((chain) => (
+                <div key={chain.id} className="mb-1">
+                  <strong className="text-yellow-400">{chain.id}</strong>:{" "}
+                  {chain.name} ({chain.ticker})
+                </div>
+              ))}
+            </div>
+            <div className="mt-6 p-4 border border-blue-500 rounded-md bg-blue-900/20">
+              <p className="text-blue-300 font-medium mb-2">
+                🎉 Congratulations on completing the Adamik Terminal tutorial!
+              </p>
+              <p className="text-gray-300 mb-3">
+                You've learned how to interact with multiple blockchains using
+                the Adamik API and Sodot MPC technology.
+              </p>
+              <p className="text-gray-300 mb-3">
+                Explore the source code of this application on GitHub:
+              </p>
+              <a
+                href="https://github.com/AdamikHQ/adamik-tutorial"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              >
+                View on GitHub
+              </a>
+              <p className="mt-4 text-gray-400 text-sm">
+                Type <span className="font-mono text-green-400">start</span> to
+                begin the tutorial again.
+              </p>
+            </div>
+          </div>
+        ),
+        type: "info",
+      };
+    } catch (error) {
+      console.error("Error fetching chains:", error);
+      return {
+        success: false,
+        output: (
+          <div>
+            <p>
+              Error fetching chains:{" "}
+              {error instanceof Error ? error.message : "Unknown error"}
+            </p>
+            <p className="mt-2 text-xs text-gray-400">This could be because:</p>
+            <ul className="list-disc ml-4 text-xs text-gray-400">
+              <li>
+                The API server is not running at{" "}
+                {import.meta.env.VITE_ADAMIK_API_BASE_URL}
+              </li>
+              <li>The API key is invalid or missing</li>
+              <li>The API endpoint structure has changed</li>
+            </ul>
+            <p className="mt-2 text-xs">
+              Check the browser console for more details.
+            </p>
+          </div>
+        ),
+        type: "error",
+      };
+    }
+  },
+};

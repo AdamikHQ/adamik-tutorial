@@ -16,7 +16,7 @@ interface TerminalProps {
 }
 
 interface CommandEntry {
-  id: number;
+  id: number | string;
   command: string;
   output: React.ReactNode;
   type: "success" | "error" | "info";
@@ -24,11 +24,12 @@ interface CommandEntry {
 
 // Define the complete flow with commands and descriptions
 export const guidedFlowStepsWithDescriptions = [
-  { command: "start", description: "Start the tutorial" },
-  { command: "chain-selection", description: "Select a blockchain" },
-  { command: "prepare-tx", description: "Prepare a transaction" },
-  { command: "sign-tx", description: "Sign the transaction" },
-  { command: "broadcast-tx", description: "Broadcast transaction" },
+  { step: "help", description: "Get help" },
+  { step: "start", description: "Start tutorial" },
+  { step: "prepare-tx", description: "Prepare tx" },
+  { step: "sign-tx", description: "Sign tx" },
+  { step: "broadcast-tx", description: "Broadcast tx" },
+  { step: "explore-chains", description: "Explore chains" },
 ];
 
 // Derive the simple array of step descriptions when needed
@@ -36,12 +37,12 @@ export const guidedFlowSteps = guidedFlowStepsWithDescriptions.map(
   (step) => step.description
 );
 
-const Terminal: React.FC<TerminalProps> = ({
+const Terminal = ({
   className,
   welcomeMessage = DEFAULT_WELCOME_MESSAGE,
   initialCommands = [],
   onProgressUpdate,
-}) => {
+}: TerminalProps) => {
   const [commandHistory, setCommandHistory] = useState<CommandEntry[]>([]);
   const [commandIndex, setCommandIndex] = useState<number>(-1);
   const [currentCommand, setCurrentCommand] = useState<string>("");
@@ -93,11 +94,12 @@ const Terminal: React.FC<TerminalProps> = ({
 
   // Define the guided flow commands (with special case for chain selection)
   const guidedFlow = [
-    guidedFlowStepsWithDescriptions[0].command, // start
+    guidedFlowStepsWithDescriptions[0].step, // start
     "optimism", // Default chain, but any chain selection should continue the flow
-    guidedFlowStepsWithDescriptions[2].command, // prepare-tx
-    guidedFlowStepsWithDescriptions[3].command, // sign-tx
-    guidedFlowStepsWithDescriptions[4].command, // broadcast-tx
+    guidedFlowStepsWithDescriptions[2].step, // prepare-tx
+    guidedFlowStepsWithDescriptions[3].step, // sign-tx
+    guidedFlowStepsWithDescriptions[4].step, // broadcast-tx
+    guidedFlowStepsWithDescriptions[5].step, // explore-chains
   ];
 
   // Determine the next suggested command based on command history
@@ -189,9 +191,12 @@ const Terminal: React.FC<TerminalProps> = ({
     } else if (lastCommand === "help") {
       // After help command, suggest start as the next action
       updateSuggestion("start", 0); // Start is the current step (yellow)
-    } else if (lastCommand === "broadcast-tx") {
-      // After completing the flow with broadcast-tx, suggest starting a new cycle
+    } else if (lastCommand === "explore-chains") {
+      // After completing the flow with explore-chains, suggest starting a new cycle
       updateSuggestion("start", 0); // Start is the current step (yellow)
+    } else if (lastCommand === "broadcast-tx") {
+      // After broadcast-tx, suggest explore-chains
+      updateSuggestion("explore-chains", 5); // explore-chains is the current step (yellow)
     } else if (lastCommand === "prepare-tx" && lastType === "success") {
       // After prepare-tx, suggest sign-tx
       updateSuggestion("sign-tx", 3); // sign-tx is the current step (yellow)
@@ -241,6 +246,8 @@ const Terminal: React.FC<TerminalProps> = ({
       newStep = 3; // Sign transaction step
     } else if (command === "broadcast-tx") {
       newStep = 4; // Broadcast transaction step
+    } else if (command === "explore-chains") {
+      newStep = 5; // Explore chains step
     }
 
     // Check if the command is a chain selection and we have chain details
@@ -347,6 +354,11 @@ const Terminal: React.FC<TerminalProps> = ({
         if (onProgressUpdate) {
           onProgressUpdate(4);
         }
+      } else if (command === "explore-chains") {
+        setCurrentFlowStep(5);
+        if (onProgressUpdate) {
+          onProgressUpdate(5);
+        }
       }
 
       // Add the command to history immediately with a loading state
@@ -406,6 +418,63 @@ const Terminal: React.FC<TerminalProps> = ({
             onProgressUpdate(4);
           }
         }, 500); // Small delay to ensure the UI updates properly
+      }
+      // Special handling for broadcast-tx command - directly update the flow step to 5 (explore-chains)
+      else if (command === "broadcast-tx" && result.success) {
+        // Update to step 5 (explore-chains is the next step)
+        setTimeout(() => {
+          setCurrentFlowStep(5);
+          if (onProgressUpdate) {
+            onProgressUpdate(5);
+          }
+        }, 500); // Small delay to ensure the UI updates properly
+      }
+
+      // After broadcast-tx, suggest explore-chains
+      if (command === "broadcast-tx" && result.success) {
+        setTimeout(() => {
+          setCommandHistory((prev) => [
+            ...prev,
+            {
+              id: Date.now(),
+              command: "",
+              output: (
+                <div className="mt-2">
+                  <p>
+                    🎉 Congratulations! You've successfully broadcast a
+                    transaction.
+                  </p>
+                  <p className="mt-2">
+                    Next, try exploring all supported chains with:
+                  </p>
+                  <p className="font-bold mt-1">explore-chains</p>
+                </div>
+              ),
+              type: "success",
+            },
+          ]);
+          updateCurrentFlowStep("explore-chains");
+        }, 1000);
+      }
+
+      // After explore-chains, suggest restarting the tutorial
+      if (command === "explore-chains" && result.success) {
+        setTimeout(() => {
+          setCommandHistory((prev) => [
+            ...prev,
+            {
+              id: Date.now(),
+              command: "",
+              output: (
+                <div className="mt-2">
+                  <p>🎉 You've completed the tutorial! To restart, type:</p>
+                  <p className="font-bold mt-1">start</p>
+                </div>
+              ),
+              type: "success",
+            },
+          ]);
+        }, 1000);
       }
     }
 

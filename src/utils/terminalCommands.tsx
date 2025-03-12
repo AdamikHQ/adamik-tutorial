@@ -6,6 +6,7 @@ import {
   prepareTxCommand,
   signTxCommand,
   broadcastTxCommand,
+  exploreChainsCommand,
 } from "./commands";
 import { SodotSigner } from "../signers/Sodot";
 import { encodePubKeyToAddress } from "../adamik/encodePubkeyToAddress";
@@ -22,6 +23,7 @@ const commands = {
   "prepare-tx": prepareTxCommand,
   "sign-tx": signTxCommand,
   "broadcast-tx": broadcastTxCommand,
+  "explore-chains": exploreChainsCommand,
 };
 
 // Restricted initial commands
