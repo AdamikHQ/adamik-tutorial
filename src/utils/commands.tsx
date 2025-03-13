@@ -496,9 +496,13 @@ export const prepareTxCommand: Command = {
     const recipientAddress = workflowState.address; // Self-transfer for demo
     const amount = "0.0001"; // Small amount for demo in main units (ETH, etc.)
 
-    // Convert amount to lowest unit based on chain decimals
-    // For Ethereum and EVM chains, this is typically 18 decimals (wei)
-    const decimals = 18; // Default to 18 decimals for EVM chains
+    // Get the correct number of decimals from the chain data
+    const decimals = workflowState.selectedChainData.decimals;
+    console.log(
+      `Using ${decimals} decimals for ${workflowState.selectedChain}`
+    );
+
+    // Convert amount to lowest unit based on chain-specific decimals
     const amountInLowestUnit = convertToSmallestUnit(amount, decimals);
 
     try {
@@ -523,6 +527,7 @@ export const prepareTxCommand: Command = {
         value: amount,
         // Use type assertion to access the nonce from the response data
         nonce: (encodedTransaction?.transaction?.data as any)?.nonce || "0",
+        decimals: decimals, // Add decimals to the display for transparency
       };
 
       return {
@@ -545,7 +550,11 @@ export const prepareTxCommand: Command = {
               </p>
               <p className="text-gray-300 mb-1">
                 <span className="text-gray-500">Value:</span>{" "}
-                {transaction.value}
+                {transaction.value} {workflowState.selectedChainData.ticker}
+              </p>
+              <p className="text-gray-300 mb-1">
+                <span className="text-gray-500">Decimals:</span>{" "}
+                {transaction.decimals}
               </p>
               <p className="text-gray-300 mb-1">
                 <span className="text-gray-500">Nonce:</span>{" "}

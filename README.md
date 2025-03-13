@@ -117,9 +117,38 @@ Make sure to set the following environment variables in your Vercel project:
 VITE_SODOT_VERTEX_URL_0=https://your-sodot-vertex-0-url
 VITE_SODOT_VERTEX_URL_1=https://your-sodot-vertex-1-url
 VITE_SODOT_VERTEX_URL_2=https://your-sodot-vertex-2-url
-VITE_SODOT_VERTEX_API_KEY_0=your-api-key-0
-VITE_SODOT_VERTEX_API_KEY_1=your-api-key-1
-VITE_SODOT_VERTEX_API_KEY_2=your-api-key-2
 ```
 
 These environment variables are used by the proxy to forward requests to the correct SODOT vertices.
+
+## SODOT Proxy Implementation
+
+### Vercel Deployment
+
+In production (Vercel deployment), the application uses `/api/sodot-proxy` for routing requests to SODOT vertices. This approach:
+
+- Handles authentication with API keys
+- Avoids CORS issues
+- Provides a consistent interface for the frontend
+
+### Local Development
+
+For local development, the application connects directly to SODOT vertices. The `SodotSigner` class automatically detects the environment and adjusts the URLs accordingly:
+
+- In production: Uses `/api/sodot-proxy?vertex=X&path=Y` format
+- In development: Uses direct URLs to SODOT vertices
+
+The development server in `vite.config.ts` includes proxy configurations for the SODOT vertices to avoid CORS issues during local development.
+
+### Environment Variables
+
+The following environment variables are required for the SODOT proxy:
+
+```
+SODOT_VERTEX_0_URL=https://vertex-demo-0.sodot.dev
+SODOT_VERTEX_0_API_KEY=your-api-key-here
+SODOT_VERTEX_1_URL=https://vertex-demo-1.sodot.dev
+SODOT_VERTEX_1_API_KEY=your-api-key-here
+SODOT_VERTEX_2_URL=https://vertex-demo-2.sodot.dev
+SODOT_VERTEX_2_API_KEY=your-api-key-here
+```
