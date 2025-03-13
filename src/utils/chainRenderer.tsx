@@ -67,10 +67,7 @@ export const renderChainInfo = (
                     </p>
                     <p className="text-sm text-gray-400">
                       Amount:{" "}
-                      {(
-                        Number(token.amount) /
-                        Math.pow(10, Number(token.token.decimals))
-                      ).toFixed(Number(token.token.decimals))}
+                      {formatNumber(token.amount, Number(token.token.decimals))}
                     </p>
                   </div>
                 ))}
@@ -83,38 +80,31 @@ export const renderChainInfo = (
               <div className="grid gap-1 ml-4 mt-1">
                 <p>
                   Total:{" "}
-                  {(
-                    Number(balance.balances.staking.total) /
-                    Math.pow(10, chain.decimals)
-                  ).toFixed(chain.decimals)}{" "}
+                  {formatNumber(balance.balances.staking.total, chain.decimals)}{" "}
                   {chain.ticker}
                 </p>
                 <p>
                   Locked:{" "}
-                  {(
-                    Number(balance.balances.staking.locked) /
-                    Math.pow(10, chain.decimals)
-                  ).toFixed(chain.decimals)}{" "}
+                  {formatNumber(
+                    balance.balances.staking.locked,
+                    chain.decimals
+                  )}{" "}
                   {chain.ticker}
                 </p>
                 <p>
                   Unlocking:{" "}
-                  {Number(balance.balances.staking.unlocking) === 0
-                    ? "0"
-                    : (
-                        Number(balance.balances.staking.unlocking) /
-                        Math.pow(10, chain.decimals)
-                      ).toFixed(chain.decimals)}{" "}
+                  {formatNumber(
+                    balance.balances.staking.unlocking,
+                    chain.decimals
+                  )}{" "}
                   {chain.ticker}
                 </p>
                 <p>
                   Unlocked:{" "}
-                  {Number(balance.balances.staking.unlocked) === 0
-                    ? "0"
-                    : (
-                        Number(balance.balances.staking.unlocked) /
-                        Math.pow(10, chain.decimals)
-                      ).toFixed(chain.decimals)}{" "}
+                  {formatNumber(
+                    balance.balances.staking.unlocked,
+                    chain.decimals
+                  )}{" "}
                   {chain.ticker}
                 </p>
                 {balance.balances.staking.positions &&
@@ -130,10 +120,7 @@ export const renderChainInfo = (
                             >
                               <p>
                                 Amount:{" "}
-                                {(
-                                  Number(pos.amount) /
-                                  Math.pow(10, chain.decimals)
-                                ).toFixed(chain.decimals)}{" "}
+                                {formatNumber(pos.amount, chain.decimals)}{" "}
                                 {chain.ticker}
                               </p>
                               <p>Status: {pos.status}</p>
@@ -159,10 +146,7 @@ export const renderChainInfo = (
                             (reward, index) => (
                               <div key={index} className="mb-1">
                                 <p>
-                                  {(
-                                    Number(reward.amount) /
-                                    Math.pow(10, chain.decimals)
-                                  ).toFixed(chain.decimals)}{" "}
+                                  {formatNumber(reward.amount, chain.decimals)}{" "}
                                   {chain.ticker}
                                   <span className="text-sm text-gray-400">
                                     {" "}
@@ -177,10 +161,10 @@ export const renderChainInfo = (
                             (reward, index) => (
                               <div key={index} className="mb-1">
                                 <p>
-                                  {(
-                                    Number(reward.amount) /
-                                    Math.pow(10, Number(reward.token.decimals))
-                                  ).toFixed(Number(reward.token.decimals))}{" "}
+                                  {formatNumber(
+                                    reward.amount,
+                                    Number(reward.token.decimals)
+                                  )}{" "}
                                   {reward.token.ticker}
                                   <span className="text-sm text-gray-400">
                                     {" "}

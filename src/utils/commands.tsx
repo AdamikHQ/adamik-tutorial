@@ -7,9 +7,7 @@ import {
 } from "./terminalTypes";
 import { showroomChains } from "./showroomChains";
 import { SodotSigner } from "../signers/Sodot";
-import { encodePubKeyToAddress } from "../adamik/encodePubkeyToAddress";
-import { getAccountState } from "../adamik/getAccountState";
-import { infoTerminal } from "./utils";
+import { formatNumber } from "./utils";
 import { AdamikChain } from "../adamik/types";
 import { adamikGetChain } from "../adamik/getChain";
 import { adamikGetChains } from "../adamik/getChains";
@@ -491,10 +489,15 @@ export const prepareTxCommand: Command = {
       };
     }
 
-    // For simplicity, we'll create a basic transaction
-    // In a real app, you'd want to get user input for recipient and amount
-    const recipientAddress = workflowState.address; // Self-transfer for demo
-    const amount = "0.0001"; // Small amount for demo in main units (ETH, etc.)
+    // Get chain-specific configuration from showroomChains
+    const chainConfig = showroomChains[workflowState.selectedChain];
+
+    // Determine recipient address - use the default from config or fall back to self-send
+    const recipientAddress =
+      chainConfig.defaultRecipient || workflowState.address;
+
+    // Determine amount - use the default from config or fall back to a small amount
+    const amount = chainConfig.defaultAmount || "0.0001";
 
     // Get the correct number of decimals from the chain data
     const decimals = workflowState.selectedChainData.decimals;
@@ -530,6 +533,9 @@ export const prepareTxCommand: Command = {
         decimals: decimals, // Add decimals to the display for transparency
       };
 
+      // Determine if this is a self-send transaction
+      const isSelfSend = transaction.from === transaction.to;
+
       return {
         success: true,
         output: (
@@ -547,18 +553,14 @@ export const prepareTxCommand: Command = {
               </p>
               <p className="text-gray-300 mb-1">
                 <span className="text-gray-500">To:</span> {transaction.to}
+                {isSelfSend && (
+                  <span className="text-yellow-500 ml-2">(Self-send)</span>
+                )}
               </p>
               <p className="text-gray-300 mb-1">
                 <span className="text-gray-500">Value:</span>{" "}
-                {transaction.value} {workflowState.selectedChainData.ticker}
-              </p>
-              <p className="text-gray-300 mb-1">
-                <span className="text-gray-500">Decimals:</span>{" "}
-                {transaction.decimals}
-              </p>
-              <p className="text-gray-300 mb-1">
-                <span className="text-gray-500">Nonce:</span>{" "}
-                {transaction.nonce}
+                {parseFloat(amount).toString()}{" "}
+                {workflowState.selectedChainData.ticker}
               </p>
             </div>
             <p className="text-medium text-gray-400 mt-3">
