@@ -87,3 +87,28 @@ The application includes a proxy configuration in `vite.config.ts` to handle COR
 - `src/signers`: Implementation of the SODOT signer
 - `src/adamik`: API client for interacting with the Adamik API
 - `src/contexts`: React contexts for state management
+
+## Deployment on Vercel
+
+This project includes a proxy setup for SODOT API requests when deployed on Vercel. The proxy handles the communication between the frontend and the SODOT vertices.
+
+### How it works
+
+1. The frontend makes requests to `/api/sodot-proxy?vertex=X` where X is the vertex number (0, 1, or 2)
+2. The proxy forwards these requests to the appropriate SODOT vertex using the environment variables
+3. The proxy returns the response from the SODOT vertex to the frontend
+
+### Environment Variables for Vercel
+
+Make sure to set the following environment variables in your Vercel project:
+
+```
+VITE_SODOT_VERTEX_URL_0=https://your-sodot-vertex-0-url
+VITE_SODOT_VERTEX_URL_1=https://your-sodot-vertex-1-url
+VITE_SODOT_VERTEX_URL_2=https://your-sodot-vertex-2-url
+VITE_SODOT_VERTEX_API_KEY_0=your-api-key-0
+VITE_SODOT_VERTEX_API_KEY_1=your-api-key-1
+VITE_SODOT_VERTEX_API_KEY_2=your-api-key-2
+```
+
+These environment variables are used by the proxy to forward requests to the correct SODOT vertices.

@@ -31,15 +31,15 @@ export class SodotSigner implements BaseSigner {
   // TODO: Make this configurable and extendable
   private SODOT_VERTICES = [
     {
-      url: "/sodot-vertex-0",
+      url: "/api/sodot-proxy?vertex=0",
       apiKey: import.meta.env.VITE_SODOT_VERTEX_API_KEY_0!,
     },
     {
-      url: "/sodot-vertex-1",
+      url: "/api/sodot-proxy?vertex=1",
       apiKey: import.meta.env.VITE_SODOT_VERTEX_API_KEY_1!,
     },
     {
-      url: "/sodot-vertex-2",
+      url: "/api/sodot-proxy?vertex=2",
       apiKey: import.meta.env.VITE_SODOT_VERTEX_API_KEY_2!,
     },
   ];
@@ -67,34 +67,38 @@ export class SodotSigner implements BaseSigner {
   }
 
   static isConfigValid(): boolean {
-    if (!import.meta.env.VITE_SODOT_VERTEX_URL_0) {
-      throw new Error(
-        "VITE_SODOT_VERTEX_URL_0 is not set in your .env.local file"
-      );
-    }
+    // Check for API keys which are still required
     if (!import.meta.env.VITE_SODOT_VERTEX_API_KEY_0) {
-      throw new Error(
-        "VITE_SODOT_VERTEX_API_KEY_0 is not set in your .env.local file"
-      );
-    }
-    if (!import.meta.env.VITE_SODOT_VERTEX_URL_1) {
-      throw new Error(
-        "VITE_SODOT_VERTEX_URL_1 is not set in your .env.local file"
+      console.warn(
+        "VITE_SODOT_VERTEX_API_KEY_0 is not set in your environment"
       );
     }
     if (!import.meta.env.VITE_SODOT_VERTEX_API_KEY_1) {
-      throw new Error(
-        "VITE_SODOT_VERTEX_API_KEY_1 is not set in your .env.local file"
-      );
-    }
-    if (!import.meta.env.VITE_SODOT_VERTEX_URL_2) {
-      throw new Error(
-        "VITE_SODOT_VERTEX_URL_2 is not set in your .env.local file"
+      console.warn(
+        "VITE_SODOT_VERTEX_API_KEY_1 is not set in your environment"
       );
     }
     if (!import.meta.env.VITE_SODOT_VERTEX_API_KEY_2) {
-      throw new Error(
-        "VITE_SODOT_VERTEX_API_KEY_2 is not set in your .env.local file"
+      console.warn(
+        "VITE_SODOT_VERTEX_API_KEY_2 is not set in your environment"
+      );
+    }
+
+    // URLs are now handled by the proxy, so we don't need to check them here
+    // But we'll still check if they're set for local development
+    if (!import.meta.env.VITE_SODOT_VERTEX_URL_0) {
+      console.warn(
+        "VITE_SODOT_VERTEX_URL_0 is not set in your environment - this is required for the proxy to work"
+      );
+    }
+    if (!import.meta.env.VITE_SODOT_VERTEX_URL_1) {
+      console.warn(
+        "VITE_SODOT_VERTEX_URL_1 is not set in your environment - this is required for the proxy to work"
+      );
+    }
+    if (!import.meta.env.VITE_SODOT_VERTEX_URL_2) {
+      console.warn(
+        "VITE_SODOT_VERTEX_URL_2 is not set in your environment - this is required for the proxy to work"
       );
     }
 
@@ -547,51 +551,70 @@ export class SodotSigner implements BaseSigner {
       );
     }
 
-    const response = await fetch(apiUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: this.SODOT_VERTICES[vertexId].apiKey,
-      },
-      body: JSON.stringify(requestBody),
-    });
+    try {
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: this.SODOT_VERTICES[vertexId].apiKey,
+        },
+        body: JSON.stringify(requestBody),
+      });
 
-    if (!response.ok) {
-      const errorMessage = await response.text();
+      if (!response.ok) {
+        const errorMessage = await response.text();
+        console.error(`Error deriving pubkey: ${errorMessage}`);
+        console.error(`Status: ${response.status}`);
+        console.error(`URL: ${apiUrl}`);
+
+        // Log the error response
+        if (apiLogsInstance && logId !== -1) {
+          logApiResponse(
+            apiLogsInstance,
+            logId,
+            { status: response.status, error: errorMessage },
+            true
+          );
+        }
+
+        throw new Error(`Failed to derive pubkey: ${errorMessage}`);
+      }
+
+      const pubkey = await response.json();
+
+      // Log the successful response
+      if (apiLogsInstance && logId !== -1) {
+        logApiResponse(apiLogsInstance, logId, {
+          status: response.status,
+          data: pubkey,
+        });
+      }
+
+      // For ed25519 keys
+      if ("pubkey" in pubkey) {
+        return pubkey.pubkey;
+      }
+
+      // For secp256k1 keys (including Bitcoin)
+      if ("compressed" in pubkey) {
+        return pubkey.compressed;
+      }
+
+      throw new Error(`Unexpected pubkey format: ${JSON.stringify(pubkey)}`);
+    } catch (error) {
+      console.error(`Error in derivePubkeyWithVertex: ${error}`);
 
       // Log the error response
       if (apiLogsInstance && logId !== -1) {
         logApiResponse(
           apiLogsInstance,
           logId,
-          { status: response.status, error: errorMessage },
+          { status: 500, error: String(error) },
           true
         );
       }
 
-      throw new Error(`Failed to derive pubkey: ${errorMessage}`);
+      throw error;
     }
-
-    const pubkey = await response.json();
-
-    // Log the successful response
-    if (apiLogsInstance && logId !== -1) {
-      logApiResponse(apiLogsInstance, logId, {
-        status: response.status,
-        data: pubkey,
-      });
-    }
-
-    // For ed25519 keys
-    if ("pubkey" in pubkey) {
-      return pubkey.pubkey;
-    }
-
-    // For secp256k1 keys (including Bitcoin)
-    if ("compressed" in pubkey) {
-      return pubkey.compressed;
-    }
-
-    throw new Error(`Unexpected pubkey format: ${JSON.stringify(pubkey)}`);
   }
 }
