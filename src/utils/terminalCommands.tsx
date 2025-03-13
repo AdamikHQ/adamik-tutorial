@@ -31,6 +31,7 @@ const initialCommands = {
   help: helpCommand,
   start: startCommand,
   clear: clearCommand,
+  "explore-chains": exploreChainsCommand,
 };
 
 // Function to update terminal output with progress
@@ -334,11 +335,12 @@ export const executeCommand = async (
       !helpExecuted &&
       !chainSelected &&
       commandName !== "help" &&
-      commandName !== "start"
+      commandName !== "start" &&
+      commandName !== "explore-chains"
     ) {
       return {
         success: false,
-        output: `Command not available. Only "help" and "start" commands are available initially. Type "help" to see all available commands.`,
+        output: `Command not available. Only "help", "start", and "clear" commands are available initially. Type "help" to see all available commands.`,
         type: "error",
       };
     } else {

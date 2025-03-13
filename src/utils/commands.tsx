@@ -88,6 +88,17 @@ export const helpCommand: Command = {
                   <span className="inline-flex items-center bg-gray-800 px-2 py-0.5 rounded mr-2">
                     <span className="font-mono">
                       <span className="text-purple-500">$</span>{" "}
+                      <span className="text-blue-500 font-bold">
+                        explore-chains
+                      </span>
+                    </span>
+                  </span>
+                  <span>- Explore all supported chains</span>
+                </li>
+                <li className="mb-1">
+                  <span className="inline-flex items-center bg-gray-800 px-2 py-0.5 rounded mr-2">
+                    <span className="font-mono">
+                      <span className="text-purple-500">$</span>{" "}
                       <span className="text-blue-500 font-bold">help</span>
                     </span>
                   </span>
@@ -155,6 +166,9 @@ export const clearCommand: Command = {
   name: "clear",
   description: "Clears the terminal",
   execute: (_args: string[] = []): CommandResult => {
+    // Reset the tutorial completion flag when clearing the terminal
+    sessionStorage.removeItem("tutorialCompleted");
+
     return {
       success: true,
       output: null,
@@ -364,6 +378,10 @@ export const startCommand: Command = {
     try {
       // Reset workflow state when starting a new flow
       resetWorkflowState();
+
+      // Reset the tutorial completion flag when starting a new tutorial
+      // This ensures the congratulations message will show again if they complete the full flow
+      sessionStorage.removeItem("tutorialCompleted");
 
       // Store chains in session storage
       sessionStorage.setItem(
@@ -802,6 +820,13 @@ export const exploreChainsCommand: Command = {
         ticker: chain.ticker,
       }));
 
+      // Check if the user has completed the tutorial before
+      const hasCompletedTutorial =
+        sessionStorage.getItem("tutorialCompleted") === "true";
+
+      // Set the flag to indicate the tutorial has been completed
+      sessionStorage.setItem("tutorialCompleted", "true");
+
       return {
         success: true,
         output: (
@@ -818,33 +843,43 @@ export const exploreChainsCommand: Command = {
                 </div>
               ))}
             </div>
-            <div className="mt-6 p-4 border border-blue-500 rounded-md bg-blue-900/20">
-              <p className="text-blue-300 font-medium mb-2">
-                🎉 Congratulations on successfully interacting with the{" "}
-                {showroomChains[workflowState.selectedChain!]?.name ||
-                  workflowState.selectedChain}{" "}
-                blockchain!
-              </p>
-              <p className="text-gray-300 mb-3">
+
+            {!hasCompletedTutorial ? (
+              // First-time completion - show congratulations message
+              <div className="mt-6 p-4 border border-blue-500 rounded-md bg-blue-900/20">
+                <p className="text-blue-300 font-medium mb-2">
+                  🎉 Congratulations on successfully interacting with the{" "}
+                  {showroomChains[workflowState.selectedChain!]?.name ||
+                    workflowState.selectedChain}{" "}
+                  blockchain!
+                </p>
+                <p className="text-gray-300 mb-3">
+                  Try the flow again to see how easily you can scale across any
+                  blockchain network.
+                </p>
+                <p className="text-gray-300 mb-3">
+                  Explore the source code of this application on GitHub:
+                </p>
+                <a
+                  href="https://github.com/AdamikHQ/adamik-tutorial"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                >
+                  View on GitHub
+                </a>
+                <p className="mt-4 text-gray-400 text-sm">
+                  Type <span className="font-mono text-green-400">start</span>{" "}
+                  to try another chain.
+                </p>
+              </div>
+            ) : (
+              // Subsequent completions - show simpler message
+              <p className="text-green-500 mt-4">
                 Try the flow again to see how easily you can scale across any
                 blockchain network.
               </p>
-              <p className="text-gray-300 mb-3">
-                Explore the source code of this application on GitHub:
-              </p>
-              <a
-                href="https://github.com/AdamikHQ/adamik-tutorial"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-              >
-                View on GitHub
-              </a>
-              <p className="mt-4 text-gray-400 text-sm">
-                Type <span className="font-mono text-green-400">start</span> to
-                try another chain.
-              </p>
-            </div>
+            )}
           </div>
         ),
         type: "info",
