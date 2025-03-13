@@ -66,11 +66,11 @@ export const showroomChains: Record<
     // For Avalanche, we'll use self-send
     defaultAmount: "0.01",
   },
-  bsc: {
-    name: "BNB Chain",
-    ticker: "BNB",
-    explorerUrl: "https://bscscan.com/tx/",
-    // For BNB Chain, we'll use self-send
-    defaultAmount: "0.001",
-  },
+  // bsc: {
+  //   name: "BNB Chain",
+  //   ticker: "BNB",
+  //   explorerUrl: "https://bscscan.com/tx/",
+  //   // For BNB Chain, we'll use self-send
+  //   defaultAmount: "0.001",
+  // },
 };
