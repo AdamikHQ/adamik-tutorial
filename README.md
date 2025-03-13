@@ -95,8 +95,19 @@ This project includes a proxy setup for SODOT API requests when deployed on Verc
 ### How it works
 
 1. The frontend makes requests to `/api/sodot-proxy?vertex=X` where X is the vertex number (0, 1, or 2)
-2. The proxy forwards these requests to the appropriate SODOT vertex using the environment variables
+2. The Vercel serverless function forwards these requests to the appropriate SODOT vertex using the environment variables
 3. The proxy returns the response from the SODOT vertex to the frontend
+
+### API Route Structure
+
+The API routes are structured as follows:
+
+- `/api/sodot-proxy/[...path].js` - Handles all requests to SODOT vertices
+- The vertex number is passed as a query parameter: `?vertex=X`
+- The path to the SODOT vertex endpoint is passed as part of the URL path
+
+For example, to call the `/ecdsa/derive-pubkey` endpoint on vertex 0, the frontend would make a request to:
+`/api/sodot-proxy/ecdsa/derive-pubkey?vertex=0`
 
 ### Environment Variables for Vercel
 

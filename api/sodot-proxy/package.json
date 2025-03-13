@@ -2,9 +2,8 @@
   "name": "sodot-proxy-api",
   "version": "1.0.0",
   "description": "Proxy API for SODOT vertices",
-  "main": "sodot-proxy.js",
+  "main": "index.js",
   "dependencies": {
-    "micro": "^10.0.1",
-    "node-fetch": "^3.3.2"
+    "micro": "^10.0.1"
   }
 }
