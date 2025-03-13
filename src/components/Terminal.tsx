@@ -247,12 +247,11 @@ const Terminal = ({
     } else if (command === "broadcast-tx") {
       newStep = 4; // Broadcast transaction step
     } else if (command === "explore-chains") {
-      // For explore-chains, check if we're in the guided flow
-      // If we have a transaction hash, we're in the guided flow
+      // Only set to step 5 if the user has completed the previous steps
       if (workflowState.txHash) {
         newStep = 5; // Explore chains step (final step in guided flow)
       } else {
-        // If we're not in the guided flow, reset to start
+        // If the user hasn't completed the previous steps, reset to step 0
         newStep = 0;
       }
     }
@@ -342,9 +341,18 @@ const Terminal = ({
           onProgressUpdate(4);
         }
       } else if (command === "explore-chains") {
-        setCurrentFlowStep(5);
-        if (onProgressUpdate) {
-          onProgressUpdate(5);
+        // Only set to step 5 if the user has completed the previous steps
+        if (workflowState.txHash) {
+          setCurrentFlowStep(5);
+          if (onProgressUpdate) {
+            onProgressUpdate(5);
+          }
+        } else {
+          // If the user hasn't completed the previous steps, reset to step 0
+          setCurrentFlowStep(0);
+          if (onProgressUpdate) {
+            onProgressUpdate(0);
+          }
         }
       }
 
@@ -425,6 +433,28 @@ const Terminal = ({
           setCurrentFlowStep(5);
           if (onProgressUpdate) {
             onProgressUpdate(5);
+          }
+
+          // Set processing state to false after all updates
+          setIsProcessingCommand(false);
+        }, 500); // Small delay to ensure the UI updates properly
+      }
+      // Special handling for explore-chains command
+      else if (command === "explore-chains" && result.success) {
+        // Update the flow step based on whether the user has completed the guided flow
+        setTimeout(() => {
+          if (workflowState.txHash) {
+            // If the user has completed the guided flow, keep at step 5
+            setCurrentFlowStep(5);
+            if (onProgressUpdate) {
+              onProgressUpdate(5);
+            }
+          } else {
+            // If the user hasn't completed the guided flow, reset to step 0
+            setCurrentFlowStep(0);
+            if (onProgressUpdate) {
+              onProgressUpdate(0);
+            }
           }
 
           // Set processing state to false after all updates
