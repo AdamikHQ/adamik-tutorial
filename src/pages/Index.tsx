@@ -36,13 +36,15 @@ const Index = () => {
           >
             About
           </Button>
-          <Button
-            variant="outline"
-            onClick={() => window.open("https://github.com/AdamikHQ", "_blank")}
-            className="text-sm font-medium"
+          <a
+            href="https://github.com/AdamikHQ/adamik-tutorial"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center w-14 h-14 rounded-md hover:bg-gray-100"
           >
-            Documentation
-          </Button>
+            <img src="/github-mark.svg" alt="GitHub" className="h-12 w-12" />
+            <span className="sr-only">GitHub</span>
+          </a>
         </nav>
       </header>
 
