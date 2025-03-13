@@ -651,11 +651,6 @@ const Terminal = ({
         <div className="terminal-button bg-green-500"></div>
         <div className="ml-4 text-xs text-gray-400 flex-1 text-center">
           Sodot Multichain Demo
-          {isTutorialDone && (
-            <span className="ml-2 text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">
-              Tutorial Completed
-            </span>
-          )}
         </div>
       </div>
 

@@ -45,9 +45,33 @@ const HorizontalProgressIndicator: React.FC<
             Tutorial Progress
           </h3>
           {tutorialCompleted && (
-            <span className="ml-2 text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">
-              Completed
-            </span>
+            <div className="flex items-center">
+              <span className="ml-2 text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">
+                Completed
+              </span>
+              {onResetTutorial && (
+                <button
+                  onClick={onResetTutorial}
+                  className="ml-2 text-xs text-gray-500 hover:text-gray-700 flex items-center"
+                  title="Reset Tutorial"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-3 w-3"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    />
+                  </svg>
+                </button>
+              )}
+            </div>
           )}
         </div>
         <span className="text-xs text-gray-500">
@@ -67,30 +91,6 @@ const HorizontalProgressIndicator: React.FC<
           style={{ width: `${progressPercentage}%` }}
         ></div>
       </div>
-
-      {/* Reset button - only show when tutorial is completed */}
-      {tutorialCompleted && onResetTutorial && (
-        <button
-          onClick={onResetTutorial}
-          className="w-full mb-4 py-2 px-3 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors flex items-center justify-center"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-4 w-4 mr-1"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-            />
-          </svg>
-          Reset Tutorial
-        </button>
-      )}
 
       {/* Current step description - for very small screens only */}
       <div
@@ -115,7 +115,7 @@ const HorizontalProgressIndicator: React.FC<
       {/* Step indicators with descriptions - grid layout for better alignment */}
       <div
         className={cn(
-          "hidden sm:grid grid-cols-5 gap-2 mt-4",
+          "hidden sm:grid grid-cols-6 gap-1 mt-4",
           tutorialCompleted ? "opacity-60" : ""
         )}
       >
@@ -189,7 +189,7 @@ const HorizontalProgressIndicator: React.FC<
       {/* Simplified step indicators for very small screens */}
       <div
         className={cn(
-          "grid sm:hidden grid-cols-5 gap-1 mt-4",
+          "grid sm:hidden grid-cols-6 gap-1 mt-4",
           tutorialCompleted ? "opacity-60" : ""
         )}
       >

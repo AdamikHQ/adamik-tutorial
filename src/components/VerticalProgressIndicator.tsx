@@ -45,15 +45,15 @@ const VerticalProgressIndicator: React.FC<VerticalProgressIndicatorProps> = ({
         )}
       </div>
 
-      {/* Reset button - only show when tutorial is completed */}
+      {/* Reset button - only show when tutorial is completed, now more subtle */}
       {tutorialCompleted && onResetTutorial && (
         <button
           onClick={onResetTutorial}
-          className="w-full mb-4 py-2 px-3 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors flex items-center justify-center"
+          className="w-full mb-4 py-1.5 px-2 text-xs text-gray-600 hover:text-gray-800 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors flex items-center justify-center border border-gray-200"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
-            className="h-4 w-4 mr-1"
+            className="h-3 w-3 mr-1"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
