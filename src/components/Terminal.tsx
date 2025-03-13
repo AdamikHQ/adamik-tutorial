@@ -614,7 +614,7 @@ const Terminal = ({
         <div className="terminal-button bg-yellow-500"></div>
         <div className="terminal-button bg-green-500"></div>
         <div className="ml-4 text-xs text-gray-400 flex-1 text-center">
-          Adamik Terminal
+          Sodot Multichain Demo
         </div>
       </div>
 

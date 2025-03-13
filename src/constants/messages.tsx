@@ -2,7 +2,7 @@ import React from "react";
 
 export const DEFAULT_WELCOME_MESSAGE = (
   <span>
-    Welcome to the Adamik Terminal. Available commands:{" "}
+    Welcome to Sodot Multichain Demo. Available commands:{" "}
     <span className="font-mono">
       <span className="text-purple-500">$</span>{" "}
       <span className="text-green-500 font-bold">help</span>

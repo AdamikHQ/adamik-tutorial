@@ -25,7 +25,7 @@ const Index = () => {
           <div className="h-8 w-8 rounded-md bg-primary flex items-center justify-center">
             <span className="text-white font-semibold text-lg">&gt;_</span>
           </div>
-          <h1 className="text-xl font-medium">Adamik Terminal</h1>
+          <h1 className="text-xl font-medium">Multichain Demo</h1>
         </div>
 
         <nav className="flex items-center space-x-4">
@@ -50,13 +50,20 @@ const Index = () => {
       <main className="flex-grow flex flex-col items-center justify-center p-4 lg:p-8">
         <div className="w-full max-w-[1400px] mx-auto">
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold tracking-tight mb-3">
-              Sodot Multi Chain Demo, powered by Adamik API
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Leverage Sodot MPC technology and interact with more than 60+
-              blockchains
-            </p>
+            <div className="max-w-2xl mx-auto">
+              <div className="flex justify-center mb-6">
+                <img
+                  src="/SodotMultichainDemo.svg"
+                  alt="Sodot Multi Chain Demo, powered by Adamik API"
+                  className="max-w-full h-auto"
+                  style={{ marginTop: "-40px" }}
+                />
+              </div>
+              <p className="text-lg text-gray-600 pt-2">
+                Leverage Sodot's MPC technology to interact with over 60
+                blockchains
+              </p>
+            </div>
           </div>
 
           <TerminalLayout
@@ -87,7 +94,7 @@ const Index = () => {
 
       {/* Footer */}
       <footer className="w-full py-6 px-8 text-center text-sm text-gray-500">
-        © {new Date().getFullYear()} Adamik Tutorial. All rights reserved.
+        © {new Date().getFullYear()} Sodot Multichain. All rights reserved.
       </footer>
     </div>
   );
