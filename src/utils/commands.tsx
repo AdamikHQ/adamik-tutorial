@@ -834,8 +834,18 @@ export const exploreChainsCommand: Command = {
       const hasCompletedTutorial =
         sessionStorage.getItem("tutorialCompleted") === "true";
 
-      // Set the flag to indicate the tutorial has been completed
-      sessionStorage.setItem("tutorialCompleted", "true");
+      // Check if the user has completed all steps of the guided flow
+      const hasCompletedGuidedFlow =
+        workflowState.selectedChain &&
+        workflowState.address &&
+        workflowState.transaction &&
+        workflowState.signature &&
+        workflowState.txHash;
+
+      // Only set the tutorial completed flag if the user has completed the guided flow
+      if (hasCompletedGuidedFlow) {
+        sessionStorage.setItem("tutorialCompleted", "true");
+      }
 
       return {
         success: true,
@@ -854,12 +864,12 @@ export const exploreChainsCommand: Command = {
               ))}
             </div>
 
-            {!hasCompletedTutorial ? (
+            {hasCompletedGuidedFlow && !hasCompletedTutorial ? (
               // First-time completion - show congratulations message
               <div className="mt-6 p-4 border border-blue-500 rounded-md bg-blue-900/20">
                 <p className="text-blue-300 font-medium mb-2">
                   🎉 Congratulations on successfully interacting with the{" "}
-                  {showroomChains[workflowState.selectedChain!]?.name ||
+                  {showroomChains[workflowState.selectedChain]?.name ||
                     workflowState.selectedChain}{" "}
                   blockchain!
                 </p>
@@ -883,11 +893,18 @@ export const exploreChainsCommand: Command = {
                   to try another chain.
                 </p>
               </div>
-            ) : (
+            ) : hasCompletedGuidedFlow ? (
               // Subsequent completions - show simpler message
               <p className="text-green-500 mt-4">
                 Try the flow again to see how easily you can scale across any
                 blockchain network.
+              </p>
+            ) : (
+              // No guided flow completion - show generic message
+              <p className="text-green-500 mt-4">
+                {workflowState.selectedChain
+                  ? "Continue with the tutorial to interact with the blockchain."
+                  : "Type the start command to begin exploring blockchain interactions."}
               </p>
             )}
           </div>

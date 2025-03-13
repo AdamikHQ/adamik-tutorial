@@ -7,6 +7,7 @@ import { useApiLogs } from "../contexts/ApiLogsContext";
 import { DEFAULT_WELCOME_MESSAGE } from "../constants/messages";
 import SodotConfigStatus from "./SodotConfigStatus";
 import { showroomChains } from "../utils/showroomChains";
+import { workflowState } from "../utils/terminalTypes";
 
 interface TerminalProps {
   className?: string;
@@ -246,33 +247,13 @@ const Terminal = ({
     } else if (command === "broadcast-tx") {
       newStep = 4; // Broadcast transaction step
     } else if (command === "explore-chains") {
-      newStep = 5; // Explore chains step
-    }
-
-    // Check if the command is a chain selection and we have chain details
-    // This indicates a successful chain selection with all steps completed
-    if (Object.keys(showroomChains).includes(command)) {
-      // Check if we have the chain details in the output
-      const lastCommandEntry = commandHistory[commandHistory.length - 1];
-      if (lastCommandEntry && lastCommandEntry.output) {
-        const output = lastCommandEntry.output;
-        const hasChainDetails =
-          output &&
-          typeof output === "object" &&
-          React.isValidElement(output) &&
-          output.props?.children?.some?.((child) =>
-            child?.props?.children?.some?.(
-              (grandchild) =>
-                typeof grandchild === "string" &&
-                (grandchild.includes("Address for") ||
-                  grandchild.includes("Chain information retrieved"))
-            )
-          );
-
-        if (hasChainDetails) {
-          // If we have chain details, we should move to step 2 (Prepare transaction)
-          newStep = 2;
-        }
+      // For explore-chains, check if we're in the guided flow
+      // If we have a transaction hash, we're in the guided flow
+      if (workflowState.txHash) {
+        newStep = 5; // Explore chains step (final step in guided flow)
+      } else {
+        // If we're not in the guided flow, reset to start
+        newStep = 0;
       }
     }
 
@@ -282,7 +263,8 @@ const Terminal = ({
       newStep !== currentFlowStep &&
       (newStep >= currentFlowStep ||
         command === "clear" ||
-        command === "broadcast-tx")
+        command === "start" ||
+        (command === "explore-chains" && !workflowState.txHash))
     ) {
       setCurrentFlowStep(newStep);
       // Call the onProgressUpdate callback if provided
@@ -457,7 +439,6 @@ const Terminal = ({
       // After broadcast-tx, suggest explore-chains
       if (command === "broadcast-tx" && result.success) {
         setTimeout(() => {
-          updateCurrentFlowStep("explore-chains");
           setSuggestedCommand("explore-chains");
         }, 1000);
       }
@@ -465,7 +446,10 @@ const Terminal = ({
       // After explore-chains, suggest restarting the tutorial
       if (command === "explore-chains" && result.success) {
         setTimeout(() => {
-          setSuggestedCommand("start");
+          // If we completed the guided flow, suggest starting a new one
+          if (workflowState.txHash) {
+            setSuggestedCommand("start");
+          }
         }, 1000);
       }
     }

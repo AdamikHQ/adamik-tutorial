@@ -73,7 +73,8 @@ export const executeCommand = async (
       parsedResult.chainSelection &&
       commandName !== "help" &&
       commandName !== "start" &&
-      commandName !== "clear"
+      commandName !== "clear" &&
+      commandName !== "explore-chains"
     ) {
       // User is selecting a chain
       const chainId = commandName;
