@@ -9,8 +9,18 @@ export default async function handler(req, res) {
     }
 
     // Get the path from the URL path segments
-    const pathSegments = req.query.path || [];
-    const path = pathSegments.length > 0 ? `/${pathSegments.join("/")}` : "";
+    let path = "";
+    if (req.query.path) {
+      // Handle both array and string cases
+      if (Array.isArray(req.query.path)) {
+        path = `/${req.query.path.join("/")}`;
+      } else if (typeof req.query.path === "string") {
+        path = `/${req.query.path}`;
+      }
+    }
+
+    console.log(`Path segments:`, req.query.path);
+    console.log(`Constructed path: ${path}`);
 
     // Get the environment variables for the vertex
     const vertexUrl = process.env[`VITE_SODOT_VERTEX_URL_${vertexNumber}`];

@@ -605,6 +605,7 @@ export class SodotSigner implements BaseSigner {
     derivationPath: number[],
     curve: "ecdsa" | "ed25519"
   ) {
+    // Use the correct URL format for the API route
     const apiUrl = `${this.SODOT_VERTICES[vertexId].url}/${curve}/derive-pubkey?vertex=${this.SODOT_VERTICES[vertexId].vertexParam}`;
     let logId = -1;
 
