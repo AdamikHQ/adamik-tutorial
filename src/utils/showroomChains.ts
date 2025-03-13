@@ -10,10 +10,10 @@ export const showroomChains: Record<
     defaultAmount?: string; // Default amount to transfer
   }
 > = {
-  ethereum: {
-    name: "Ethereum",
+  sepolia: {
+    name: "Ethereum Sepolia (testnet)",
     ticker: "ETH",
-    explorerUrl: "https://etherscan.io/tx/",
+    explorerUrl: "https://sepolia.etherscan.io/tx/",
     // For Ethereum, we'll use self-send (null means use sender address)
     defaultAmount: "0.0001",
   },
