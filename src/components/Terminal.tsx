@@ -54,6 +54,8 @@ const Terminal = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const [sodotConfigChecked, setSodotConfigChecked] = useState<boolean>(false);
   const [currentFlowStep, setCurrentFlowStep] = useState<number>(0); // Start is the current step (yellow)
+  const [isProcessingCommand, setIsProcessingCommand] =
+    useState<boolean>(false); // Track if a command is processing
 
   // Notify parent component when progress changes
   useEffect(() => {
@@ -296,6 +298,9 @@ const Terminal = ({
     // Hide welcome message for all commands
     setShowWelcomeMessage(false);
 
+    // Set processing state to true
+    setIsProcessingCommand(true);
+
     const id = commandCount.current++;
 
     // For clear command, we don't need progressive updates
@@ -323,6 +328,9 @@ const Terminal = ({
           onProgressUpdate(0);
         }
       }
+
+      // Set processing state to false
+      setIsProcessingCommand(false);
     } else {
       // Immediately update the flow step based on the command being executed
       // This ensures the progress indicator updates right after the user presses enter
@@ -397,6 +405,9 @@ const Terminal = ({
 
           // Explicitly set the suggested command to prepare-tx
           setSuggestedCommand("prepare-tx");
+
+          // Set processing state to false after all updates
+          setIsProcessingCommand(false);
         }, 500); // Small delay to ensure the UI updates properly
       }
       // Special handling for prepare-tx command - directly update the flow step to 3 (sign-tx)
@@ -407,6 +418,9 @@ const Terminal = ({
           if (onProgressUpdate) {
             onProgressUpdate(3);
           }
+
+          // Set processing state to false after all updates
+          setIsProcessingCommand(false);
         }, 500); // Small delay to ensure the UI updates properly
       }
       // Special handling for sign-tx command - directly update the flow step to 4 (broadcast-tx)
@@ -417,6 +431,9 @@ const Terminal = ({
           if (onProgressUpdate) {
             onProgressUpdate(4);
           }
+
+          // Set processing state to false after all updates
+          setIsProcessingCommand(false);
         }, 500); // Small delay to ensure the UI updates properly
       }
       // Special handling for broadcast-tx command - directly update the flow step to 5 (explore-chains)
@@ -427,7 +444,14 @@ const Terminal = ({
           if (onProgressUpdate) {
             onProgressUpdate(5);
           }
+
+          // Set processing state to false after all updates
+          setIsProcessingCommand(false);
         }, 500); // Small delay to ensure the UI updates properly
+      }
+      // For all other commands, set processing state to false immediately
+      else {
+        setIsProcessingCommand(false);
       }
 
       // After broadcast-tx, suggest explore-chains
@@ -493,6 +517,9 @@ const Terminal = ({
 
     if (!currentCommand.trim()) return;
 
+    // Set processing state to true
+    setIsProcessingCommand(true);
+
     // Add command to history
     setCommandHistory((prev) => [
       ...prev,
@@ -520,6 +547,9 @@ const Terminal = ({
     ]);
 
     setCurrentCommand("");
+
+    // Set processing state to false
+    setIsProcessingCommand(false);
   };
 
   const handleCommandChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -615,7 +645,7 @@ const Terminal = ({
           </div>
         ))}
 
-        {sodotConfigChecked && (
+        {sodotConfigChecked && !isProcessingCommand && (
           <CommandLine
             value={currentCommand}
             onChange={setCurrentCommand}
