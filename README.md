@@ -1,14 +1,14 @@
-# Adamik API Terminal Tutorial
+# Sodot Multichain Demo
 
 ## Project Overview
 
-This interactive terminal-based application demonstrates how to interact with blockchain networks using the Adamik API and SODOT Multi-Party Computation (MPC) technology. The project provides a user-friendly interface for exploring various blockchain networks, generating cryptographic keys, creating addresses, and checking account balances.
+This interactive terminal-based application demonstrates how to interact with over 60 blockchain networks using Sodot's Multi-Party Computation (MPC) technology. The project provides a user-friendly interface for exploring various blockchain networks, generating cryptographic keys, creating addresses, checking account balances, and executing transactions.
 
 ## Features
 
 - **Interactive Terminal Interface**: Explore blockchain networks through a command-line interface
 - **Multi-Party Computation (MPC)**: Generate secure cryptographic keys using SODOT technology
-- **Multi-Chain Support**: Works with Bitcoin, Ethereum, Optimism, and many other blockchain networks
+- **Multi-Chain Support**: Works with over 60 blockchain networks including Ethereum, Optimism, TON, and more
 - **Address Generation**: Create addresses for different blockchain networks
 - **Balance Checking**: View account balances and token holdings
 - **Transaction Workflow**: Prepare, sign, and broadcast transactions
@@ -21,6 +21,7 @@ This interactive terminal-based application demonstrates how to interact with bl
 - **prepare-tx** - Prepare an unsigned transaction
 - **sign-tx** - Sign a prepared transaction
 - **broadcast-tx** - Broadcast a signed transaction to the network
+- **explore-chains** - Explore all supported chains
 - **clear** - Clears the terminal
 
 ## Guided Flow
@@ -28,10 +29,11 @@ This interactive terminal-based application demonstrates how to interact with bl
 The application provides a guided workflow that takes you through the process of:
 
 1. Starting the application with `start`
-2. Selecting a blockchain network (e.g., `optimism`, `tron`, etc.)
+2. Selecting a blockchain network (e.g., `optimism`, `ton`, etc.)
 3. Preparing a transaction with `prepare-tx`
 4. Signing the transaction with `sign-tx`
 5. Broadcasting the transaction with `broadcast-tx`
+6. Exploring all supported chains with `explore-chains`
 
 ## Getting Started
 

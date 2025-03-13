@@ -13,7 +13,7 @@ const About = () => {
           <div className="h-8 w-8 rounded-md bg-primary flex items-center justify-center">
             <span className="text-white font-semibold text-lg">&gt;_</span>
           </div>
-          <h1 className="text-xl font-medium">Adamik Tutorial</h1>
+          <h1 className="text-xl font-medium">Sodot Multichain Demo</h1>
         </div>
 
         <nav className="flex items-center space-x-4">
@@ -28,7 +28,7 @@ const About = () => {
             variant="outline"
             onClick={() =>
               window.open(
-                "https://github.com/adamikcrypt/adamik-tutorial",
+                "https://github.com/AdamikHQ/adamik-tutorial",
                 "_blank"
               )
             }
@@ -44,26 +44,27 @@ const About = () => {
         <div className="max-w-3xl w-full mx-auto animate-text-fade-in opacity-0">
           <div className="text-center mb-10">
             <h2 className="text-3xl font-bold tracking-tight mb-3">
-              About Adamik Tutorial
+              About Sodot Multichain Demo
             </h2>
             <p className="text-lg text-gray-600">
-              An interactive way to learn and explore blockchain networks
-              through the Adamik API.
+              An interactive way to explore and interact with over 60 blockchain
+              networks using Sodot's MPC technology.
             </p>
           </div>
 
           <div className="bg-white rounded-lg shadow-xl p-8 space-y-6">
             <div>
               <h3 className="text-xl font-semibold mb-3">
-                What is Adamik Tutorial?
+                What is Sodot Multichain Demo?
               </h3>
               <p className="text-gray-600">
-                Adamik Tutorial is an interactive learning tool designed to help
-                developers understand blockchain networks and cryptographic
-                operations. Through a command-line interface, you can explore
-                different blockchains, generate cryptographic keys using SODOT
-                MPC technology, create blockchain addresses, check account
-                balances, and execute transactions across multiple networks.
+                Sodot Multichain Demo is an interactive tool designed to
+                showcase how developers can interact with multiple blockchain
+                networks using Sodot's secure MPC technology. Through a
+                command-line interface, you can explore different blockchains,
+                generate cryptographic keys using SODOT MPC technology, create
+                blockchain addresses, check account balances, and execute
+                transactions across multiple networks.
               </p>
             </div>
 
@@ -79,7 +80,8 @@ const About = () => {
                 </li>
                 <li>API call logging and visualization</li>
                 <li>
-                  Support for Bitcoin, Ethereum, Optimism, and other networks
+                  Support for over 60 blockchain networks including Ethereum,
+                  Optimism, TON, and more
                 </li>
               </ul>
             </div>
@@ -115,6 +117,9 @@ const About = () => {
                 <code className="block text-sm text-gray-800 mb-1">
                   broadcast-tx - Broadcast a signed transaction to the network
                 </code>
+                <code className="block text-sm text-gray-800 mb-1">
+                  explore-chains - Explore all supported chains
+                </code>
                 <code className="block text-sm text-gray-800">
                   clear - Clears the terminal
                 </code>
@@ -141,7 +146,7 @@ const About = () => {
                   </code>
                   ,{" "}
                   <code className="bg-gray-200 text-black px-1.5 py-0.5 rounded font-medium">
-                    tron
+                    ton
                   </code>
                   , etc.)
                 </li>
@@ -161,6 +166,12 @@ const About = () => {
                   Broadcasting the transaction with{" "}
                   <code className="bg-gray-200 text-black px-1.5 py-0.5 rounded font-medium">
                     broadcast-tx
+                  </code>
+                </li>
+                <li>
+                  Exploring all supported chains with{" "}
+                  <code className="bg-gray-200 text-black px-1.5 py-0.5 rounded font-medium">
+                    explore-chains
                   </code>
                 </li>
               </ol>
@@ -184,7 +195,7 @@ const About = () => {
                 party has access to the complete key.
               </p>
               <p className="text-gray-600 mt-2">
-                In this tutorial, we use SODOT to generate keys and sign
+                In this demo, we use SODOT to generate keys and sign
                 transactions across various blockchain networks, demonstrating
                 how MPC can provide institutional-grade security for blockchain
                 operations.
@@ -205,7 +216,7 @@ const About = () => {
 
       {/* Footer */}
       <footer className="w-full py-6 px-8 text-center text-sm text-gray-500">
-        © {new Date().getFullYear()} Adamik Tutorial. All rights reserved.
+        © {new Date().getFullYear()} Sodot Multichain. All rights reserved.
       </footer>
     </div>
   );
