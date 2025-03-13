@@ -7,7 +7,7 @@ import { useApiLogs } from "../contexts/ApiLogsContext";
 import { DEFAULT_WELCOME_MESSAGE } from "../constants/messages";
 import SodotConfigStatus from "./SodotConfigStatus";
 import { showroomChains } from "../utils/showroomChains";
-import { workflowState } from "../utils/terminalTypes";
+import { workflowState, isTutorialCompleted } from "../utils/terminalTypes";
 
 interface TerminalProps {
   className?: string;
@@ -25,8 +25,8 @@ interface CommandEntry {
 
 // Define the complete flow with commands and descriptions
 export const guidedFlowStepsWithDescriptions = [
-  { step: "help", description: "Get help" },
   { step: "start", description: "Start tutorial" },
+  { step: "chain-selection", description: "Select chain" },
   { step: "prepare-tx", description: "Prepare tx" },
   { step: "sign-tx", description: "Sign tx" },
   { step: "broadcast-tx", description: "Broadcast tx" },
@@ -57,6 +57,28 @@ const Terminal = ({
   const [currentFlowStep, setCurrentFlowStep] = useState<number>(0); // Start is the current step (yellow)
   const [isProcessingCommand, setIsProcessingCommand] =
     useState<boolean>(false); // Track if a command is processing
+  const [isTutorialDone, setIsTutorialDone] = useState<boolean>(false);
+
+  // Check if tutorial is completed
+  useEffect(() => {
+    const checkTutorialStatus = () => {
+      const completed = isTutorialCompleted();
+      setIsTutorialDone(completed);
+    };
+
+    // Check on mount and whenever a command is processed
+    checkTutorialStatus();
+
+    // Set up event listener for storage changes
+    const handleStorageChange = () => {
+      checkTutorialStatus();
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, [commandHistory]);
 
   // Notify parent component when progress changes
   useEffect(() => {
@@ -629,13 +651,15 @@ const Terminal = ({
         <div className="terminal-button bg-green-500"></div>
         <div className="ml-4 text-xs text-gray-400 flex-1 text-center">
           Sodot Multichain Demo
+          {isTutorialDone && (
+            <span className="ml-2 text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">
+              Tutorial Completed
+            </span>
+          )}
         </div>
       </div>
 
-      <div
-        ref={terminalRef}
-        className="terminal-content flex-1 p-4 overflow-y-auto"
-      >
+      <div className="terminal-content flex-1 p-4 overflow-y-auto">
         {!sodotConfigChecked && (
           <SodotConfigStatus onConfigChecked={handleConfigChecked} />
         )}

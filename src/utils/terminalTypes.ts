@@ -37,3 +37,17 @@ export let workflowState: WorkflowState = {};
 export const resetWorkflowState = () => {
   workflowState = {};
 };
+
+// Check if tutorial is completed
+export const isTutorialCompleted = (): boolean => {
+  return sessionStorage.getItem("tutorialCompleted") === "true";
+};
+
+// Set tutorial as completed
+export const setTutorialCompleted = (completed: boolean = true): void => {
+  if (completed) {
+    sessionStorage.setItem("tutorialCompleted", "true");
+  } else {
+    sessionStorage.removeItem("tutorialCompleted");
+  }
+};

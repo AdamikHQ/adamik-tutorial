@@ -20,6 +20,7 @@ const TerminalLayout: React.FC<TerminalLayoutProps> = ({
 }) => {
   const apiLogs = useApiLogs();
   const [currentStep, setCurrentStep] = useState<number>(0);
+  const [tutorialCompleted, setTutorialCompleted] = useState<boolean>(false);
 
   // Convert the guidedFlowStepsWithDescriptions to the format expected by the progress indicators
   const progressSteps = guidedFlowStepsWithDescriptions.map((item) => ({
@@ -32,9 +33,27 @@ const TerminalLayout: React.FC<TerminalLayoutProps> = ({
     setApiLogsInstance(apiLogs);
   }, [apiLogs]);
 
+  // Check if tutorial is completed on mount and when currentStep changes
+  useEffect(() => {
+    const isCompleted = sessionStorage.getItem("tutorialCompleted") === "true";
+    setTutorialCompleted(isCompleted);
+  }, [currentStep]);
+
   const handleProgressUpdate = (step: number) => {
     console.log("Progress update:", step);
     setCurrentStep(step);
+  };
+
+  const handleResetTutorial = () => {
+    // Clear the tutorial completed flag
+    sessionStorage.removeItem("tutorialCompleted");
+    setTutorialCompleted(false);
+
+    // Reset the current step
+    setCurrentStep(0);
+
+    // Reset the workflow state by refreshing the page
+    window.location.reload();
   };
 
   return (
@@ -45,6 +64,8 @@ const TerminalLayout: React.FC<TerminalLayoutProps> = ({
           <VerticalProgressIndicator
             currentStep={currentStep}
             steps={progressSteps}
+            tutorialCompleted={tutorialCompleted}
+            onResetTutorial={handleResetTutorial}
           />
         </div>
       </div>
@@ -56,6 +77,8 @@ const TerminalLayout: React.FC<TerminalLayoutProps> = ({
           <HorizontalProgressIndicator
             currentStep={currentStep}
             steps={progressSteps}
+            tutorialCompleted={tutorialCompleted}
+            onResetTutorial={handleResetTutorial}
           />
         </div>
 

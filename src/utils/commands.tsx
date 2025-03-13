@@ -4,6 +4,8 @@ import {
   CommandResult,
   resetWorkflowState,
   workflowState,
+  isTutorialCompleted,
+  setTutorialCompleted,
 } from "./terminalTypes";
 import { showroomChains } from "./showroomChains";
 import { SodotSigner } from "../signers/Sodot";
@@ -831,8 +833,7 @@ export const exploreChainsCommand: Command = {
       }));
 
       // Check if the user has completed the tutorial before
-      const hasCompletedTutorial =
-        sessionStorage.getItem("tutorialCompleted") === "true";
+      const hasCompletedTutorial = isTutorialCompleted();
 
       // Check if the user has completed all steps of the guided flow
       const hasCompletedGuidedFlow =
@@ -844,7 +845,7 @@ export const exploreChainsCommand: Command = {
 
       // Only set the tutorial completed flag if the user has completed the guided flow
       if (hasCompletedGuidedFlow) {
-        sessionStorage.setItem("tutorialCompleted", "true");
+        setTutorialCompleted(true);
       }
 
       return {

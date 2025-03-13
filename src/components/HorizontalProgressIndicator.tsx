@@ -10,11 +10,19 @@ interface HorizontalProgressIndicatorProps {
   currentStep: number;
   steps: ProgressStep[] | string[];
   className?: string;
+  tutorialCompleted?: boolean;
+  onResetTutorial?: () => void;
 }
 
 const HorizontalProgressIndicator: React.FC<
   HorizontalProgressIndicatorProps
-> = ({ currentStep, steps, className }) => {
+> = ({
+  currentStep,
+  steps,
+  className,
+  tutorialCompleted = false,
+  onResetTutorial,
+}) => {
   // Helper function to get step description
   const getStepDescription = (
     step: ProgressStep | string,
@@ -32,27 +40,68 @@ const HorizontalProgressIndicator: React.FC<
   return (
     <div className={cn("horizontal-progress-indicator w-full", className)}>
       <div className="flex justify-between items-center mb-2">
-        <h3 className="text-sm font-semibold text-gray-700">
-          Tutorial Progress
-        </h3>
+        <div className="flex items-center">
+          <h3 className="text-sm font-semibold text-gray-700">
+            Tutorial Progress
+          </h3>
+          {tutorialCompleted && (
+            <span className="ml-2 text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">
+              Completed
+            </span>
+          )}
+        </div>
         <span className="text-xs text-gray-500">
           Step {currentStep + 1} of {steps.length}
         </span>
       </div>
 
       {/* Progress bar */}
-      <div className="relative h-2 bg-gray-200 rounded-full overflow-hidden mb-4">
+      <div
+        className={cn(
+          "relative h-2 bg-gray-200 rounded-full overflow-hidden mb-4",
+          tutorialCompleted ? "opacity-60" : ""
+        )}
+      >
         <div
           className="absolute h-full bg-yellow-500 rounded-full transition-all duration-300 ease-in-out"
           style={{ width: `${progressPercentage}%` }}
         ></div>
       </div>
 
+      {/* Reset button - only show when tutorial is completed */}
+      {tutorialCompleted && onResetTutorial && (
+        <button
+          onClick={onResetTutorial}
+          className="w-full mb-4 py-2 px-3 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors flex items-center justify-center"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-4 w-4 mr-1"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+            />
+          </svg>
+          Reset Tutorial
+        </button>
+      )}
+
       {/* Current step description - for very small screens only */}
-      <div className="flex items-center sm:hidden">
+      <div
+        className={cn(
+          "flex items-center sm:hidden",
+          tutorialCompleted ? "opacity-60" : ""
+        )}
+      >
         <div
-          className="w-5 h-5 rounded-full flex items-center justify-center mr-3 
-            bg-yellow-500 border-2 border-yellow-400 ring-2 ring-yellow-100"
+          className={`w-5 h-5 rounded-full flex items-center justify-center mr-3 
+            bg-yellow-500 border-2 border-yellow-400 ring-2 ring-yellow-100`}
         >
           <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
         </div>
@@ -64,7 +113,12 @@ const HorizontalProgressIndicator: React.FC<
       </div>
 
       {/* Step indicators with descriptions - grid layout for better alignment */}
-      <div className="hidden sm:grid grid-cols-5 gap-2 mt-4">
+      <div
+        className={cn(
+          "hidden sm:grid grid-cols-5 gap-2 mt-4",
+          tutorialCompleted ? "opacity-60" : ""
+        )}
+      >
         {steps.map((step, index) => {
           const isActive = index === currentStep;
           const isCompleted = index < currentStep;
@@ -133,7 +187,12 @@ const HorizontalProgressIndicator: React.FC<
       </div>
 
       {/* Simplified step indicators for very small screens */}
-      <div className="grid sm:hidden grid-cols-5 gap-1 mt-4">
+      <div
+        className={cn(
+          "grid sm:hidden grid-cols-5 gap-1 mt-4",
+          tutorialCompleted ? "opacity-60" : ""
+        )}
+      >
         {steps.map((step, index) => {
           const isActive = index === currentStep;
           const isCompleted = index < currentStep;

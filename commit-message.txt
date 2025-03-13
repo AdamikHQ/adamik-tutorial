@@ -1,0 +1,45 @@
+fix: improve explore-chains command behavior and progress bar
+
+This commit fixes several issues with the explore-chains command:
+
+1. Fixed the command execution to properly recognize explore-chains as a command
+   rather than treating it as a chain selection attempt when used after the
+   start command.
+
+2. Improved progress bar behavior for the explore-chains command:
+   - When used outside the guided flow, the progress bar now correctly resets
+     to step 0 instead of showing all steps as completed
+   - When used as part of the guided flow (after broadcast-tx), it properly
+     advances to step 5
+
+3. Enhanced the explore-chains command output to show appropriate messages
+   based on the user's progress in the guided flow:
+   - Shows congratulations only after completing the full guided flow
+   - Shows a simpler message for subsequent completions
+   - Shows a generic message when used outside the guided flow
+
+These changes ensure that the explore-chains command works correctly at any
+point in the flow while maintaining the integrity of the guided tutorial
+experience.
+
+feat: add tutorial completion status and reset button
+
+This commit adds visual indication when the tutorial has been completed and provides a way to reset the tutorial progress:
+
+1. Added a "Completed" badge to the progress indicators when the tutorial is completed
+2. Added a reset button to allow users to restart the tutorial
+3. Applied a subtle greyed-out effect to the progress indicators when the tutorial is completed
+4. Added a "Tutorial Completed" badge to the terminal header
+5. Improved the tutorial completion tracking with dedicated helper functions
+
+These changes enhance the user experience by providing clear visual feedback about the tutorial status and allowing users to easily restart the tutorial if needed.
+
+fix: correct tutorial progress steps to match actual flow
+
+This commit fixes the tutorial progress steps to match the actual flow of the tutorial:
+
+1. Removed the "Get help" step from the beginning of the progress bar
+2. Added a proper "Select chain" step to represent the chain selection phase
+3. Updated the guidedFlow array to correctly reference the steps
+
+These changes ensure that the progress bar accurately reflects the actual tutorial flow, making it more intuitive for users to follow along with the guided experience.
