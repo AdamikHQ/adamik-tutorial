@@ -58,6 +58,22 @@ const Terminal = ({
   const [isProcessingCommand, setIsProcessingCommand] =
     useState<boolean>(false); // Track if a command is processing
   const [isTutorialDone, setIsTutorialDone] = useState<boolean>(false);
+  const lastUpdateRef = useRef<number>(Date.now()); // Track when the last update happened
+
+  // Create a custom setCommandHistory function that also triggers scrolling
+  const updateCommandHistory = (
+    updater: React.SetStateAction<CommandEntry[]>
+  ) => {
+    setCommandHistory(updater);
+    lastUpdateRef.current = Date.now();
+
+    // Schedule a scroll to bottom
+    setTimeout(() => {
+      if (terminalRef.current) {
+        terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
+      }
+    }, 0);
+  };
 
   // Check if tutorial is completed
   useEffect(() => {
@@ -103,12 +119,36 @@ const Terminal = ({
     }
   }, [initialCommands, sodotConfigChecked]);
 
-  // Auto scroll to bottom when new commands are added
+  // Enhanced auto scroll to bottom when new content is added
   useEffect(() => {
-    if (terminalRef.current) {
-      terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
+    // Function to scroll to bottom
+    const scrollToBottom = () => {
+      if (terminalRef.current) {
+        terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
+      }
+    };
+
+    // Scroll immediately when command history changes
+    scrollToBottom();
+
+    // Set up an interval to check for updates during command processing
+    let intervalId: number | undefined;
+
+    if (isProcessingCommand) {
+      intervalId = window.setInterval(() => {
+        // Only scroll if there was a recent update
+        if (Date.now() - lastUpdateRef.current < 500) {
+          scrollToBottom();
+        }
+      }, 100);
     }
-  }, [commandHistory, sodotConfigChecked]);
+
+    return () => {
+      if (intervalId !== undefined) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [commandHistory, sodotConfigChecked, isProcessingCommand]);
 
   // Focus input on mount and when clicking terminal
   useEffect(() => {
@@ -316,7 +356,7 @@ const Terminal = ({
         setShowWelcomeMessage(true); // Show the welcome message again after clear
 
         // Clear the terminal history but preserve the output from the clear command
-        setCommandHistory([
+        updateCommandHistory([
           {
             id,
             command,
@@ -379,7 +419,7 @@ const Terminal = ({
       }
 
       // Add the command to history immediately with a loading state
-      setCommandHistory((prev) => [
+      updateCommandHistory((prev) => [
         ...prev,
         {
           id,
@@ -389,11 +429,11 @@ const Terminal = ({
         },
       ]);
 
-      // Execute the command with the ID and setCommandHistory for progressive updates
-      const result = await executeCommand(command, id, setCommandHistory);
+      // Execute the command with the ID and our custom update function for progressive updates
+      const result = await executeCommand(command, id, updateCommandHistory);
 
       // Update the final result
-      setCommandHistory((prev) => {
+      updateCommandHistory((prev) => {
         const updatedHistory = [...prev];
         const commandIndex = updatedHistory.findIndex((cmd) => cmd.id === id);
         if (commandIndex !== -1) {
@@ -557,7 +597,7 @@ const Terminal = ({
     setIsProcessingCommand(true);
 
     // Add command to history
-    setCommandHistory((prev) => [
+    updateCommandHistory((prev) => [
       ...prev,
       {
         id: commandCount.current++,
@@ -572,7 +612,7 @@ const Terminal = ({
     const output = await executeCommand(currentCommand);
 
     // Add command and output to entries
-    setCommandHistory((prev) => [
+    updateCommandHistory((prev) => [
       ...prev,
       {
         id: commandCount.current++,
@@ -654,7 +694,10 @@ const Terminal = ({
         </div>
       </div>
 
-      <div className="terminal-content flex-1 p-4 overflow-y-auto">
+      <div
+        ref={terminalRef}
+        className="terminal-content flex-1 p-4 overflow-y-auto"
+      >
         {!sodotConfigChecked && (
           <SodotConfigStatus onConfigChecked={handleConfigChecked} />
         )}
