@@ -820,11 +820,14 @@ export const exploreChainsCommand: Command = {
             </div>
             <div className="mt-6 p-4 border border-blue-500 rounded-md bg-blue-900/20">
               <p className="text-blue-300 font-medium mb-2">
-                🎉 Congratulations on completing the Adamik Terminal tutorial!
+                🎉 Congratulations on successfully interacting with the{" "}
+                {showroomChains[workflowState.selectedChain!]?.name ||
+                  workflowState.selectedChain}{" "}
+                blockchain!
               </p>
               <p className="text-gray-300 mb-3">
-                You've learned how to interact with multiple blockchains using
-                the Adamik API and Sodot MPC technology.
+                Try the flow again to see how easily you can scale across any
+                blockchain network.
               </p>
               <p className="text-gray-300 mb-3">
                 Explore the source code of this application on GitHub:
@@ -839,7 +842,7 @@ export const exploreChainsCommand: Command = {
               </a>
               <p className="mt-4 text-gray-400 text-sm">
                 Type <span className="font-mono text-green-400">start</span> to
-                begin the tutorial again.
+                try another chain.
               </p>
             </div>
           </div>
