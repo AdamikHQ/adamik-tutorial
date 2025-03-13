@@ -166,8 +166,8 @@ export const clearCommand: Command = {
   name: "clear",
   description: "Clears the terminal",
   execute: (_args: string[] = []): CommandResult => {
-    // Reset the tutorial completion flag when clearing the terminal
-    sessionStorage.removeItem("tutorialCompleted");
+    // We don't reset the tutorial completion flag when clearing the terminal
+    // to ensure the congratulations message doesn't show again
 
     return {
       success: true,
@@ -379,9 +379,8 @@ export const startCommand: Command = {
       // Reset workflow state when starting a new flow
       resetWorkflowState();
 
-      // Reset the tutorial completion flag when starting a new tutorial
-      // This ensures the congratulations message will show again if they complete the full flow
-      sessionStorage.removeItem("tutorialCompleted");
+      // We don't reset the tutorial completion flag when starting a new tutorial
+      // This ensures the congratulations message only shows the first time
 
       // Store chains in session storage
       sessionStorage.setItem(
