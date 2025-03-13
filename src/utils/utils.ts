@@ -3,6 +3,32 @@ import { AdamikSignatureFormat } from "../adamik/types";
 import { Signer } from "../signers";
 
 /**
+ * Formats a number to remove trailing zeros and decimal point if needed
+ * @param value - The number or string to format
+ * @param decimals - The number of decimals to use for formatting
+ * @returns A formatted string without trailing zeros
+ * Example: formatNumber("1.000000", 6) -> "1"
+ * Example: formatNumber("2.345000", 6) -> "2.345"
+ * Example: formatNumber(0, 6) -> "0"
+ */
+export const formatNumber = (
+  value: number | string,
+  decimals: number
+): string => {
+  // Convert to number if it's a string
+  const num = typeof value === "string" ? Number(value) : value;
+
+  // If the number is 0, just return "0"
+  if (num === 0) return "0";
+
+  // Format with fixed decimals
+  const formatted = (num / Math.pow(10, decimals)).toFixed(decimals);
+
+  // Remove trailing zeros and decimal point if needed
+  return formatted.replace(/\.?0+$/, "");
+};
+
+/**
  * Converts an amount from the main unit to the smallest unit
  * @param amount - The amount in the main unit
  * @param decimals - The number of decimals in the smallest unit

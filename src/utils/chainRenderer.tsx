@@ -1,5 +1,6 @@
 import React from "react";
 import { AdamikChain } from "../adamik/types";
+import { formatNumber } from "./utils";
 
 // Function to render chain information
 export const renderChainInfo = (
@@ -9,10 +10,6 @@ export const renderChainInfo = (
   addressInfo: any,
   balance: any
 ) => {
-  const formattedNativeBalance = (
-    Number(balance.balances.native.available) / Math.pow(10, chain.decimals)
-  ).toFixed(chain.decimals);
-
   return (
     <div>
       <div className="mb-6 space-y-2">
@@ -34,24 +31,26 @@ export const renderChainInfo = (
             <strong>Native Balance:</strong>
             <div className="grid grid-cols-2 gap-2 ml-4 mt-1">
               <p>
-                Available: {formattedNativeBalance} {chain.ticker}
+                Available:{" "}
+                {formatNumber(
+                  balance.balances.native.available,
+                  chain.decimals
+                )}{" "}
+                {chain.ticker}
               </p>
               <p>
                 Total:{" "}
-                {(
-                  Number(balance.balances.native.total) /
-                  Math.pow(10, chain.decimals)
-                ).toFixed(chain.decimals)}{" "}
+                {formatNumber(balance.balances.native.total, chain.decimals)}{" "}
                 {chain.ticker}
               </p>
               {balance.balances.native.unconfirmed !== "0" &&
                 !isNaN(Number(balance.balances.native.unconfirmed)) && (
                   <p>
                     Unconfirmed:{" "}
-                    {(
-                      Number(balance.balances.native.unconfirmed) /
-                      Math.pow(10, chain.decimals)
-                    ).toFixed(chain.decimals)}{" "}
+                    {formatNumber(
+                      balance.balances.native.unconfirmed,
+                      chain.decimals
+                    )}{" "}
                     {chain.ticker}
                   </p>
                 )}
@@ -100,18 +99,22 @@ export const renderChainInfo = (
                 </p>
                 <p>
                   Unlocking:{" "}
-                  {(
-                    Number(balance.balances.staking.unlocking) /
-                    Math.pow(10, chain.decimals)
-                  ).toFixed(chain.decimals)}{" "}
+                  {Number(balance.balances.staking.unlocking) === 0
+                    ? "0"
+                    : (
+                        Number(balance.balances.staking.unlocking) /
+                        Math.pow(10, chain.decimals)
+                      ).toFixed(chain.decimals)}{" "}
                   {chain.ticker}
                 </p>
                 <p>
                   Unlocked:{" "}
-                  {(
-                    Number(balance.balances.staking.unlocked) /
-                    Math.pow(10, chain.decimals)
-                  ).toFixed(chain.decimals)}{" "}
+                  {Number(balance.balances.staking.unlocked) === 0
+                    ? "0"
+                    : (
+                        Number(balance.balances.staking.unlocked) /
+                        Math.pow(10, chain.decimals)
+                      ).toFixed(chain.decimals)}{" "}
                   {chain.ticker}
                 </p>
                 {balance.balances.staking.positions &&
@@ -134,12 +137,6 @@ export const renderChainInfo = (
                                 {chain.ticker}
                               </p>
                               <p>Status: {pos.status}</p>
-                              <p>
-                                Completion:{" "}
-                                {new Date(
-                                  pos.completionDate * 1000
-                                ).toLocaleString()}
-                              </p>
                               <p className="text-sm text-gray-400">
                                 Validators: {pos.validatorAddresses.join(", ")}
                               </p>
