@@ -753,14 +753,8 @@ export const broadcastTxCommand: Command = {
 
       // For Ethereum-based chains, we need to keep the 0x prefix
       // For other chains like Cosmos, we need to remove it
-      const isEthereumBased = [
-        "ethereum",
-        "optimism",
-        "arbitrum",
-        "polygon",
-        "avalanche",
-        "binance",
-      ].includes(workflowState.selectedChain!);
+      // Use the chain family to determine if it's EVM-based
+      const isEthereumBased = workflowState.selectedChainData?.family === "evm";
       const formattedTxHash = isEthereumBased
         ? txHash
         : txHash.replace("0x", "");
