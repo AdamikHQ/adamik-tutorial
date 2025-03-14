@@ -37,7 +37,7 @@ const Index = () => {
             About
           </Button>
           <a
-            href="https://github.com/AdamikHQ/adamik-tutorial"
+            href="https://github.com/AdamikHQ/adamik-tutorial/tree/signer-turnkey"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center w-14 h-14 rounded-md hover:bg-gray-100"
@@ -55,15 +55,15 @@ const Index = () => {
             <div className="max-w-2xl mx-auto">
               <div className="flex justify-center mb-6">
                 <img
-                  src="/SodotMultichainDemo.svg"
-                  alt="Sodot Multi Chain Demo, powered by Adamik API"
+                  src="/TurnkeyMultichainDemo.svg"
+                  alt="Turnkey Multi Chain Demo, powered by Adamik API"
                   className="max-w-full h-auto"
                   style={{ marginTop: "-40px" }}
                 />
               </div>
               <p className="text-lg text-gray-600 pt-2">
-                Leverage Sodot's MPC technology to interact with over 60
-                blockchains
+                Leverage Turnkey's secure signing technology to interact with
+                over 60 blockchains
               </p>
             </div>
           </div>
@@ -96,7 +96,7 @@ const Index = () => {
 
       {/* Footer */}
       <footer className="w-full py-6 px-8 text-center text-sm text-gray-500">
-        © {new Date().getFullYear()} Sodot Multichain. All rights reserved.
+        © {new Date().getFullYear()} Turnkey Multichain. All rights reserved.
       </footer>
     </div>
   );

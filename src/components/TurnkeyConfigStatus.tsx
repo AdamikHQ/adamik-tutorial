@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from "react";
 import {
-  SODOT_CHECKING_MESSAGE,
-  SODOT_CONNECTED_MESSAGE,
-  SODOT_ERROR_MESSAGE,
+  TURNKEY_CHECKING_MESSAGE,
+  TURNKEY_CONNECTED_MESSAGE,
+  TURNKEY_ERROR_MESSAGE,
 } from "../constants/messages";
-import { SodotSigner } from "../signers/Sodot";
+import { TurnkeySigner } from "../signers/Turnkey";
 
-interface SodotConfigStatusProps {
+interface TurnkeyConfigStatusProps {
   onConfigChecked: () => void;
 }
 
-const SodotConfigStatus: React.FC<SodotConfigStatusProps> = ({
+const TurnkeyConfigStatus: React.FC<TurnkeyConfigStatusProps> = ({
   onConfigChecked,
 }) => {
   const [status, setStatus] = useState<"checking" | "verified" | "error">(
@@ -18,10 +18,10 @@ const SodotConfigStatus: React.FC<SodotConfigStatusProps> = ({
   );
 
   useEffect(() => {
-    const checkSodotConfig = async () => {
+    const checkTurnkeyConfig = async () => {
       try {
-        // Check if SODOT configuration is valid
-        const isValid = SodotSigner.isConfigValid();
+        // Check if Turnkey configuration is valid
+        const isValid = TurnkeySigner.isConfigValid();
 
         if (isValid) {
           // Wait a moment to show the checking message (for UX purposes)
@@ -31,7 +31,7 @@ const SodotConfigStatus: React.FC<SodotConfigStatusProps> = ({
           setStatus("error");
         }
       } catch (error) {
-        console.error("SODOT configuration check failed:", error);
+        console.error("Turnkey configuration check failed:", error);
         setStatus("error");
       } finally {
         // Wait a moment before triggering the callback
@@ -41,16 +41,16 @@ const SodotConfigStatus: React.FC<SodotConfigStatusProps> = ({
       }
     };
 
-    checkSodotConfig();
+    checkTurnkeyConfig();
   }, [onConfigChecked]);
 
   return (
     <div className="animate-text-fade-in opacity-0 text-terminal-muted mb-2">
-      {status === "checking" && SODOT_CHECKING_MESSAGE}
-      {status === "verified" && SODOT_CONNECTED_MESSAGE}
-      {status === "error" && SODOT_ERROR_MESSAGE}
+      {status === "checking" && TURNKEY_CHECKING_MESSAGE}
+      {status === "verified" && TURNKEY_CONNECTED_MESSAGE}
+      {status === "error" && TURNKEY_ERROR_MESSAGE}
     </div>
   );
 };
 
-export default SodotConfigStatus;
+export default TurnkeyConfigStatus;

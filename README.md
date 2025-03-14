@@ -1,13 +1,13 @@
-# Sodot Multichain Demo
+# Turnkey Multichain Demo
 
 ## Project Overview
 
-This interactive terminal-based application demonstrates how to interact with over 60 blockchain networks using Sodot's Multi-Party Computation (MPC) technology. The project provides a user-friendly interface for exploring various blockchain networks, generating cryptographic keys, creating addresses, checking account balances, and executing transactions.
+This interactive terminal-based application demonstrates how to interact with over 60 blockchain networks using Turnkey's secure signing technology. The project provides a user-friendly interface for exploring various blockchain networks, generating cryptographic keys, creating addresses, checking account balances, and executing transactions.
 
 ## Features
 
 - **Interactive Terminal Interface**: Explore blockchain networks through a command-line interface
-- **Multi-Party Computation (MPC)**: Generate secure cryptographic keys using SODOT technology
+- **Secure Key Management**: Generate secure cryptographic keys using Turnkey technology
 - **Multi-Chain Support**: Works with over 60 blockchain networks including Ethereum, Optimism, TON, and more
 - **Address Generation**: Create addresses for different blockchain networks
 - **Balance Checking**: View account balances and token holdings
@@ -41,7 +41,7 @@ Follow these steps to run the project locally:
 
 ```sh
 # Step 1: Clone the repository
-git clone https://github.com/AdamikHQ/adamik-tutorial
+git clone https://github.com/AdamikHQ/adamik-tutorial -b signer-turnkey
 
 # Step 2: Navigate to the project directory
 cd adamik-tutorial
@@ -49,14 +49,13 @@ cd adamik-tutorial
 # Step 3: Install the necessary dependencies
 pnpm install
 
-# Step 4: Create a .env.local file with your SODOT vertex API keys
+# Step 4: Create a .env.local file with your Turnkey API keys
 # Example:
-# VITE_SODOT_VERTEX_URL_0=https://vertex-demo-0.sodot.dev
-# VITE_SODOT_VERTEX_API_KEY_0=your-api-key-0
-# VITE_SODOT_VERTEX_URL_1=https://vertex-demo-1.sodot.dev
-# VITE_SODOT_VERTEX_API_KEY_1=your-api-key-1
-# VITE_SODOT_VERTEX_URL_2=https://vertex-demo-2.sodot.dev
-# VITE_SODOT_VERTEX_API_KEY_2=your-api-key-2
+# VITE_TURNKEY_API_PUBLIC_KEY=your-api-public-key
+# VITE_TURNKEY_API_PRIVATE_KEY=your-api-private-key
+# VITE_TURNKEY_BASE_URL=https://api.turnkey.com
+# VITE_TURNKEY_ORGANIZATION_ID=your-organization-id
+# VITE_TURNKEY_WALLET_ID=your-wallet-id
 
 # Step 5: Start the development server
 pnpm dev
@@ -70,85 +69,35 @@ This project is built with:
 - **TypeScript**: Type-safe JavaScript
 - **React**: UI library for building interactive interfaces
 - **Tailwind CSS**: Utility-first CSS framework
-- **SODOT MPC**: Secure Multi-Party Computation for cryptographic operations
+- **Turnkey**: Secure key management for cryptographic operations
 
-## About SODOT MPC Technology
+## About Turnkey Technology
 
-SODOT is a secure Multi-Party Computation (MPC) system that enables distributed key generation and signing. Unlike traditional wallets where a single entity controls the private key, SODOT splits cryptographic operations across multiple parties (vertices), enhancing security by ensuring no single party has access to the complete key.
+Turnkey is a secure key management system that enables developers to easily integrate blockchain functionality into their applications. It provides a secure and reliable way to manage private keys and sign transactions across multiple blockchain networks.
 
 ## CORS Configuration
 
-The application includes a proxy configuration in `vite.config.ts` to handle CORS issues when connecting to SODOT vertices. This allows the frontend to communicate with the SODOT API without cross-origin restrictions.
+The application includes a proxy configuration in `vite.config.ts` to handle CORS issues when connecting to external APIs. This allows the frontend to communicate with the APIs without cross-origin restrictions.
 
 ## Project Structure
 
 - `src/components`: React components including the Terminal interface
 - `src/utils`: Utility functions for terminal commands and rendering
-- `src/signers`: Implementation of the SODOT signer
+- `src/signers`: Implementation of the Turnkey signer
 - `src/adamik`: API client for interacting with the Adamik API
 - `src/contexts`: React contexts for state management
 
-## Deployment on Vercel
+## Environment Variables
 
-This project includes a proxy setup for SODOT API requests when deployed on Vercel. The proxy handles the communication between the frontend and the SODOT vertices.
-
-### How it works
-
-1. The frontend makes requests to `/api/sodot-proxy?vertex=X` where X is the vertex number (0, 1, or 2)
-2. The Vercel serverless function forwards these requests to the appropriate SODOT vertex using the environment variables
-3. The proxy returns the response from the SODOT vertex to the frontend
-
-### API Route Structure
-
-The API routes are structured as follows:
-
-- `/api/sodot-proxy/[...path].js` - Handles all requests to SODOT vertices
-- The vertex number is passed as a query parameter: `?vertex=X`
-- The path to the SODOT vertex endpoint is passed as part of the URL path
-
-For example, to call the `/ecdsa/derive-pubkey` endpoint on vertex 0, the frontend would make a request to:
-`/api/sodot-proxy/ecdsa/derive-pubkey?vertex=0`
-
-### Environment Variables for Vercel
-
-Make sure to set the following environment variables in your Vercel project:
+The following environment variables are required:
 
 ```
-VITE_SODOT_VERTEX_URL_0=https://your-sodot-vertex-0-url
-VITE_SODOT_VERTEX_URL_1=https://your-sodot-vertex-1-url
-VITE_SODOT_VERTEX_URL_2=https://your-sodot-vertex-2-url
-```
+VITE_ADAMIK_API_BASE_URL=https://api.adamik.io
+VITE_ADAMIK_API_KEY=your-api-key-here
 
-These environment variables are used by the proxy to forward requests to the correct SODOT vertices.
-
-## SODOT Proxy Implementation
-
-### Vercel Deployment
-
-In production (Vercel deployment), the application uses `/api/sodot-proxy` for routing requests to SODOT vertices. This approach:
-
-- Handles authentication with API keys
-- Avoids CORS issues
-- Provides a consistent interface for the frontend
-
-### Local Development
-
-For local development, the application connects directly to SODOT vertices. The `SodotSigner` class automatically detects the environment and adjusts the URLs accordingly:
-
-- In production: Uses `/api/sodot-proxy?vertex=X&path=Y` format
-- In development: Uses direct URLs to SODOT vertices
-
-The development server in `vite.config.ts` includes proxy configurations for the SODOT vertices to avoid CORS issues during local development.
-
-### Environment Variables
-
-The following environment variables are required for the SODOT proxy:
-
-```
-SODOT_VERTEX_0_URL=https://vertex-demo-0.sodot.dev
-SODOT_VERTEX_0_API_KEY=your-api-key-here
-SODOT_VERTEX_1_URL=https://vertex-demo-1.sodot.dev
-SODOT_VERTEX_1_API_KEY=your-api-key-here
-SODOT_VERTEX_2_URL=https://vertex-demo-2.sodot.dev
-SODOT_VERTEX_2_API_KEY=your-api-key-here
+VITE_TURNKEY_API_PUBLIC_KEY=your-api-public-key
+VITE_TURNKEY_API_PRIVATE_KEY=your-api-private-key
+VITE_TURNKEY_BASE_URL=https://api.turnkey.com
+VITE_TURNKEY_ORGANIZATION_ID=your-organization-id
+VITE_TURNKEY_WALLET_ID=your-wallet-id
 ```

@@ -34,4 +34,20 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  optimizeDeps: {
+    esbuildOptions: {
+      // Node.js global to browser globalThis
+      define: {
+        global: "globalThis",
+      },
+    },
+  },
+  define: {
+    // By default, Vite doesn't include shims for NodeJS/
+    // necessary for Turnkey SDK to work
+    global: "globalThis",
+    process: {
+      env: {},
+    },
+  },
 }));

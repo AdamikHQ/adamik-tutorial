@@ -5,7 +5,7 @@ import { ChevronDown, ChevronRight } from "lucide-react";
 export interface ApiLogEntry {
   id: number;
   timestamp: Date;
-  provider: "Adamik" | "Sodot" | "System";
+  provider: "Adamik" | "Turnkey" | "System";
   endpoint: string;
   method: "GET" | "POST" | "PUT" | "DELETE";
   request?: any;
@@ -55,7 +55,7 @@ const ApiLogs: React.FC<ApiLogsProps> = ({ logs, className }) => {
     switch (provider) {
       case "Adamik":
         return "text-blue-400";
-      case "Sodot":
+      case "Turnkey":
         return "text-purple-400";
       case "System":
         return "text-gray-400";
@@ -81,19 +81,17 @@ const ApiLogs: React.FC<ApiLogsProps> = ({ logs, className }) => {
 
   // Function to highlight chainId and account address in the endpoint
   const highlightEndpointParts = (endpoint: string) => {
-    // Handle SODOT endpoints
-    if (endpoint.includes("/sodot-vertex")) {
-      // Match pattern like /sodot-vertex-{vertexId}/{curve}/{operation}
-      const regex = /\/sodot-vertex-(\d+)\/([^\/]+)\/([^\/]+)/;
+    // Handle Turnkey endpoints
+    if (endpoint.includes("/turnkey")) {
+      // Match pattern like /turnkey/{operation}
+      const regex = /\/turnkey\/([^\/]+)/;
       const match = endpoint.match(regex);
 
       if (match) {
-        const [fullMatch, vertexId, curve, operation] = match;
+        const [fullMatch, operation] = match;
         return (
           <>
-            /sodot-vertex-
-            <span className="highlight-chain">{vertexId}</span>/
-            <span className="highlight-address">{curve}</span>/
+            /turnkey/
             <span className="highlight-operation">{operation}</span>
           </>
         );
@@ -147,22 +145,13 @@ const ApiLogs: React.FC<ApiLogsProps> = ({ logs, className }) => {
 
     const { endpoint, method } = log;
 
-    // Handle SODOT API calls
-    if (endpoint.includes("/sodot-vertex")) {
-      if (endpoint.includes("/derive-pubkey")) {
-        return "Derive Public Key";
-      }
+    // Handle Turnkey API calls
+    if (endpoint.includes("/turnkey")) {
       if (endpoint.includes("/sign")) {
         return "Sign Transaction";
       }
-      if (endpoint.includes("/keygen-init")) {
-        return "Initialize Key Generation";
-      }
-      if (endpoint.includes("/keygen")) {
-        return "Generate Key";
-      }
-      if (endpoint.includes("/create-room")) {
-        return "Create Signing Room";
+      if (endpoint.includes("/get-public-key")) {
+        return "Get Public Key";
       }
     }
 

@@ -8,7 +8,7 @@ import {
   broadcastTxCommand,
   exploreChainsCommand,
 } from "./commands";
-import { SodotSigner } from "../signers/Sodot";
+import { TurnkeySigner } from "../signers/Turnkey";
 import { encodePubKeyToAddress } from "../adamik/encodePubkeyToAddress";
 import { getAccountState } from "../adamik/getAccountState";
 import { infoTerminal } from "./utils";
@@ -152,8 +152,8 @@ export const executeCommand = async (
           );
         }
 
-        // Step 2: Create SodotSigner instance and generate pubkey
-        const signer = new SodotSigner(chainId, chain.signerSpec);
+        // Step 2: Create TurnkeySigner instance and generate pubkey
+        const signer = new TurnkeySigner(chainId, chain.signerSpec);
         infoTerminal(`Generating keys for ${chain.name}...`, "TERMINAL");
         const pubkey = await signer.getPubkey();
         if (!pubkey) {
@@ -295,8 +295,8 @@ export const executeCommand = async (
               </p>
               <p>{error instanceof Error ? error.message : "Unknown error"}</p>
               <p className="mt-2 text-xs text-gray-400">
-                Make sure your SODOT configuration is correct in your .env.local
-                file.
+                Make sure your Turnkey configuration is correct in your
+                .env.local file.
               </p>
             </div>
           ),

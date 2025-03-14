@@ -8,7 +8,7 @@ import {
   setTutorialCompleted,
 } from "./terminalTypes";
 import { showroomChains } from "./showroomChains";
-import { SodotSigner } from "../signers/Sodot";
+import { TurnkeySigner } from "../signers/Turnkey";
 import { formatNumber } from "./utils";
 import { AdamikChain } from "../adamik/types";
 import { adamikGetChain } from "../adamik/getChain";
@@ -608,7 +608,7 @@ export const signTxCommand: Command = {
 
     try {
       // Get the signer
-      const signer = new SodotSigner(
+      const signer = new TurnkeySigner(
         workflowState.selectedChain!,
         workflowState.selectedChainData!.signerSpec
       );
@@ -638,8 +638,8 @@ export const signTxCommand: Command = {
       if (apiLogsInstance) {
         logId = logApiCall(
           apiLogsInstance,
-          "Sodot",
-          "/sodot-vertex-0/ecdsa/sign",
+          "Turnkey",
+          "/sign",
           "POST",
           encodedTx
         );
@@ -876,7 +876,7 @@ export const exploreChainsCommand: Command = {
                   Explore the source code of this application on GitHub:
                 </p>
                 <a
-                  href="https://github.com/AdamikHQ/adamik-tutorial"
+                  href="https://github.com/AdamikHQ/adamik-tutorial/tree/signer-turnkey"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-block px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"

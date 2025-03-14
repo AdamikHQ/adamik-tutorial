@@ -13,7 +13,7 @@ const About = () => {
           <div className="h-8 w-8 rounded-md bg-primary flex items-center justify-center">
             <span className="text-white font-semibold text-lg">&gt;_</span>
           </div>
-          <h1 className="text-xl font-medium">Sodot Multichain Demo</h1>
+          <h1 className="text-xl font-medium">Turnkey Multichain Demo</h1>
         </div>
 
         <nav className="flex items-center space-x-4">
@@ -25,7 +25,7 @@ const About = () => {
             Terminal
           </Button>
           <a
-            href="https://github.com/AdamikHQ/adamik-tutorial"
+            href="https://github.com/AdamikHQ/adamik-tutorial/tree/signer-turnkey"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center w-14 h-14 rounded-md hover:bg-gray-100"
@@ -41,25 +41,25 @@ const About = () => {
         <div className="max-w-3xl w-full mx-auto animate-text-fade-in opacity-0">
           <div className="text-center mb-10">
             <h2 className="text-3xl font-bold tracking-tight mb-3">
-              About Sodot Multichain Demo
+              About Turnkey Multichain Demo
             </h2>
             <p className="text-lg text-gray-600">
-              Interact with over 60 blockchain networks using Sodot's MPC and
-              Adamik technologies.
+              Interact with over 60 blockchain networks using Turnkey and Adamik
+              technologies.
             </p>
           </div>
 
           <div className="bg-white rounded-lg shadow-xl p-8 space-y-6">
             <div>
               <h3 className="text-xl font-semibold mb-3">
-                What is Sodot Multichain Demo?
+                What is Turnkey Multichain Demo?
               </h3>
               <p className="text-gray-600">
-                Sodot Multichain Demo is an interactive tool designed to
+                Turnkey Multichain Demo is an interactive tool designed to
                 showcase how developers can interact with multiple blockchain
-                networks using Sodot's secure MPC technology. Through a
+                networks using Turnkey's secure signing technology. Through a
                 command-line interface, you can explore different blockchains,
-                generate cryptographic keys using SODOT MPC technology, create
+                generate cryptographic keys using Turnkey technology, create
                 blockchain addresses, check account balances, and execute
                 transactions across multiple networks.
               </p>
@@ -69,7 +69,7 @@ const About = () => {
               <h3 className="text-xl font-semibold mb-3">Key Features</h3>
               <ul className="list-disc pl-5 space-y-1 text-gray-600">
                 <li>Interactive blockchain exploration via command-line</li>
-                <li>Multi-party computation (MPC) key generation with SODOT</li>
+                <li>Secure key management with Turnkey</li>
                 <li>Address derivation for multiple blockchain networks</li>
                 <li>Real-time account balance checking</li>
                 <li>
@@ -181,20 +181,19 @@ const About = () => {
 
             <div>
               <h3 className="text-xl font-semibold mb-3">
-                About SODOT MPC Technology
+                About Turnkey Technology
               </h3>
               <p className="text-gray-600">
-                SODOT is a secure Multi-Party Computation (MPC) system that
-                enables distributed key generation and signing. Unlike
-                traditional wallets where a single entity controls the private
-                key, SODOT splits cryptographic operations across multiple
-                parties (vertices), enhancing security by ensuring no single
-                party has access to the complete key.
+                Turnkey is a secure key management system that enables
+                developers to easily integrate blockchain functionality into
+                their applications. It provides a secure and reliable way to
+                manage private keys and sign transactions across multiple
+                blockchain networks.
               </p>
               <p className="text-gray-600 mt-2">
-                In this demo, we use SODOT to generate keys and sign
+                In this demo, we use Turnkey to generate keys and sign
                 transactions across various blockchain networks, demonstrating
-                how MPC can provide institutional-grade security for blockchain
+                how it can provide institutional-grade security for blockchain
                 operations.
               </p>
             </div>
@@ -213,7 +212,7 @@ const About = () => {
 
       {/* Footer */}
       <footer className="w-full py-6 px-8 text-center text-sm text-gray-500">
-        © {new Date().getFullYear()} Sodot Multichain. All rights reserved.
+        © {new Date().getFullYear()} Turnkey Multichain. All rights reserved.
       </footer>
     </div>
   );

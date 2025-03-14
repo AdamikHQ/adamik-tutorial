@@ -110,7 +110,7 @@ export const getCoinTypeFromDerivationPath = (
 };
 
 // Define console sources explicitly
-const CONSOLE_SOURCE = ["Adamik", "LOCAL MNEMONIC (UNSECURE)", "SODOT"];
+const CONSOLE_SOURCE = ["Adamik", "LOCAL MNEMONIC (UNSECURE)", "TURNKEY"];
 
 export const infoTerminal = (message: string, source?: string) => {
   if (source === "Adamik") {

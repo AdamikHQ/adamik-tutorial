@@ -1,11 +1,11 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, KeyboardEvent } from "react";
 import CommandLine from "./CommandLine";
 import TerminalOutput from "./TerminalOutput";
 import { executeCommand } from "../utils/terminalCommands";
 import { cn } from "@/lib/utils";
 import { useApiLogs } from "../contexts/ApiLogsContext";
 import { DEFAULT_WELCOME_MESSAGE } from "../constants/messages";
-import SodotConfigStatus from "./SodotConfigStatus";
+import TurnkeyConfigStatus from "./TurnkeyConfigStatus";
 import { showroomChains } from "../utils/showroomChains";
 import { workflowState, isTutorialCompleted } from "../utils/terminalTypes";
 
@@ -53,7 +53,8 @@ const Terminal = ({
   const [showWelcomeMessage, setShowWelcomeMessage] = useState<boolean>(true);
   const [suggestedCommand, setSuggestedCommand] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
-  const [sodotConfigChecked, setSodotConfigChecked] = useState<boolean>(false);
+  const [turnkeyConfigChecked, setTurnkeyConfigChecked] =
+    useState<boolean>(false);
   const [currentFlowStep, setCurrentFlowStep] = useState<number>(0); // Start is the current step (yellow)
   const [isProcessingCommand, setIsProcessingCommand] =
     useState<boolean>(false); // Track if a command is processing
@@ -108,7 +109,7 @@ const Terminal = ({
     // Reset the helpExecuted flag when the component mounts
     sessionStorage.removeItem("helpExecuted");
 
-    if (initialCommands.length > 0 && sodotConfigChecked) {
+    if (initialCommands.length > 0 && turnkeyConfigChecked) {
       const delay = 500; // delay between commands in ms
 
       initialCommands.forEach((cmd, index) => {
@@ -117,7 +118,7 @@ const Terminal = ({
         }, delay * (index + 1));
       });
     }
-  }, [initialCommands, sodotConfigChecked]);
+  }, [initialCommands, turnkeyConfigChecked]);
 
   // Enhanced auto scroll to bottom when new content is added
   useEffect(() => {
@@ -148,14 +149,14 @@ const Terminal = ({
         clearInterval(intervalId);
       }
     };
-  }, [commandHistory, sodotConfigChecked, isProcessingCommand]);
+  }, [commandHistory, turnkeyConfigChecked, isProcessingCommand]);
 
   // Focus input on mount and when clicking terminal
   useEffect(() => {
-    if (sodotConfigChecked) {
+    if (turnkeyConfigChecked) {
       inputRef.current?.focus();
     }
-  }, [sodotConfigChecked]);
+  }, [turnkeyConfigChecked]);
 
   // Define the guided flow commands (with special case for chain selection)
   const guidedFlow = [
@@ -551,7 +552,7 @@ const Terminal = ({
   };
 
   const handleConfigChecked = () => {
-    setSodotConfigChecked(true);
+    setTurnkeyConfigChecked(true);
   };
 
   const handleKeyNavigation = (direction: "up" | "down" | "tab") => {
@@ -690,7 +691,7 @@ const Terminal = ({
         <div className="terminal-button bg-yellow-500"></div>
         <div className="terminal-button bg-green-500"></div>
         <div className="ml-4 text-xs text-gray-400 flex-1 text-center">
-          Sodot Multichain Demo
+          Turnkey Multichain Demo
         </div>
       </div>
 
@@ -698,11 +699,11 @@ const Terminal = ({
         ref={terminalRef}
         className="terminal-content flex-1 p-4 overflow-y-auto"
       >
-        {!sodotConfigChecked && (
-          <SodotConfigStatus onConfigChecked={handleConfigChecked} />
+        {!turnkeyConfigChecked && (
+          <TurnkeyConfigStatus onConfigChecked={handleConfigChecked} />
         )}
 
-        {sodotConfigChecked && showWelcomeMessage && (
+        {turnkeyConfigChecked && showWelcomeMessage && (
           <div
             key="welcome-message"
             className="animate-text-fade-in opacity-0 text-terminal-muted mb-2"
@@ -721,7 +722,7 @@ const Terminal = ({
           </div>
         ))}
 
-        {sodotConfigChecked && !isProcessingCommand && (
+        {turnkeyConfigChecked && !isProcessingCommand && (
           <CommandLine
             value={currentCommand}
             onChange={setCurrentCommand}
