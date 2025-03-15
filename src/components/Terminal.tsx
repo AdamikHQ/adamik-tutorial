@@ -159,12 +159,12 @@ const Terminal = ({
 
   // Define the guided flow commands (with special case for chain selection)
   const guidedFlow = [
-    guidedFlowStepsWithDescriptions[0].step, // start
+    guidedFlowStepsWithDescriptions[0].step.toLowerCase(), // start
     "optimism", // Default chain, but any chain selection should continue the flow
-    guidedFlowStepsWithDescriptions[2].step, // prepare-tx
-    guidedFlowStepsWithDescriptions[3].step, // sign-tx
-    guidedFlowStepsWithDescriptions[4].step, // broadcast-tx
-    guidedFlowStepsWithDescriptions[5].step, // explore-chains
+    guidedFlowStepsWithDescriptions[2].step.toLowerCase(), // prepare-tx
+    guidedFlowStepsWithDescriptions[3].step.toLowerCase(), // sign-tx
+    guidedFlowStepsWithDescriptions[4].step.toLowerCase(), // broadcast-tx
+    guidedFlowStepsWithDescriptions[5].step.toLowerCase(), // explore-chains
   ];
 
   // Determine the next suggested command based on command history
@@ -192,20 +192,27 @@ const Terminal = ({
     // Helper function to update suggested command and flow step together
     const updateSuggestion = (command: string, flowStep: number) => {
       setSuggestedCommand(command);
+
+      // Normalize the command for case-insensitive comparison
+      const normalizedCommand = command.toLowerCase();
+      const normalizedLastCommand = lastCommand.toLowerCase();
+
       // Only update the flow step if it's not a regression (going back to a lower step)
       // unless it's a clear command or we're starting over
       if (
         flowStep >= currentFlowStep ||
-        command === "start" ||
-        lastCommand === "clear" ||
-        lastCommand === "broadcast-tx"
+        normalizedCommand === "start" ||
+        normalizedLastCommand === "clear" ||
+        normalizedLastCommand === "broadcast-tx"
       ) {
         setCurrentFlowStep(flowStep);
       }
     };
 
     // Check if the last command was a chain selection - use direct check with showroomChains
-    let isChainSelection = Object.keys(showroomChains).includes(lastCommand);
+    let isChainSelection = Object.keys(showroomChains).some(
+      (chainId) => chainId.toLowerCase() === lastCommand.toLowerCase()
+    );
 
     // Also check if we're in chain selection mode from the lastCommandResult
     const lastCommandResultJson = sessionStorage.getItem("lastCommandResult");
@@ -229,7 +236,9 @@ const Terminal = ({
       );
 
     // Find the current position in the guided flow
-    let currentIndex = guidedFlow.indexOf(lastCommand);
+    // Normalize lastCommand for case-insensitive comparison
+    const normalizedLastCommand = lastCommand.toLowerCase();
+    let currentIndex = guidedFlow.indexOf(normalizedLastCommand);
 
     // If the last command was a chain selection, find the index of the default chain
     // in the guided flow and use that as the current index
@@ -241,26 +250,31 @@ const Terminal = ({
     }
 
     // Special case handling
-    if (lastCommand === "clear") {
+    if (normalizedLastCommand === "clear") {
       // If user cleared the terminal, suggest starting again
       updateSuggestion("start", 0); // Start is the current step (yellow)
-    } else if (lastCommand === "help") {
+    } else if (normalizedLastCommand === "help") {
       // After help command, suggest start as the next action
       updateSuggestion("start", 0); // Start is the current step (yellow)
-    } else if (lastCommand === "explore-chains") {
+    } else if (normalizedLastCommand === "explore-chains") {
       // After completing the flow with explore-chains, suggest starting a new cycle
       updateSuggestion("start", 0); // Start is the current step (yellow)
-    } else if (lastCommand === "broadcast-tx") {
+    } else if (normalizedLastCommand === "broadcast-tx") {
       // After broadcast-tx, suggest explore-chains
       updateSuggestion("explore-chains", 5); // explore-chains is the current step (yellow)
-    } else if (lastCommand === "prepare-tx" && lastType === "success") {
+    } else if (
+      normalizedLastCommand === "prepare-tx" &&
+      lastType === "success"
+    ) {
       // After prepare-tx, suggest sign-tx
       updateSuggestion("sign-tx", 3); // sign-tx is the current step (yellow)
-    } else if (lastCommand === "sign-tx" && lastType === "success") {
+    } else if (normalizedLastCommand === "sign-tx" && lastType === "success") {
       // After sign-tx, suggest broadcast-tx
       updateSuggestion("broadcast-tx", 4); // broadcast-tx is the current step (yellow)
     } else if (
-      Object.keys(showroomChains).includes(lastCommand) &&
+      Object.keys(showroomChains).some(
+        (chainId) => chainId.toLowerCase() === lastCommand.toLowerCase()
+      ) &&
       lastType === "success"
     ) {
       // After successful chain selection, suggest prepare-tx
@@ -268,8 +282,22 @@ const Terminal = ({
     } else if (hasChainDetails) {
       // If the output shows chain details, suggest prepare-tx
       updateSuggestion("prepare-tx", 2); // prepare-tx is the current step (yellow)
+    } else if (
+      Object.keys(showroomChains).some(
+        (chainId) => chainId.toLowerCase() === lastCommand.toLowerCase()
+      ) &&
+      !hasChainDetails
+    ) {
+      // Chain selection in progress, but not completed yet
+      // Keep the current suggestion (which should be the chain selection)
+      updateSuggestion("", 1); // Chain selection is the current step (yellow)
+    } else if (normalizedLastCommand === "start" && lastType === "success") {
+      // After start command, suggest chain selection
+      // We'll suggest optimism as a default chain
+      updateSuggestion("optimism", 1); // Chain selection is the current step (yellow)
     } else if (inChainSelectionMode) {
-      // If we're in chain selection mode, suggest the default chain
+      // If we're in chain selection mode but the last command wasn't a valid chain
+      // Keep suggesting chain selection
       updateSuggestion("optimism", 1); // Chain selection is the current step (yellow)
     } else if (currentIndex >= 0 && currentIndex < guidedFlow.length - 1) {
       // If the last command is in our flow and not the last step, suggest the next one
@@ -277,11 +305,17 @@ const Terminal = ({
       let nextFlowStep = currentFlowStep; // Keep the current flow step by default
 
       // Update the flow step based on the last command
-      if (lastCommand === "start" && lastType === "success") {
+      if (normalizedLastCommand === "start" && lastType === "success") {
         nextFlowStep = 1; // Chain selection is the current step (yellow)
-      } else if (lastCommand === "prepare-tx" && lastType === "success") {
+      } else if (
+        normalizedLastCommand === "prepare-tx" &&
+        lastType === "success"
+      ) {
         nextFlowStep = 3; // Sign-tx is the current step (yellow)
-      } else if (lastCommand === "sign-tx" && lastType === "success") {
+      } else if (
+        normalizedLastCommand === "sign-tx" &&
+        lastType === "success"
+      ) {
         nextFlowStep = 4; // Broadcast-tx is the current step (yellow)
       }
 
@@ -297,18 +331,25 @@ const Terminal = ({
   const updateCurrentFlowStep = (command: string) => {
     let newStep = currentFlowStep;
 
+    // Normalize the command to lowercase for case-insensitive comparison
+    const normalizedCommand = command.toLowerCase();
+
     // Determine the step based on the command
-    if (command === "start") {
+    if (normalizedCommand === "start") {
       newStep = 0; // Start step
-    } else if (Object.keys(showroomChains).includes(command)) {
+    } else if (
+      Object.keys(showroomChains).some(
+        (chainId) => chainId.toLowerCase() === normalizedCommand
+      )
+    ) {
       newStep = 1; // Chain selection step
-    } else if (command === "prepare-tx") {
+    } else if (normalizedCommand === "prepare-tx") {
       newStep = 2; // Prepare transaction step
-    } else if (command === "sign-tx") {
+    } else if (normalizedCommand === "sign-tx") {
       newStep = 3; // Sign transaction step
-    } else if (command === "broadcast-tx") {
+    } else if (normalizedCommand === "broadcast-tx") {
       newStep = 4; // Broadcast transaction step
-    } else if (command === "explore-chains") {
+    } else if (normalizedCommand === "explore-chains") {
       // Only set to step 5 if the user has completed the previous steps
       if (workflowState.txHash) {
         newStep = 5; // Explore chains step (final step in guided flow)
@@ -323,9 +364,9 @@ const Terminal = ({
     if (
       newStep !== currentFlowStep &&
       (newStep >= currentFlowStep ||
-        command === "clear" ||
-        command === "start" ||
-        (command === "explore-chains" && !workflowState.txHash))
+        normalizedCommand === "clear" ||
+        normalizedCommand === "start" ||
+        (normalizedCommand === "explore-chains" && !workflowState.txHash))
     ) {
       setCurrentFlowStep(newStep);
       // Call the onProgressUpdate callback if provided
@@ -346,8 +387,11 @@ const Terminal = ({
 
     const id = commandCount.current++;
 
+    // Normalize command for case-insensitive comparison
+    const normalizedCommand = command.trim().toLowerCase();
+
     // For clear command, we don't need progressive updates
-    if (command.trim().toLowerCase() === "clear") {
+    if (normalizedCommand === "clear") {
       const result = await executeCommand(command);
 
       if (result.clearTerminal) {
@@ -377,32 +421,36 @@ const Terminal = ({
     } else {
       // Immediately update the flow step based on the command being executed
       // This ensures the progress indicator updates right after the user presses enter
-      if (command === "start") {
+      if (normalizedCommand === "start") {
         setCurrentFlowStep(0);
         if (onProgressUpdate) {
           onProgressUpdate(0);
         }
-      } else if (Object.keys(showroomChains).includes(command)) {
+      } else if (
+        Object.keys(showroomChains).some(
+          (chainId) => chainId.toLowerCase() === normalizedCommand
+        )
+      ) {
         setCurrentFlowStep(1);
         if (onProgressUpdate) {
           onProgressUpdate(1);
         }
-      } else if (command === "prepare-tx") {
+      } else if (normalizedCommand === "prepare-tx") {
         setCurrentFlowStep(2);
         if (onProgressUpdate) {
           onProgressUpdate(2);
         }
-      } else if (command === "sign-tx") {
+      } else if (normalizedCommand === "sign-tx") {
         setCurrentFlowStep(3);
         if (onProgressUpdate) {
           onProgressUpdate(3);
         }
-      } else if (command === "broadcast-tx") {
+      } else if (normalizedCommand === "broadcast-tx") {
         setCurrentFlowStep(4);
         if (onProgressUpdate) {
           onProgressUpdate(4);
         }
-      } else if (command === "explore-chains") {
+      } else if (normalizedCommand === "explore-chains") {
         // Only set to step 5 if the user has completed the previous steps
         if (workflowState.txHash) {
           setCurrentFlowStep(5);
@@ -447,7 +495,12 @@ const Terminal = ({
       });
 
       // Special handling for chain selection commands
-      if (Object.keys(showroomChains).includes(command) && result.success) {
+      if (
+        Object.keys(showroomChains).some(
+          (chainId) => chainId.toLowerCase() === normalizedCommand
+        ) &&
+        result.success
+      ) {
         // If this was a successful chain selection, update the flow step to prepare-tx (step 2)
         setTimeout(() => {
           setCurrentFlowStep(2);
@@ -463,7 +516,7 @@ const Terminal = ({
         }, 500); // Small delay to ensure the UI updates properly
       }
       // Special handling for prepare-tx command - directly update the flow step to 3 (sign-tx)
-      else if (command === "prepare-tx" && result.success) {
+      else if (normalizedCommand === "prepare-tx" && result.success) {
         // Update to step 3 (sign-tx is the next step)
         setTimeout(() => {
           setCurrentFlowStep(3);
@@ -476,7 +529,7 @@ const Terminal = ({
         }, 500); // Small delay to ensure the UI updates properly
       }
       // Special handling for sign-tx command - directly update the flow step to 4 (broadcast-tx)
-      else if (command === "sign-tx" && result.success) {
+      else if (normalizedCommand === "sign-tx" && result.success) {
         // Update to step 4 (broadcast-tx is the next step)
         setTimeout(() => {
           setCurrentFlowStep(4);
@@ -489,7 +542,7 @@ const Terminal = ({
         }, 500); // Small delay to ensure the UI updates properly
       }
       // Special handling for broadcast-tx command - directly update the flow step to 5 (explore-chains)
-      else if (command === "broadcast-tx" && result.success) {
+      else if (normalizedCommand === "broadcast-tx" && result.success) {
         // Update to step 5 (explore-chains is the next step)
         setTimeout(() => {
           setCurrentFlowStep(5);
@@ -502,7 +555,7 @@ const Terminal = ({
         }, 500); // Small delay to ensure the UI updates properly
       }
       // Special handling for explore-chains command
-      else if (command === "explore-chains" && result.success) {
+      else if (normalizedCommand === "explore-chains" && result.success) {
         // Update the flow step based on whether the user has completed the guided flow
         setTimeout(() => {
           if (workflowState.txHash) {
@@ -529,14 +582,14 @@ const Terminal = ({
       }
 
       // After broadcast-tx, suggest explore-chains
-      if (command === "broadcast-tx" && result.success) {
+      if (normalizedCommand === "broadcast-tx" && result.success) {
         setTimeout(() => {
           setSuggestedCommand("explore-chains");
         }, 1000);
       }
 
       // After explore-chains, suggest restarting the tutorial
-      if (command === "explore-chains" && result.success) {
+      if (normalizedCommand === "explore-chains" && result.success) {
         setTimeout(() => {
           // If we completed the guided flow, suggest starting a new one
           if (workflowState.txHash) {
