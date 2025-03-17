@@ -22,13 +22,6 @@ const Index = () => {
       {/* Header */}
       <header className="w-full py-6 px-8 flex justify-between items-center">
         <div className="flex items-center space-x-2">
-          <div className="h-8 w-8 rounded-md bg-primary flex items-center justify-center">
-            <span className="text-white font-semibold text-lg">&gt;_</span>
-          </div>
-          <h1 className="text-xl font-medium">Multichain Demo</h1>
-        </div>
-
-        <nav className="flex items-center space-x-4">
           <Button
             variant="ghost"
             onClick={() => navigate("/about")}
@@ -36,6 +29,9 @@ const Index = () => {
           >
             About
           </Button>
+        </div>
+
+        <nav className="flex items-center">
           <a
             href="https://github.com/AdamikHQ/adamik-tutorial"
             target="_blank"
@@ -51,14 +47,14 @@ const Index = () => {
       {/* Main Content */}
       <main className="flex-grow flex flex-col items-center justify-center p-4 lg:p-8">
         <div className="w-full max-w-[1400px] mx-auto">
-          <div className="text-center mb-8">
+          <div className="text-center mb-8 mt-6 md:mt-0">
             <div className="max-w-2xl mx-auto">
               <div className="flex justify-center mb-6">
                 <img
                   src="/SodotMultichainDemo.svg"
                   alt="Sodot Multi Chain Demo, powered by Adamik API"
                   className="max-w-full h-auto"
-                  style={{ marginTop: "-40px" }}
+                  style={{ marginTop: "10px" }}
                 />
               </div>
               <p className="text-lg text-gray-600 pt-2">
