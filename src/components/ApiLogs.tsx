@@ -24,20 +24,6 @@ const ApiLogs: React.FC<ApiLogsProps> = ({ logs, className }) => {
   const logsRef = useRef<HTMLDivElement>(null);
   const [expandedLogs, setExpandedLogs] = useState<Record<number, boolean>>({});
 
-  // Auto scroll to bottom when new logs are added
-  useEffect(() => {
-    if (logsRef.current) {
-      logsRef.current.scrollTop = logsRef.current.scrollHeight;
-    }
-  }, [logs]);
-
-  const toggleExpand = (id: number) => {
-    setExpandedLogs((prev) => ({
-      ...prev,
-      [id]: !prev[id],
-    }));
-  };
-
   const getStatusColor = (status: ApiLogEntry["status"]) => {
     switch (status) {
       case "pending":
@@ -77,65 +63,6 @@ const ApiLogs: React.FC<ApiLogsProps> = ({ logs, className }) => {
       default:
         return "bg-gray-600";
     }
-  };
-
-  // Function to highlight chainId and account address in the endpoint
-  const highlightEndpointParts = (endpoint: string) => {
-    // Handle Signer endpoints
-    if (endpoint.includes("/sodot-vertex")) {
-      // Match pattern like /sodot-vertex-{vertexId}/{curve}/{operation}
-      const regex = /\/sodot-vertex-(\d+)\/([^\/]+)\/([^\/]+)/;
-      const match = endpoint.match(regex);
-
-      if (match) {
-        const [fullMatch, vertexId, curve, operation] = match;
-        return (
-          <>
-            /signer-vertex-
-            <span className="highlight-chain">{vertexId}</span>/
-            <span className="highlight-address">{curve}</span>/
-            <span className="highlight-operation">{operation}</span>
-          </>
-        );
-      }
-    }
-
-    // Match pattern like /api/{chainId}/account/{address}/
-    const regex = /\/api\/([^\/]+)\/account\/([^\/]+)\//;
-    const match = endpoint.match(regex);
-
-    if (match) {
-      const [fullMatch, chainId, address] = match;
-      const parts = endpoint.split(fullMatch);
-
-      return (
-        <>
-          {parts[0]}
-          /api/
-          <span className="highlight-chain">{chainId}</span>
-          /account/
-          <span className="highlight-address">{address}</span>/{parts[1]}
-        </>
-      );
-    }
-
-    // Match pattern like /api/{chainId}/transaction/
-    const txRegex = /\/api\/([^\/]+)\/transaction\/([^\/]+)/;
-    const txMatch = endpoint.match(txRegex);
-
-    if (txMatch) {
-      const [fullMatch, chainId, operation] = txMatch;
-      return (
-        <>
-          /api/
-          <span className="highlight-chain">{chainId}</span>
-          /transaction/
-          <span className="highlight-operation">{operation}</span>
-        </>
-      );
-    }
-
-    return endpoint;
   };
 
   // Function to get a descriptive title for the API call
@@ -199,6 +126,150 @@ const ApiLogs: React.FC<ApiLogsProps> = ({ logs, className }) => {
     return "API Call";
   };
 
+  // Filter and deduplicate logs
+  const filteredLogs = React.useMemo(() => {
+    // Track the logs to keep
+    const result: ApiLogEntry[] = [];
+    const setupOperationIds = new Set<number>();
+
+    // Group signing operations by their approximate timestamp (7-second windows)
+    // This ensures different sign-tx commands are preserved
+    const signingGroups: Record<string, ApiLogEntry[]> = {};
+
+    // First pass: Group signing logs by time and mark setup logs
+    logs.forEach((log) => {
+      const description = getApiCallDescription(log);
+
+      // Group signing operations by timestamp
+      if (description === "Signing Transaction") {
+        // Create 7-second window identifier
+        const timeWindow = Math.floor(log.timestamp.getTime() / (1000 * 7));
+        const groupKey = `sign-${timeWindow}`;
+
+        if (!signingGroups[groupKey]) {
+          signingGroups[groupKey] = [];
+        }
+        signingGroups[groupKey].push(log);
+      }
+
+      // Skip setup logs entirely
+      if (description === "Setting up Secure Signing Environment") {
+        setupOperationIds.add(log.id);
+      }
+    });
+
+    // Find the best log from each signing group
+    const bestSigningLogs = new Set<number>();
+    Object.values(signingGroups).forEach((group) => {
+      // Choose the best log from this group (prefer the one with simple signature format)
+      let bestLog = group[0];
+      for (const log of group) {
+        if (
+          log.response &&
+          typeof log.response === "object" &&
+          "signature" in log.response
+        ) {
+          bestLog = log;
+          break;
+        }
+      }
+      bestSigningLogs.add(bestLog.id);
+    });
+
+    // Second pass: Build result array
+    logs.forEach((log) => {
+      // For signing logs, only include the best one from each time window
+      if (getApiCallDescription(log) === "Signing Transaction") {
+        if (!bestSigningLogs.has(log.id)) {
+          return;
+        }
+      }
+
+      // Skip setup logs
+      if (setupOperationIds.has(log.id)) {
+        return;
+      }
+
+      // Keep this log
+      result.push(log);
+    });
+
+    return result;
+  }, [logs]);
+
+  // Auto scroll to bottom when new logs are added
+  useEffect(() => {
+    if (logsRef.current) {
+      logsRef.current.scrollTop = logsRef.current.scrollHeight;
+    }
+  }, [filteredLogs]);
+
+  const toggleExpand = (id: number) => {
+    setExpandedLogs((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  };
+
+  // Function to highlight chainId and account address in the endpoint
+  const highlightEndpointParts = (endpoint: string) => {
+    // Handle Signer endpoints
+    if (endpoint.includes("/sodot-vertex")) {
+      // Match pattern like /sodot-vertex-{vertexId}/{curve}/{operation}
+      const regex = /\/sodot-vertex-(\d+)\/([^\/]+)\/([^\/]+)/;
+      const match = endpoint.match(regex);
+
+      if (match) {
+        const [fullMatch, vertexId, curve, operation] = match;
+        return (
+          <>
+            /signer-vertex-
+            <span className="highlight-chain">{vertexId}</span>/
+            <span className="highlight-address">{curve}</span>/
+            <span className="highlight-operation">{operation}</span>
+          </>
+        );
+      }
+    }
+
+    // Match pattern like /api/{chainId}/account/{address}/
+    const regex = /\/api\/([^\/]+)\/account\/([^\/]+)\//;
+    const match = endpoint.match(regex);
+
+    if (match) {
+      const [fullMatch, chainId, address] = match;
+      const parts = endpoint.split(fullMatch);
+
+      return (
+        <>
+          {parts[0]}
+          /api/
+          <span className="highlight-chain">{chainId}</span>
+          /account/
+          <span className="highlight-address">{address}</span>/{parts[1]}
+        </>
+      );
+    }
+
+    // Match pattern like /api/{chainId}/transaction/
+    const txRegex = /\/api\/([^\/]+)\/transaction\/([^\/]+)/;
+    const txMatch = endpoint.match(txRegex);
+
+    if (txMatch) {
+      const [fullMatch, chainId, operation] = txMatch;
+      return (
+        <>
+          /api/
+          <span className="highlight-chain">{chainId}</span>
+          /transaction/
+          <span className="highlight-operation">{operation}</span>
+        </>
+      );
+    }
+
+    return endpoint;
+  };
+
   return (
     <div
       className={cn(
@@ -211,7 +282,7 @@ const ApiLogs: React.FC<ApiLogsProps> = ({ logs, className }) => {
         <div className="terminal-button bg-yellow-500"></div>
         <div className="terminal-button bg-green-500"></div>
         <div className="ml-4 text-xs text-gray-400 flex-1 text-center">
-          API Logs
+          API & MPC Operations
         </div>
       </div>
 
@@ -219,12 +290,12 @@ const ApiLogs: React.FC<ApiLogsProps> = ({ logs, className }) => {
         ref={logsRef}
         className="terminal-content flex-1 p-4 overflow-y-auto"
       >
-        {logs.length === 0 ? (
+        {filteredLogs.length === 0 ? (
           <div className="text-gray-500 text-center py-4">
-            No API calls recorded yet. Interact with the terminal to see logs.
+            No operations recorded yet. Interact with the terminal to see logs.
           </div>
         ) : (
-          logs.map((log) => (
+          filteredLogs.map((log) => (
             <div
               key={log.id}
               className={cn(
@@ -245,6 +316,11 @@ const ApiLogs: React.FC<ApiLogsProps> = ({ logs, className }) => {
                 <span className="text-sm font-medium text-gray-200">
                   {getApiCallDescription(log)}
                 </span>
+                {log.provider === "Signer" && (
+                  <span className="ml-2 text-xs text-purple-400 bg-purple-400/10 px-2 py-0.5 rounded">
+                    Secure MPC
+                  </span>
+                )}
               </div>
 
               {/* Basic information - always visible */}
@@ -284,7 +360,7 @@ const ApiLogs: React.FC<ApiLogsProps> = ({ logs, className }) => {
                       : "text-gray-400 hover:text-gray-300"
                   )}
                   aria-label={
-                    expandedLogs[log.id] ? "Collapse details" : "Expand details"
+                    expandedLogs[log.id] ? "Hide details" : "Show details"
                   }
                 >
                   {expandedLogs[log.id] ? (
