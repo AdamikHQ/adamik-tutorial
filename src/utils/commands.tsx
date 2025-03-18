@@ -638,7 +638,7 @@ export const signTxCommand: Command = {
       if (apiLogsInstance) {
         logId = logApiCall(
           apiLogsInstance,
-          "Sodot",
+          "Signer",
           "/sodot-vertex-0/ecdsa/sign",
           "POST",
           encodedTx
