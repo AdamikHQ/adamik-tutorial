@@ -45,7 +45,7 @@ const ensureUrlFormat = (url: string): string => {
 export class SodotSigner implements BaseSigner {
   public chainId: string;
   public signerSpec: AdamikSignerSpec;
-  public signerName = Signer.SODOT;
+  public signerName = "Signer";
 
   // TODO: Make this configurable and extendable
   private SODOT_VERTICES = isProduction()
@@ -154,7 +154,7 @@ export class SodotSigner implements BaseSigner {
 
       if (this.signerSpec.curve === AdamikCurve.SECP256K1) {
         infoTerminal(
-          "please use VITE_SODOT_EXISTING_ECDSA_KEY_IDS to be able to reuse the same keys",
+          "Please save these key IDs for future use",
           this.signerName
         );
         await italicInfoTerminal(
@@ -164,7 +164,7 @@ export class SodotSigner implements BaseSigner {
         infoTerminal(`keyIds: ${this.keyIds}`, this.signerName);
       } else if (this.signerSpec.curve === AdamikCurve.ED25519) {
         infoTerminal(
-          "please use VITE_SODOT_EXISTING_ED25519_KEY_IDS to be able to reuse the same keys",
+          "Please save these key IDs for future use",
           this.signerName
         );
         await italicInfoTerminal(
@@ -202,11 +202,11 @@ export class SodotSigner implements BaseSigner {
     );
 
     if (!signature) {
-      errorTerminal("Failed to sign message with Sodot", this.signerName);
-      throw new Error("Failed to sign message with Vertex");
+      errorTerminal("Failed to sign message", this.signerName);
+      throw new Error("Failed to sign message");
     }
 
-    infoTerminal("Signature from SODOT:", this.signerName);
+    infoTerminal("Signature generated:", this.signerName);
     await italicInfoTerminal(JSON.stringify(signature, null, 2));
 
     if ("signature" in signature) {
@@ -247,11 +247,11 @@ export class SodotSigner implements BaseSigner {
     if (apiLogsInstance) {
       logId = logApiCall(
         apiLogsInstance,
-        "Sodot",
+        "Signer",
         apiUrl,
         "POST",
         requestBody,
-        "Create Signing Room"
+        "Setting up Secure Signing Environment"
       );
     }
 
@@ -350,11 +350,11 @@ export class SodotSigner implements BaseSigner {
     if (apiLogsInstance) {
       logId = logApiCall(
         apiLogsInstance,
-        "Sodot",
+        "Signer",
         apiUrl,
         "GET",
         undefined,
-        "Initialize Key Generation"
+        "Initializing Key Generation"
       );
     }
 
@@ -466,11 +466,11 @@ export class SodotSigner implements BaseSigner {
     if (apiLogsInstance) {
       logId = logApiCall(
         apiLogsInstance,
-        "Sodot",
+        "Signer",
         apiUrl,
         "POST",
         requestBody,
-        "Generate Key"
+        "Generating Secure Key"
       );
     }
 
@@ -631,11 +631,11 @@ export class SodotSigner implements BaseSigner {
     if (apiLogsInstance) {
       logId = logApiCall(
         apiLogsInstance,
-        "Sodot",
+        "Signer",
         apiUrl,
         "POST",
         body,
-        "Sign Transaction"
+        "Signing Transaction"
       );
     }
 
@@ -730,10 +730,10 @@ export class SodotSigner implements BaseSigner {
     hashAlgo?: string
   ) {
     // We create a room for signing.
-    infoTerminal("Creating room with Vertex...", this.signerName);
+    infoTerminal("Preparing to sign transaction...", this.signerName);
     const roomUuid = await this.createRoomWithVertex(0, this.n);
     // We tell all Vertex servers to particpate in signing the message.
-    infoTerminal("Signing message with Vertex...", this.signerName);
+    infoTerminal("Signing transaction...", this.signerName);
     const signatures = await Promise.all(
       keyIds.map(async (keyId, i) =>
         this.signWithVertex(
@@ -747,7 +747,7 @@ export class SodotSigner implements BaseSigner {
         )
       )
     );
-    infoTerminal("Message signed with Vertex.", this.signerName);
+    infoTerminal("Transaction successfully signed.", this.signerName);
     // We return only one of the signatures as these are identical.
     return signatures[0];
   }
@@ -793,11 +793,11 @@ export class SodotSigner implements BaseSigner {
     if (apiLogsInstance) {
       logId = logApiCall(
         apiLogsInstance,
-        "Sodot",
+        "Signer",
         apiUrl,
         "POST",
         requestBody,
-        "Derive Public Key"
+        "Retrieving Public Key"
       );
     }
 

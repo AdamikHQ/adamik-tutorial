@@ -51,15 +51,14 @@ const Index = () => {
             <div className="max-w-2xl mx-auto">
               <div className="flex justify-center mb-6">
                 <img
-                  src="/SodotMultichainDemo.svg"
-                  alt="Sodot Multi Chain Demo, powered by Adamik API"
+                  src="/AdamikMultichainDemo.svg"
+                  alt="Multichain Demo, powered by Adamik API"
                   className="max-w-full h-auto"
                   style={{ marginTop: "10px" }}
                 />
               </div>
               <p className="text-lg text-gray-600 pt-2">
-                Leverage Sodot's MPC technology to interact with over 60
-                blockchains
+                Interact with over 60 blockchains, with a single API
               </p>
             </div>
           </div>
@@ -92,7 +91,7 @@ const Index = () => {
 
       {/* Footer */}
       <footer className="w-full py-6 px-8 text-center text-sm text-gray-500">
-        © {new Date().getFullYear()} Sodot Multichain. All rights reserved.
+        © {new Date().getFullYear()} Multichain Demo. All rights reserved.
       </footer>
     </div>
   );

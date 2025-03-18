@@ -5,7 +5,7 @@ import { ChevronDown, ChevronRight } from "lucide-react";
 export interface ApiLogEntry {
   id: number;
   timestamp: Date;
-  provider: "Adamik" | "Sodot" | "System";
+  provider: "Adamik" | "Signer" | "System";
   endpoint: string;
   method: "GET" | "POST" | "PUT" | "DELETE";
   request?: any;
@@ -55,7 +55,7 @@ const ApiLogs: React.FC<ApiLogsProps> = ({ logs, className }) => {
     switch (provider) {
       case "Adamik":
         return "text-blue-400";
-      case "Sodot":
+      case "Signer":
         return "text-purple-400";
       case "System":
         return "text-gray-400";
@@ -81,7 +81,7 @@ const ApiLogs: React.FC<ApiLogsProps> = ({ logs, className }) => {
 
   // Function to highlight chainId and account address in the endpoint
   const highlightEndpointParts = (endpoint: string) => {
-    // Handle SODOT endpoints
+    // Handle Signer endpoints
     if (endpoint.includes("/sodot-vertex")) {
       // Match pattern like /sodot-vertex-{vertexId}/{curve}/{operation}
       const regex = /\/sodot-vertex-(\d+)\/([^\/]+)\/([^\/]+)/;
@@ -91,7 +91,7 @@ const ApiLogs: React.FC<ApiLogsProps> = ({ logs, className }) => {
         const [fullMatch, vertexId, curve, operation] = match;
         return (
           <>
-            /sodot-vertex-
+            /signer-vertex-
             <span className="highlight-chain">{vertexId}</span>/
             <span className="highlight-address">{curve}</span>/
             <span className="highlight-operation">{operation}</span>
@@ -147,22 +147,22 @@ const ApiLogs: React.FC<ApiLogsProps> = ({ logs, className }) => {
 
     const { endpoint, method } = log;
 
-    // Handle SODOT API calls
+    // Handle Signer API calls
     if (endpoint.includes("/sodot-vertex")) {
       if (endpoint.includes("/derive-pubkey")) {
-        return "Derive Public Key";
+        return "Retrieving Public Key";
       }
       if (endpoint.includes("/sign")) {
-        return "Sign Transaction";
+        return "Signing Transaction";
       }
       if (endpoint.includes("/keygen-init")) {
-        return "Initialize Key Generation";
+        return "Initializing Key Generation";
       }
       if (endpoint.includes("/keygen")) {
-        return "Generate Key";
+        return "Generating Secure Key";
       }
       if (endpoint.includes("/create-room")) {
-        return "Create Signing Room";
+        return "Setting up Secure Signing Environment";
       }
     }
 

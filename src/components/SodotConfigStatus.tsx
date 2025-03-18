@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from "react";
 import {
-  SODOT_CHECKING_MESSAGE,
-  SODOT_CONNECTED_MESSAGE,
-  SODOT_ERROR_MESSAGE,
+  SIGNER_CHECKING_MESSAGE,
+  SIGNER_CONNECTED_MESSAGE,
+  SIGNER_ERROR_MESSAGE,
 } from "../constants/messages";
 import { SodotSigner } from "../signers/Sodot";
 
-interface SodotConfigStatusProps {
+interface SignerConfigStatusProps {
   onConfigChecked: () => void;
 }
 
-const SodotConfigStatus: React.FC<SodotConfigStatusProps> = ({
+const SignerConfigStatus: React.FC<SignerConfigStatusProps> = ({
   onConfigChecked,
 }) => {
   const [status, setStatus] = useState<"checking" | "verified" | "error">(
@@ -18,9 +18,9 @@ const SodotConfigStatus: React.FC<SodotConfigStatusProps> = ({
   );
 
   useEffect(() => {
-    const checkSodotConfig = async () => {
+    const checkSignerConfig = async () => {
       try {
-        // Check if SODOT configuration is valid
+        // Check if signer configuration is valid
         const isValid = SodotSigner.isConfigValid();
 
         if (isValid) {
@@ -31,7 +31,7 @@ const SodotConfigStatus: React.FC<SodotConfigStatusProps> = ({
           setStatus("error");
         }
       } catch (error) {
-        console.error("SODOT configuration check failed:", error);
+        console.error("Signer configuration check failed:", error);
         setStatus("error");
       } finally {
         // Wait a moment before triggering the callback
@@ -41,16 +41,16 @@ const SodotConfigStatus: React.FC<SodotConfigStatusProps> = ({
       }
     };
 
-    checkSodotConfig();
+    checkSignerConfig();
   }, [onConfigChecked]);
 
   return (
     <div className="animate-text-fade-in opacity-0 text-terminal-muted mb-2">
-      {status === "checking" && SODOT_CHECKING_MESSAGE}
-      {status === "verified" && SODOT_CONNECTED_MESSAGE}
-      {status === "error" && SODOT_ERROR_MESSAGE}
+      {status === "checking" && SIGNER_CHECKING_MESSAGE}
+      {status === "verified" && SIGNER_CONNECTED_MESSAGE}
+      {status === "error" && SIGNER_ERROR_MESSAGE}
     </div>
   );
 };
 
-export default SodotConfigStatus;
+export default SignerConfigStatus;

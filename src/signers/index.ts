@@ -5,7 +5,7 @@ import { BaseSigner } from "./types";
 
 export enum Signer {
   LOCAL = "LOCAL MNEMONIC (UNSECURE)",
-  SODOT = "SODOT",
+  SODOT = "Secure Signer",
 }
 
 export const signerSelector = async (
