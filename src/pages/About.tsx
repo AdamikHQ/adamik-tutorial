@@ -9,21 +9,15 @@ const About = () => {
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-gray-50 to-gray-100">
       {/* Header */}
       <header className="w-full py-6 px-8 flex justify-between items-center">
-        <div className="flex items-center space-x-2">
-          <div className="h-8 w-8 rounded-md bg-primary flex items-center justify-center">
-            <span className="text-white font-semibold text-lg">&gt;_</span>
-          </div>
-          <h1 className="text-xl font-medium">Sodot Multichain Demo</h1>
-        </div>
+        <Button
+          variant="ghost"
+          onClick={() => navigate("/")}
+          className="text-sm font-medium hover:bg-gray-100"
+        >
+          Terminal
+        </Button>
 
-        <nav className="flex items-center space-x-4">
-          <Button
-            variant="ghost"
-            onClick={() => navigate("/")}
-            className="text-sm font-medium hover:bg-gray-100"
-          >
-            Terminal
-          </Button>
+        <nav className="flex items-center">
           <a
             href="https://github.com/AdamikHQ/adamik-tutorial"
             target="_blank"
