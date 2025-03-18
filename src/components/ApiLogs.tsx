@@ -1,6 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronRight,
+  Key,
+  Lock,
+  Shield,
+  Cpu,
+} from "lucide-react";
 
 export interface ApiLogEntry {
   id: number;
@@ -63,6 +70,27 @@ const ApiLogs: React.FC<ApiLogsProps> = ({ logs, className }) => {
       default:
         return "bg-gray-600";
     }
+  };
+
+  // Function to get the appropriate icon for operation type
+  const getOperationIcon = (log: ApiLogEntry) => {
+    const description = getApiCallDescription(log);
+
+    if (description === "Retrieving Public Key") {
+      return <Key size={16} className="text-yellow-400" />;
+    }
+    if (description === "Signing Transaction") {
+      return <Lock size={16} className="text-green-400" />;
+    }
+    if (
+      description.includes("Setting up") ||
+      description.includes("Initializing") ||
+      description.includes("Generating")
+    ) {
+      return <Shield size={16} className="text-blue-400" />;
+    }
+
+    return <Cpu size={16} className="text-gray-400" />;
   };
 
   // Function to get a descriptive title for the API call
@@ -138,6 +166,19 @@ const ApiLogs: React.FC<ApiLogsProps> = ({ logs, className }) => {
 
     // First pass: Group signing logs by time and mark setup logs
     logs.forEach((log) => {
+      // Replace any "Sodot" provider text that might be displayed
+      if (log.provider === "Signer" && log.endpoint.includes("/sodot-vertex")) {
+        // Create a shallow copy of the log to avoid mutating the original
+        const updatedLog = { ...log };
+
+        // This will be shown as "Secure Signer" instead of Sodot
+        if (updatedLog.message === "Sodot") {
+          updatedLog.message = "";
+        }
+
+        log = updatedLog;
+      }
+
       const description = getApiCallDescription(log);
 
       // Group signing operations by timestamp
@@ -223,7 +264,7 @@ const ApiLogs: React.FC<ApiLogsProps> = ({ logs, className }) => {
         const [fullMatch, vertexId, curve, operation] = match;
         return (
           <>
-            /signer-vertex-
+            /secure-mpc-
             <span className="highlight-chain">{vertexId}</span>/
             <span className="highlight-address">{curve}</span>/
             <span className="highlight-operation">{operation}</span>
@@ -295,120 +336,145 @@ const ApiLogs: React.FC<ApiLogsProps> = ({ logs, className }) => {
             No operations recorded yet. Interact with the terminal to see logs.
           </div>
         ) : (
-          filteredLogs.map((log) => (
-            <div
-              key={log.id}
-              className={cn(
-                "mb-4 p-3 border-l-2 border-gray-700 animate-text-fade-in opacity-0 bg-gray-900/50 rounded api-log-entry",
-                expandedLogs[log.id] ? "border-l-blue-500" : ""
-              )}
-            >
-              {/* API Call Description with Method Badge */}
-              <div className="flex items-center gap-2 mb-3">
-                <span
-                  className={cn(
-                    "px-2 py-0.5 rounded text-xs font-bold text-white",
-                    getMethodColor(log.method)
-                  )}
-                >
-                  {log.method}
-                </span>
-                <span className="text-sm font-medium text-gray-200">
-                  {getApiCallDescription(log)}
-                </span>
-                {log.provider === "Signer" && (
-                  <span className="ml-2 text-xs text-purple-400 bg-purple-400/10 px-2 py-0.5 rounded">
-                    Secure MPC
+          filteredLogs.map((log) => {
+            // Make a shallow copy of the log to display correctly
+            const displayLog = { ...log } as ApiLogEntry & { provider: string };
+            if (log.endpoint.includes("/sodot-vertex")) {
+              // Replace any "Sodot" text in the log values that might still appear
+              if ((displayLog as any).provider === "Sodot") {
+                displayLog.provider = "Signer";
+              }
+            }
+
+            return (
+              <div
+                key={log.id}
+                className={cn(
+                  "mb-4 p-3 border-l-2 border-gray-700 animate-text-fade-in opacity-0 bg-gray-900/50 rounded api-log-entry",
+                  expandedLogs[log.id] ? "border-l-blue-500" : ""
+                )}
+              >
+                {/* API Call Description with Method Badge and Operation Icon */}
+                <div className="flex items-center gap-2 mb-3">
+                  <span
+                    className={cn(
+                      "px-2 py-0.5 rounded text-xs font-bold text-white",
+                      getMethodColor(displayLog.method)
+                    )}
+                  >
+                    {displayLog.method}
                   </span>
+                  {displayLog.provider === "Signer" ? (
+                    <div className="flex items-center gap-1.5">
+                      {getOperationIcon(displayLog)}
+                      <span className="text-sm font-medium text-gray-200">
+                        {getApiCallDescription(displayLog)}
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="text-sm font-medium text-gray-200">
+                      {getApiCallDescription(displayLog)}
+                    </span>
+                  )}
+                  {displayLog.provider === "Signer" && (
+                    <span className="ml-2 text-xs text-purple-400 bg-purple-400/10 px-2 py-0.5 rounded">
+                      Secure MPC
+                    </span>
+                  )}
+                </div>
+
+                {/* Basic information - always visible */}
+                <div className="flex justify-between items-start mb-1">
+                  <span
+                    className={cn(
+                      "font-bold",
+                      getProviderColor(displayLog.provider)
+                    )}
+                  >
+                    {displayLog.provider === "Signer"
+                      ? "Secure Signer"
+                      : displayLog.provider}
+                  </span>
+                  <span className="text-xs text-gray-400">
+                    {displayLog.timestamp.toLocaleTimeString()}
+                  </span>
+                </div>
+
+                <div className="text-xs text-gray-400 mb-2">
+                  {highlightEndpointParts(displayLog.endpoint)}
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div
+                    className={cn(
+                      "text-sm font-semibold",
+                      getStatusColor(displayLog.status)
+                    )}
+                  >
+                    {displayLog.status.toUpperCase()}
+                    {displayLog.message ? `: ${displayLog.message}` : ""}
+                  </div>
+
+                  {/* Expand/collapse button */}
+                  <button
+                    onClick={() => toggleExpand(log.id)}
+                    className={cn(
+                      "flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors",
+                      expandedLogs[log.id]
+                        ? "text-blue-400 hover:text-blue-300"
+                        : "text-gray-400 hover:text-gray-300"
+                    )}
+                    aria-label={
+                      expandedLogs[log.id] ? "Hide details" : "Show details"
+                    }
+                  >
+                    {expandedLogs[log.id] ? (
+                      <>
+                        <ChevronDown size={14} />
+                        <span>Hide details</span>
+                      </>
+                    ) : (
+                      <>
+                        <ChevronRight size={14} />
+                        <span>Show details</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {/* Expandable details */}
+                {expandedLogs[log.id] && (
+                  <div className="mt-3 space-y-3 border-t border-gray-700 pt-3">
+                    {displayLog.request && (
+                      <div>
+                        <div className="text-xs text-gray-400 mb-1 font-semibold">
+                          Request:
+                        </div>
+                        <pre className="bg-gray-800 p-2 rounded text-xs overflow-x-auto text-gray-300">
+                          {typeof displayLog.request === "string"
+                            ? displayLog.request
+                            : JSON.stringify(displayLog.request, null, 2)}
+                        </pre>
+                      </div>
+                    )}
+
+                    {displayLog.response && (
+                      <div>
+                        <div className="text-xs text-gray-400 mb-1 font-semibold">
+                          Response:
+                        </div>
+                        <pre className="bg-gray-800 p-2 rounded text-xs overflow-x-auto text-gray-300">
+                          {typeof displayLog.response === "string"
+                            ? displayLog.response
+                            : JSON.stringify(displayLog.response, null, 2)}
+                        </pre>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
-
-              {/* Basic information - always visible */}
-              <div className="flex justify-between items-start mb-1">
-                <span
-                  className={cn("font-bold", getProviderColor(log.provider))}
-                >
-                  {log.provider}
-                </span>
-                <span className="text-xs text-gray-400">
-                  {log.timestamp.toLocaleTimeString()}
-                </span>
-              </div>
-
-              <div className="text-xs text-gray-400 mb-2">
-                {highlightEndpointParts(log.endpoint)}
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div
-                  className={cn(
-                    "text-sm font-semibold",
-                    getStatusColor(log.status)
-                  )}
-                >
-                  {log.status.toUpperCase()}
-                  {log.message ? `: ${log.message}` : ""}
-                </div>
-
-                {/* Expand/collapse button */}
-                <button
-                  onClick={() => toggleExpand(log.id)}
-                  className={cn(
-                    "flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors",
-                    expandedLogs[log.id]
-                      ? "text-blue-400 hover:text-blue-300"
-                      : "text-gray-400 hover:text-gray-300"
-                  )}
-                  aria-label={
-                    expandedLogs[log.id] ? "Hide details" : "Show details"
-                  }
-                >
-                  {expandedLogs[log.id] ? (
-                    <>
-                      <ChevronDown size={14} />
-                      <span>Hide details</span>
-                    </>
-                  ) : (
-                    <>
-                      <ChevronRight size={14} />
-                      <span>Show details</span>
-                    </>
-                  )}
-                </button>
-              </div>
-
-              {/* Expandable details */}
-              {expandedLogs[log.id] && (
-                <div className="mt-3 space-y-3 border-t border-gray-700 pt-3">
-                  {log.request && (
-                    <div>
-                      <div className="text-xs text-gray-400 mb-1 font-semibold">
-                        Request:
-                      </div>
-                      <pre className="bg-gray-800 p-2 rounded text-xs overflow-x-auto text-gray-300">
-                        {typeof log.request === "string"
-                          ? log.request
-                          : JSON.stringify(log.request, null, 2)}
-                      </pre>
-                    </div>
-                  )}
-
-                  {log.response && (
-                    <div>
-                      <div className="text-xs text-gray-400 mb-1 font-semibold">
-                        Response:
-                      </div>
-                      <pre className="bg-gray-800 p-2 rounded text-xs overflow-x-auto text-gray-300">
-                        {typeof log.response === "string"
-                          ? log.response
-                          : JSON.stringify(log.response, null, 2)}
-                      </pre>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          ))
+            );
+          })
         )}
       </div>
     </div>
