@@ -33,7 +33,7 @@ const Index = () => {
 
         <nav className="flex items-center">
           <a
-            href="https://github.com/AdamikHQ/adamik-tutorial"
+            href="https://github.com/AdamikHQ/adamik-tutorial/tree/sodot-signer"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center w-14 h-14 rounded-md hover:bg-gray-100"

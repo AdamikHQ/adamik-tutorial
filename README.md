@@ -41,7 +41,7 @@ Follow these steps to run the project locally:
 
 ```sh
 # Step 1: Clone the repository
-git clone https://github.com/AdamikHQ/adamik-tutorial
+git clone https://github.com/AdamikHQ/adamik-tutorial/tree/sodot-signer
 
 # Step 2: Navigate to the project directory
 cd adamik-tutorial
