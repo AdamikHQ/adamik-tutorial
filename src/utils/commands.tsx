@@ -873,15 +873,15 @@ export const exploreChainsCommand: Command = {
                   blockchain network.
                 </p>
                 <p className="text-gray-300 mb-3">
-                  Explore the source code of this application on GitHub:
+                  Ready to build your own multi-chain application?
                 </p>
                 <a
-                  href="https://github.com/AdamikHQ/adamik-tutorial"
+                  href="https://dashboard.adamik.io"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-block px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                 >
-                  View on GitHub
+                  Get your Free API key
                 </a>
                 <p className="mt-4 text-gray-400 text-sm">
                   Type <span className="font-mono text-green-400">start</span>{" "}
