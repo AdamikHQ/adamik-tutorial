@@ -18,7 +18,7 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-b from-gray-50 to-gray-100">
+    <div className="min-h-screen flex flex-col">
       {/* Header */}
       <header className="w-full py-6 px-8 flex justify-between items-center">
         {/* About button and GitHub logo removed */}
