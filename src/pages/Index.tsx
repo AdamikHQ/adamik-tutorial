@@ -18,18 +18,18 @@ const Index = () => {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-[#FAFCFF]">
       {/* Header */}
-      <header className="w-full py-6 px-8 flex justify-between items-center">
+      <header className="w-full py-2 px-8 flex justify-between items-center">
         {/* About button and GitHub logo removed */}
       </header>
 
       {/* Main Content */}
-      <main className="flex-grow flex flex-col items-center justify-center p-4 lg:p-8">
+      <main className="flex-grow flex flex-col items-center p-4">
         <div className="w-full max-w-[1400px] mx-auto">
           <TerminalLayout
             welcomeMessage={DEFAULT_WELCOME_MESSAGE}
-            className="shadow-2xl"
+            className=""
           />
 
           {/* Tip text removed */}
