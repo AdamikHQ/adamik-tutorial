@@ -58,10 +58,30 @@ const TerminalLayout: React.FC<TerminalLayoutProps> = ({
 
   return (
     <div className="relative">
-      {/* Progress indicators removed */}
+      {/* Tutorial Progress Indicator - positioned absolutely to the left (desktop and larger laptops) */}
+      <div className="hidden lg:block absolute left-[-10rem] xl:left-[-12rem] 2xl:left-[-13rem] top-6 w-40 xl:w-44 2xl:w-48">
+        <div className="sticky top-6">
+          <VerticalProgressIndicator
+            currentStep={currentStep}
+            steps={progressSteps}
+            tutorialCompleted={tutorialCompleted}
+            onResetTutorial={handleResetTutorial}
+          />
+        </div>
+      </div>
 
       {/* Main content container */}
       <div className="flex flex-col">
+        {/* Horizontal Progress Indicator for mobile and smaller screens */}
+        <div className="lg:hidden mb-6 px-4 md:px-6">
+          <HorizontalProgressIndicator
+            currentStep={currentStep}
+            steps={progressSteps}
+            tutorialCompleted={tutorialCompleted}
+            onResetTutorial={handleResetTutorial}
+          />
+        </div>
+
         {/* Main Terminal Container */}
         <div className={cn("w-full mx-auto", className)}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">

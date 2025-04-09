@@ -863,17 +863,16 @@ export const exploreChainsCommand: Command = {
               // First-time completion - show congratulations message
               <div className="mt-6 p-4 border border-blue-500 rounded-md bg-blue-900/20">
                 <p className="text-blue-300 font-medium mb-2">
-                  🎉 Congratulations on successfully interacting with the{" "}
+                  🎉 You just broadcasted a transaction on{" "}
                   {showroomChains[workflowState.selectedChain]?.name ||
                     workflowState.selectedChain}{" "}
                   blockchain!
                 </p>
                 <p className="text-gray-300 mb-3">
-                  Try the flow again to see how easily you can scale across any
-                  blockchain network.
+                  Want to try another chain? Type start to switch.
                 </p>
                 <p className="text-gray-300 mb-3">
-                  Ready to build your own multi-chain application?
+                  Or ready to build your own multi-chain application?
                 </p>
                 <a
                   href="https://dashboard.adamik.io"
