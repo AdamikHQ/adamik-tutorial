@@ -21,27 +21,7 @@ const Index = () => {
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-gray-50 to-gray-100">
       {/* Header */}
       <header className="w-full py-6 px-8 flex justify-between items-center">
-        <div className="flex items-center space-x-2">
-          <Button
-            variant="ghost"
-            onClick={() => navigate("/about")}
-            className="text-sm font-medium hover:bg-gray-100"
-          >
-            About
-          </Button>
-        </div>
-
-        <nav className="flex items-center">
-          <a
-            href="https://github.com/AdamikHQ/adamik-tutorial"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center w-14 h-14 rounded-md hover:bg-gray-100"
-          >
-            <img src="/github-mark.svg" alt="GitHub" className="h-12 w-12" />
-            <span className="sr-only">GitHub</span>
-          </a>
-        </nav>
+        {/* About button and GitHub logo removed */}
       </header>
 
       {/* Main Content */}
@@ -68,31 +48,11 @@ const Index = () => {
             className="shadow-2xl"
           />
 
-          <div className="mt-8 text-sm text-center text-gray-500">
-            Tip: Type{" "}
-            <span className="font-mono">
-              <span className="text-purple-500">$</span>{" "}
-              <span className="text-green-500 font-bold">help</span>
-            </span>{" "}
-            to see all available commands,{" "}
-            <span className="font-mono">
-              <span className="text-purple-500">$</span>{" "}
-              <span className="text-blue-500 font-bold">start</span>
-            </span>{" "}
-            to begin exploring blockchain networks, or{" "}
-            <span className="font-mono">
-              <span className="text-purple-500">$</span>{" "}
-              <span className="text-red-500 font-bold">clear</span>
-            </span>{" "}
-            to clear the terminal.
-          </div>
+          {/* Tip text removed */}
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="w-full py-6 px-8 text-center text-sm text-gray-500">
-        © {new Date().getFullYear()} Multichain Demo. All rights reserved.
-      </footer>
+      {/* Footer removed */}
     </div>
   );
 };
