@@ -863,7 +863,7 @@ export const exploreChainsCommand: Command = {
               // First-time completion - show congratulations message
               <div className="mt-6 p-4 border border-blue-500 rounded-md bg-blue-900/20">
                 <p className="text-blue-300 font-medium mb-2">
-                  🎉 You just broadcasted a transaction on{" "}
+                  🎉 You just completed the Adamik tutorial on{" "}
                   {showroomChains[workflowState.selectedChain]?.name ||
                     workflowState.selectedChain}{" "}
                   blockchain!
