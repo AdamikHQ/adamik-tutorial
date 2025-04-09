@@ -27,22 +27,6 @@ const Index = () => {
       {/* Main Content */}
       <main className="flex-grow flex flex-col items-center justify-center p-4 lg:p-8">
         <div className="w-full max-w-[1400px] mx-auto">
-          <div className="text-center mb-8 mt-6 md:mt-0">
-            <div className="max-w-2xl mx-auto">
-              <div className="flex justify-center mb-6">
-                <img
-                  src="/AdamikMultichainDemo.svg"
-                  alt="Multichain Demo, powered by Adamik API"
-                  className="max-w-full h-auto"
-                  style={{ marginTop: "10px" }}
-                />
-              </div>
-              <p className="text-lg text-gray-600 pt-2">
-                Interact with over 60 blockchains, with a single API
-              </p>
-            </div>
-          </div>
-
           <TerminalLayout
             welcomeMessage={DEFAULT_WELCOME_MESSAGE}
             className="shadow-2xl"
