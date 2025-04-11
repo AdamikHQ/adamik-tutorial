@@ -44,27 +44,14 @@ const TerminalLayout: React.FC<TerminalLayoutProps> = ({
     setCurrentStep(step);
   };
 
-  const handleResetTutorial = () => {
-    // Clear the tutorial completed flag
-    sessionStorage.removeItem("tutorialCompleted");
-    setTutorialCompleted(false);
-
-    // Reset the current step
-    setCurrentStep(0);
-
-    // Reset the workflow state by refreshing the page
-    window.location.reload();
-  };
-
   return (
     <div className="relative max-w-[1400px] mx-auto">
       {/* Horizontal Progress Indicator for all screen sizes */}
-      <div className="mb-4 md:mb-6 px-4 md:px-0">
+      <div className="mb-2 px-4 md:px-0">
         <HorizontalProgressIndicator
           currentStep={currentStep}
           steps={progressSteps}
           tutorialCompleted={tutorialCompleted}
-          onResetTutorial={handleResetTutorial}
         />
       </div>
 
