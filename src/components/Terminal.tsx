@@ -32,12 +32,28 @@ interface CommandEntry {
 
 // Define the complete flow with commands and descriptions
 export const guidedFlowStepsWithDescriptions = [
-  { step: "start", description: "Start tutorial" },
-  { step: "chain-selection", description: "Select chain" },
-  { step: "prepare-tx", description: "Prepare tx" },
-  { step: "sign-tx", description: "Sign tx" },
-  { step: "broadcast-tx", description: "Broadcast tx" },
-  { step: "explore-chains", description: "Explore chains" },
+  { step: "start", description: "Start tutorial", shortDescription: "Start" },
+  {
+    step: "chain-selection",
+    description: "Select chain",
+    shortDescription: "Select",
+  },
+  {
+    step: "prepare-tx",
+    description: "Prepare tx",
+    shortDescription: "Prepare",
+  },
+  { step: "sign-tx", description: "Sign tx", shortDescription: "Sign" },
+  {
+    step: "broadcast-tx",
+    description: "Broadcast tx",
+    shortDescription: "Broadcast",
+  },
+  {
+    step: "explore-chains",
+    description: "Explore chains",
+    shortDescription: "Explore",
+  },
 ];
 
 // Derive the simple array of step descriptions when needed

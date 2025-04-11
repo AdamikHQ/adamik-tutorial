@@ -26,6 +26,7 @@ const TerminalLayout: React.FC<TerminalLayoutProps> = ({
   const progressSteps = guidedFlowStepsWithDescriptions.map((item) => ({
     command: item.step,
     description: item.description,
+    shortDescription: item.shortDescription,
   }));
 
   // Initialize the API logs instance

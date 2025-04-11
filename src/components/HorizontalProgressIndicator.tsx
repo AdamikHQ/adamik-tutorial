@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 interface ProgressStep {
   command: string;
   description: string;
+  shortDescription?: string; // Add short description for mobile
 }
 
 interface HorizontalProgressIndicatorProps {
@@ -16,16 +17,42 @@ interface HorizontalProgressIndicatorProps {
 const HorizontalProgressIndicator: React.FC<
   HorizontalProgressIndicatorProps
 > = ({ currentStep, steps, className, tutorialCompleted = false }) => {
-  // Helper function to get step description
+  // Helper function to get step description based on screen size
   const getStepDescription = (
     step: ProgressStep | string,
-    index: number
+    index: number,
+    isMobile: boolean = false
   ): string => {
     if (typeof step === "string") {
       return step;
     }
+    // Use short description for mobile if available
+    if (isMobile && step.shortDescription) {
+      return step.shortDescription;
+    }
     return step.description;
   };
+
+  // Detect if we're on a small screen
+  const [isMobile, setIsMobile] = React.useState(false);
+
+  // Update mobile state when window resizes
+  React.useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768); // Increased from 640 to 768 to catch more medium-sized screens
+    };
+
+    // Set initial value
+    handleResize();
+
+    // Add event listener
+    window.addEventListener("resize", handleResize);
+
+    // Clean up
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   return (
     <div className={cn("horizontal-progress-indicator w-full", className)}>
@@ -128,38 +155,49 @@ const HorizontalProgressIndicator: React.FC<
             {steps.map((step, index) => {
               const isActive = index === currentStep;
               const isCompleted = index < currentStep;
+              const isLastStep = index === steps.length - 1;
 
               // Calculate the horizontal position - use the exact same positioning as the circles
               const leftPosition =
                 index === 0
                   ? "0%"
-                  : index === steps.length - 1
+                  : isLastStep
                   ? "100%"
                   : `${(index / (steps.length - 1)) * 100}%`;
+
+              // Adjust width based on screen size and position
+              const labelWidth = isLastStep
+                ? isMobile
+                  ? "4.5rem"
+                  : "6rem" // Wider for "Explore chains"
+                : isMobile
+                ? "3.5rem"
+                : "5rem";
 
               return (
                 <div
                   key={`label-${index}`}
-                  className="absolute"
+                  className={cn(
+                    "absolute transition-all duration-300",
+                    isMobile && index > 0 && index < steps.length - 1
+                      ? "opacity-0 sm:opacity-100" // Hide middle labels on mobile
+                      : ""
+                  )}
                   style={{
                     left: leftPosition,
                     transform:
                       index === 0
                         ? "translateX(0)"
-                        : index === steps.length - 1
+                        : isLastStep
                         ? "translateX(-100%)"
                         : "translateX(-50%)",
-                    width: "5rem",
+                    width: labelWidth,
                     textAlign:
-                      index === 0
-                        ? "left"
-                        : index === steps.length - 1
-                        ? "right"
-                        : "center",
+                      index === 0 ? "left" : isLastStep ? "right" : "center",
                   }}
                 >
                   <span
-                    className={`text-xs transition-colors duration-150 block whitespace-nowrap
+                    className={`text-xs transition-colors duration-150 block whitespace-nowrap truncate
                       ${
                         isActive
                           ? "text-blue-700 font-medium"
@@ -169,7 +207,7 @@ const HorizontalProgressIndicator: React.FC<
                       }
                     `}
                   >
-                    {getStepDescription(step, index)}
+                    {getStepDescription(step, index, isMobile)}
                   </span>
                 </div>
               );
