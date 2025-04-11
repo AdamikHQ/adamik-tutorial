@@ -39,25 +39,25 @@ const HorizontalProgressIndicator: React.FC<
 
   return (
     <div className={cn("horizontal-progress-indicator w-full", className)}>
-      <div className="flex justify-between items-center mb-2">
+      <div className="flex justify-between items-center mb-3">
         <div className="flex items-center">
-          <h3 className="text-sm font-semibold text-gray-700">
+          <h3 className="text-base md:text-lg font-semibold text-gray-800">
             Tutorial Progress
           </h3>
           {tutorialCompleted && (
             <div className="flex items-center">
-              <span className="ml-2 text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">
+              <span className="ml-2 text-xs md:text-sm bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
                 Completed
               </span>
               {onResetTutorial && (
                 <button
                   onClick={onResetTutorial}
-                  className="ml-2 text-xs text-gray-500 hover:text-gray-700 flex items-center"
+                  className="ml-2 text-xs md:text-sm text-blue-600 hover:text-blue-800 flex items-center"
                   title="Reset Tutorial"
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-3 w-3"
+                    className="h-3.5 w-3.5 mr-1"
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -69,25 +69,26 @@ const HorizontalProgressIndicator: React.FC<
                       d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
                     />
                   </svg>
+                  Reset
                 </button>
               )}
             </div>
           )}
         </div>
-        <span className="text-xs text-gray-500">
+        <span className="text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded">
           Step {currentStep + 1} of {steps.length}
         </span>
       </div>
 
-      {/* Progress bar */}
+      {/* Progress bar - larger and more prominent */}
       <div
         className={cn(
-          "relative h-2 bg-gray-200 rounded-full overflow-hidden mb-4",
-          tutorialCompleted ? "opacity-60" : ""
+          "relative h-2.5 md:h-3 bg-gray-200 rounded-full overflow-hidden mb-5",
+          tutorialCompleted ? "opacity-70" : ""
         )}
       >
         <div
-          className="absolute h-full bg-yellow-500 rounded-full transition-all duration-300 ease-in-out"
+          className="absolute h-full bg-blue-600 rounded-full transition-all duration-300 ease-in-out"
           style={{ width: `${progressPercentage}%` }}
         ></div>
       </div>
@@ -95,12 +96,12 @@ const HorizontalProgressIndicator: React.FC<
       {/* Current step description - for very small screens only */}
       <div
         className={cn(
-          "flex items-center sm:hidden",
+          "flex items-center sm:hidden mb-3",
           tutorialCompleted ? "opacity-60" : ""
         )}
       >
         <div
-          className={`w-5 h-5 rounded-full flex items-center justify-center mr-3 
+          className={`w-6 h-6 rounded-full flex items-center justify-center mr-3 
             bg-yellow-500 border-2 border-yellow-400 ring-2 ring-yellow-100`}
         >
           <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
@@ -115,8 +116,8 @@ const HorizontalProgressIndicator: React.FC<
       {/* Step indicators with descriptions - grid layout for better alignment */}
       <div
         className={cn(
-          "hidden sm:grid grid-cols-6 gap-1 mt-4",
-          tutorialCompleted ? "opacity-60" : ""
+          "hidden sm:grid grid-cols-6 gap-1 mt-1",
+          tutorialCompleted ? "opacity-70" : ""
         )}
       >
         {steps.map((step, index) => {
@@ -126,11 +127,11 @@ const HorizontalProgressIndicator: React.FC<
           return (
             <div key={index} className="flex flex-col items-center">
               {/* Step description with fixed height */}
-              <div className="h-10 flex items-center justify-center mb-2 w-full px-1">
+              <div className="h-12 flex items-center justify-center mb-2 w-full px-1">
                 <span
-                  className={`text-xs text-center line-clamp-2 ${
+                  className={`text-xs md:text-sm text-center line-clamp-2 ${
                     isActive
-                      ? "text-yellow-600 font-medium"
+                      ? "text-blue-700 font-medium"
                       : isCompleted
                       ? "text-green-600"
                       : "text-gray-500"
@@ -140,11 +141,11 @@ const HorizontalProgressIndicator: React.FC<
                 </span>
               </div>
 
-              {/* Step indicator */}
+              {/* Step indicator - larger circles for desktop */}
               <div
-                className={`w-4 h-4 rounded-full flex items-center justify-center mb-1 ${
+                className={`w-5 h-5 md:w-6 md:h-6 rounded-full flex items-center justify-center mb-1 ${
                   isActive
-                    ? "bg-yellow-500 border-2 border-yellow-400"
+                    ? "bg-blue-600 border-2 border-blue-400 ring-1 ring-blue-200"
                     : isCompleted
                     ? "bg-green-500 border-2 border-green-400"
                     : "bg-gray-200 border-2 border-gray-300"
@@ -153,7 +154,7 @@ const HorizontalProgressIndicator: React.FC<
                 {isCompleted && (
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-2 w-2 text-white"
+                    className="h-3 w-3 text-white"
                     viewBox="0 0 20 20"
                     fill="currentColor"
                   >
@@ -165,15 +166,15 @@ const HorizontalProgressIndicator: React.FC<
                   </svg>
                 )}
                 {isActive && (
-                  <div className="w-1 h-1 bg-white rounded-full"></div>
+                  <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
                 )}
               </div>
 
               {/* Step number */}
               <span
-                className={`text-xs text-center ${
+                className={`text-xs md:text-sm font-medium text-center ${
                   isActive
-                    ? "text-yellow-600 font-medium"
+                    ? "text-blue-700"
                     : isCompleted
                     ? "text-green-600"
                     : "text-gray-500"
@@ -189,8 +190,8 @@ const HorizontalProgressIndicator: React.FC<
       {/* Simplified step indicators for very small screens */}
       <div
         className={cn(
-          "grid sm:hidden grid-cols-6 gap-1 mt-4",
-          tutorialCompleted ? "opacity-60" : ""
+          "grid sm:hidden grid-cols-6 gap-1 mt-1",
+          tutorialCompleted ? "opacity-70" : ""
         )}
       >
         {steps.map((step, index) => {
@@ -200,9 +201,9 @@ const HorizontalProgressIndicator: React.FC<
           return (
             <div key={index} className="flex flex-col items-center">
               <div
-                className={`w-4 h-4 rounded-full flex items-center justify-center mb-1 ${
+                className={`w-5 h-5 rounded-full flex items-center justify-center mb-1 ${
                   isActive
-                    ? "bg-yellow-500 border-2 border-yellow-400"
+                    ? "bg-blue-600 border-2 border-blue-400"
                     : isCompleted
                     ? "bg-green-500 border-2 border-green-400"
                     : "bg-gray-200 border-2 border-gray-300"
@@ -211,7 +212,7 @@ const HorizontalProgressIndicator: React.FC<
                 {isCompleted && (
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-2 w-2 text-white"
+                    className="h-2.5 w-2.5 text-white"
                     viewBox="0 0 20 20"
                     fill="currentColor"
                   >
@@ -223,13 +224,13 @@ const HorizontalProgressIndicator: React.FC<
                   </svg>
                 )}
                 {isActive && (
-                  <div className="w-1 h-1 bg-white rounded-full"></div>
+                  <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
                 )}
               </div>
               <span
-                className={`text-xs text-center ${
+                className={`text-xs font-medium text-center ${
                   isActive
-                    ? "text-yellow-600 font-medium"
+                    ? "text-blue-700"
                     : isCompleted
                     ? "text-green-600"
                     : "text-gray-500"

@@ -57,42 +57,28 @@ const TerminalLayout: React.FC<TerminalLayoutProps> = ({
   };
 
   return (
-    <div className="relative">
-      {/* Tutorial Progress Indicator - positioned absolutely to the left (desktop and larger laptops) */}
-      <div className="hidden lg:block absolute left-[-10rem] xl:left-[-12rem] 2xl:left-[-13rem] top-6 w-40 xl:w-44 2xl:w-48">
-        <div className="sticky top-6">
-          <VerticalProgressIndicator
-            currentStep={currentStep}
-            steps={progressSteps}
-            tutorialCompleted={tutorialCompleted}
-            onResetTutorial={handleResetTutorial}
-          />
-        </div>
+    <div className="relative max-w-[1400px] mx-auto">
+      {/* Horizontal Progress Indicator for all screen sizes */}
+      <div className="mb-4 md:mb-6 px-4 md:px-0">
+        <HorizontalProgressIndicator
+          currentStep={currentStep}
+          steps={progressSteps}
+          tutorialCompleted={tutorialCompleted}
+          onResetTutorial={handleResetTutorial}
+        />
       </div>
 
-      {/* Main content container */}
-      <div className="flex flex-col">
-        {/* Horizontal Progress Indicator for mobile and smaller screens */}
-        <div className="lg:hidden mb-6 px-4 md:px-6">
-          <HorizontalProgressIndicator
-            currentStep={currentStep}
-            steps={progressSteps}
-            tutorialCompleted={tutorialCompleted}
-            onResetTutorial={handleResetTutorial}
+      {/* Main Terminal Container */}
+      <div className={cn("w-full mx-auto", className)}>
+        {/* Desktop View - Two columns side by side */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+          <Terminal
+            onProgressUpdate={handleProgressUpdate}
+            className="h-[70vh]"
+            welcomeMessage={welcomeMessage}
+            initialCommands={initialCommands}
           />
-        </div>
-
-        {/* Main Terminal Container */}
-        <div className={cn("w-full mx-auto", className)}>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-            <Terminal
-              onProgressUpdate={handleProgressUpdate}
-              className="h-[80vh]"
-              welcomeMessage={welcomeMessage}
-              initialCommands={initialCommands}
-            />
-            <ApiLogs logs={apiLogs.logs} className="h-[80vh]" />
-          </div>
+          <ApiLogs logs={apiLogs.logs} className="h-[70vh]" />
         </div>
       </div>
     </div>
