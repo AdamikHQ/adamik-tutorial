@@ -41,7 +41,7 @@ const CommandLine: React.FC<CommandLineProps> = ({
 
   useEffect(() => {
     // Focus input when component mounts
-    inputRef.current?.focus();
+    //inputRef.current?.focus();
   }, []);
 
   const handleClick = () => {

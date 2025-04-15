@@ -195,7 +195,7 @@ const Terminal = forwardRef<
     // Focus input on mount and when clicking terminal
     useEffect(() => {
       if (signerConfigChecked) {
-        inputRef.current?.focus();
+        //inputRef.current?.focus();
       }
     }, [signerConfigChecked]);
 
