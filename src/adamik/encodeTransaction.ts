@@ -48,7 +48,7 @@ export const encodeTransaction = async ({
   let logId = 0;
   if (apiLogsInstance) {
     const apiUrl =
-      import.meta.env.VITE_ADAMIK_API_URL || "https://api-staging.adamik.io";
+      import.meta.env.VITE_ADAMIK_API_URL || "https://api.adamik.io";
     const url = `${apiUrl}/api/${chainId}/transaction/encode`;
 
     logId = logApiCall(
@@ -62,7 +62,7 @@ export const encodeTransaction = async ({
 
   try {
     const apiUrl =
-      import.meta.env.VITE_ADAMIK_API_URL || "https://api-staging.adamik.io";
+      import.meta.env.VITE_ADAMIK_API_URL || "https://api.adamik.io";
     const apiKey = import.meta.env.VITE_ADAMIK_API_KEY;
 
     if (!apiKey) {
