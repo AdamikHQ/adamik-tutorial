@@ -153,6 +153,12 @@ const ApiLogs: React.FC<ApiLogsProps> = ({ logs, className }) => {
       if (endpoint.includes("/get-public-key")) {
         return "Get Public Key";
       }
+      if (endpoint.includes("/get-wallet-accounts")) {
+        return "Get Wallet Accounts";
+      }
+      if (endpoint.includes("/create-wallet-accounts")) {
+        return "Create Wallet Account";
+      }
     }
 
     // Handle Adamik API calls

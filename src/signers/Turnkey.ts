@@ -12,6 +12,8 @@ import {
 } from "../utils";
 import { Signer } from "./index";
 import { BaseSigner } from "./types";
+import { apiLogsInstance } from "../adamik/apiLogsManager";
+import { logApiCall, logApiResponse } from "../contexts/ApiLogsContext";
 
 export class TurnkeySigner implements BaseSigner {
   private turnkeyClient: Turnkey;
@@ -69,48 +71,127 @@ export class TurnkeySigner implements BaseSigner {
 
   async getPubkey(): Promise<string> {
     console.log("TURNKEY WALLET ID", import.meta.env.VITE_TURNKEY_WALLET_ID);
-    const { accounts } = await this.turnkeyClient
-      .apiClient()
-      .getWalletAccounts({
+
+    // Log the API call to get wallet accounts
+    let getAccountsLogId = -1;
+    if (apiLogsInstance) {
+      const requestData = {
         walletId: import.meta.env.VITE_TURNKEY_WALLET_ID as string,
-        paginationOptions: {
-          limit: "100",
-        },
-      });
+        paginationOptions: { limit: "100" },
+      };
+      getAccountsLogId = logApiCall(
+        apiLogsInstance,
+        "Turnkey",
+        "/turnkey/get-wallet-accounts",
+        "POST",
+        requestData,
+        "Get Wallet Accounts"
+      );
+    }
 
-    const accountCompressed = accounts.find(
-      (account) =>
-        account.curve ===
-          this.convertAdamikCurveToTurnkeyCurve(this.signerSpec.curve) &&
-        getCoinTypeFromDerivationPath(account.path) ===
-          Number(this.signerSpec.coinType) &&
-        account.addressFormat === "ADDRESS_FORMAT_COMPRESSED"
-    );
-
-    if (!accountCompressed) {
-      const createAccount = await this.turnkeyClient
+    try {
+      const { accounts } = await this.turnkeyClient
         .apiClient()
-        .createWalletAccounts({
+        .getWalletAccounts({
           walletId: import.meta.env.VITE_TURNKEY_WALLET_ID as string,
-          accounts: [
-            {
-              curve: this.convertAdamikCurveToTurnkeyCurve(
-                this.signerSpec.curve
-              ),
-              path: `m/44'/${this.signerSpec.coinType}'/0'/0/0`,
-              pathFormat: "PATH_FORMAT_BIP32",
-              addressFormat: "ADDRESS_FORMAT_COMPRESSED",
-            },
-          ],
+          paginationOptions: {
+            limit: "100",
+          },
         });
 
-      this.pubKey = createAccount.addresses[0];
+      // Log the successful response
+      if (apiLogsInstance && getAccountsLogId !== -1) {
+        logApiResponse(apiLogsInstance, getAccountsLogId, { accounts });
+      }
 
-      return createAccount.addresses[0];
+      const accountCompressed = accounts.find(
+        (account) =>
+          account.curve ===
+            this.convertAdamikCurveToTurnkeyCurve(this.signerSpec.curve) &&
+          getCoinTypeFromDerivationPath(account.path) ===
+            Number(this.signerSpec.coinType) &&
+          account.addressFormat === "ADDRESS_FORMAT_COMPRESSED"
+      );
+
+      if (!accountCompressed) {
+        // Log the API call to create wallet accounts
+        let createAccountLogId = -1;
+        if (apiLogsInstance) {
+          const requestData = {
+            walletId: import.meta.env.VITE_TURNKEY_WALLET_ID as string,
+            accounts: [
+              {
+                curve: this.convertAdamikCurveToTurnkeyCurve(
+                  this.signerSpec.curve
+                ),
+                path: `m/44'/${this.signerSpec.coinType}'/0'/0/0`,
+                pathFormat: "PATH_FORMAT_BIP32",
+                addressFormat: "ADDRESS_FORMAT_COMPRESSED",
+              },
+            ],
+          };
+          createAccountLogId = logApiCall(
+            apiLogsInstance,
+            "Turnkey",
+            "/turnkey/create-wallet-accounts",
+            "POST",
+            requestData,
+            "Create Wallet Account"
+          );
+        }
+
+        try {
+          const createAccount = await this.turnkeyClient
+            .apiClient()
+            .createWalletAccounts({
+              walletId: import.meta.env.VITE_TURNKEY_WALLET_ID as string,
+              accounts: [
+                {
+                  curve: this.convertAdamikCurveToTurnkeyCurve(
+                    this.signerSpec.curve
+                  ),
+                  path: `m/44'/${this.signerSpec.coinType}'/0'/0/0`,
+                  pathFormat: "PATH_FORMAT_BIP32",
+                  addressFormat: "ADDRESS_FORMAT_COMPRESSED",
+                },
+              ],
+            });
+
+          // Log the successful response
+          if (apiLogsInstance && createAccountLogId !== -1) {
+            logApiResponse(apiLogsInstance, createAccountLogId, createAccount);
+          }
+
+          this.pubKey = createAccount.addresses[0];
+          return createAccount.addresses[0];
+        } catch (error) {
+          // Log the error response
+          if (apiLogsInstance && createAccountLogId !== -1) {
+            logApiResponse(
+              apiLogsInstance,
+              createAccountLogId,
+              { error: (error as Error).message },
+              true
+            );
+          }
+          throw error;
+        }
+      }
+
+      this.pubKey = accountCompressed.address;
+      return accountCompressed.address;
+    } catch (error) {
+      // Log the error response
+      if (apiLogsInstance && getAccountsLogId !== -1) {
+        logApiResponse(
+          apiLogsInstance,
+          getAccountsLogId,
+          { error: (error as Error).message },
+          true
+        );
+      }
+      throw error;
     }
-    this.pubKey = accountCompressed.address;
-
-    return accountCompressed.address;
   }
 
   private convertHashFunctionToTurnkeyHashFunction(
