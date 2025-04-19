@@ -89,7 +89,7 @@ const Terminal = forwardRef<
     const [suggestedCommand, setSuggestedCommand] = useState("");
     const inputRef = useRef<HTMLInputElement>(null);
     const [signerConfigChecked, setSignerConfigChecked] =
-      useState<boolean>(false);
+      useState<boolean>(true);
     const [currentFlowStep, setCurrentFlowStep] = useState<number>(0); // Start is the current step (yellow)
     const [isProcessingCommand, setIsProcessingCommand] =
       useState<boolean>(false); // Track if a command is processing
@@ -797,11 +797,13 @@ const Terminal = forwardRef<
           ref={terminalRef}
           className="terminal-content flex-1 p-4 overflow-y-auto"
         >
+          {/* Commented out config check to allow immediate terminal use
           {!signerConfigChecked && (
             <SodotConfigStatus onConfigChecked={handleConfigChecked} />
           )}
+          */}
 
-          {signerConfigChecked && showWelcomeMessage && (
+          {showWelcomeMessage && (
             <div
               key="welcome-message"
               className="animate-text-fade-in opacity-0 text-terminal-muted mb-2"
@@ -820,7 +822,7 @@ const Terminal = forwardRef<
             </div>
           ))}
 
-          {signerConfigChecked && !isProcessingCommand && (
+          {!isProcessingCommand && (
             <CommandLine
               value={currentCommand}
               onChange={setCurrentCommand}
