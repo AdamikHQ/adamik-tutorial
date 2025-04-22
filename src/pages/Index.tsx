@@ -87,6 +87,30 @@ const Index = () => {
             </span>{" "}
             to clear the terminal.
           </div>
+
+          <div className="mt-6 pt-6 border-t border-gray-800 text-center">
+            <p className="text-sm text-gray-400 mb-3">
+              Ready to explore multi-chain development for your project?
+            </p>
+            <div className="flex justify-center space-x-4">
+              <a
+                href="https://adamik.io/contact"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+              >
+                Contact us
+              </a>
+              <a
+                href="https://calendly.com/roman-j94"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 text-sm font-medium text-blue-500 bg-blue-100 bg-opacity-10 rounded-md hover:bg-opacity-20 transition-colors"
+              >
+                Schedule a demo
+              </a>
+            </div>
+          </div>
         </div>
       </main>
 
