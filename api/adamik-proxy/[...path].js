@@ -72,24 +72,7 @@ export default async function handler(req, res) {
       typeof data === "string" ? data.substring(0, 100) + "..." : data
     );
 
-    // Set the status code and send the response
-    res.status(response.status);
-
-    // Set response headers
-    for (const [key, value] of response.headers.entries()) {
-      if (!["transfer-encoding", "connection"].includes(key.toLowerCase())) {
-        res.setHeader(key, value);
-      }
-    }
-
-    // Send the response
-    if (typeof data === "string") {
-      res.send(data);
-    } else {
-      res.json(data);
-    }
-
-    return res;
+    return res.status(response.status).json(data);
   } catch (error) {
     console.error("Proxy error:", error);
     res.status(500).json({
