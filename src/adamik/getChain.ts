@@ -1,4 +1,4 @@
-import { adamikAPIKey, adamikURL } from "@/utils/utils";
+import { adamikAPIKey, adamikURL, isProduction } from "@/utils/utils";
 import { logApiCall, logApiResponse } from "../contexts/ApiLogsContext";
 import { apiLogsInstance } from "./apiLogsManager";
 import { AdamikChain } from "./types";
@@ -13,7 +13,7 @@ export const adamikGetChain = async (chainId: string): Promise<AdamikChain> => {
     const apiKey = adamikAPIKey();
     const apiBaseUrl = adamikURL();
 
-    if (!apiKey || !apiBaseUrl) {
+    if ((!isProduction() && !apiKey) || !apiBaseUrl) {
       throw new Error(
         "Missing API configuration. Please check your environment variables."
       );
