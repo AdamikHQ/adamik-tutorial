@@ -34,6 +34,18 @@ export default async function handler(req, res) {
       });
     }
 
+    const curve = path.split("/")[1];
+    let keyIds = [];
+    if (curve === "ecdsa") {
+      keyIds = process.env[`SODOT_EXISTING_ECDSA_KEY_IDS`].split(",");
+    } else if (curve === "ed25519") {
+      keyIds = process.env[`SODOT_EXISTING_ED25519_KEY_IDS`].split(",");
+    }
+
+    if (body.key_id) {
+      body.key_id = keyIds[vertexNumber];
+    }
+
     // Parse the request body if it's a POST, PUT, or PATCH request
     let body;
     if (["POST", "PUT", "PATCH"].includes(req.method)) {
