@@ -1,3 +1,4 @@
+import { adamikAPIKey, adamikURL } from "@/utils/utils";
 import { errorTerminal } from "../utils";
 import { AdamikAPIError, AdamikTransactionDetails } from "./types";
 
@@ -5,9 +6,9 @@ export const getTransactionDetails = async (
   chainId: string,
   transactionId: string
 ): Promise<AdamikTransactionDetails | undefined> => {
-  if (!process.env.ADAMIK_API_BASE_URL) {
+  if (!adamikURL()) {
     errorTerminal(
-      "ADAMIK_API_BASE_URL is not defined in environment variables",
+      "VITE_ADAMIK_API_BASE_URL is not defined in environment variables",
       "Adamik"
     );
     return;
@@ -16,11 +17,11 @@ export const getTransactionDetails = async (
   try {
     // Fetch transaction details using Adamik API
     const response = await fetch(
-      `${process.env.ADAMIK_API_BASE_URL}/api/${chainId}/transaction/${transactionId}`,
+      `${adamikURL()}/api/${chainId}/transaction/${transactionId}`,
       {
         method: "GET",
         headers: {
-          Authorization: process.env.ADAMIK_API_KEY!,
+          Authorization: adamikAPIKey(),
           "Content-Type": "application/json",
         },
       }

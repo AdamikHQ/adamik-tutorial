@@ -1,5 +1,10 @@
 import { logApiCall, logApiResponse } from "../contexts/ApiLogsContext";
-import { errorTerminal, infoTerminal } from "../utils/utils";
+import {
+  adamikAPIKey,
+  adamikURL,
+  errorTerminal,
+  infoTerminal,
+} from "../utils/utils";
 import { apiLogsInstance } from "./apiLogsManager";
 import {
   AdamikAPIError,
@@ -41,9 +46,8 @@ export const broadcastTransaction = async (
   }
 
   try {
-    const apiUrl =
-      import.meta.env.VITE_ADAMIK_API_URL || "https://api-staging.adamik.io";
-    const apiKey = import.meta.env.VITE_ADAMIK_API_KEY;
+    const apiUrl = adamikURL();
+    const apiKey = adamikAPIKey();
 
     if (!apiKey) {
       throw new Error("ADAMIK API key is not set");

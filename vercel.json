@@ -27,6 +27,10 @@
       "dest": "/api/sodot-proxy/[...path].js"
     },
     {
+      "src": "/api/adamik-proxy",
+      "dest": "/api/adamik-proxy/[...path].js"
+    },
+    {
       "src": "/(.*)",
       "dest": "/$1"
     }

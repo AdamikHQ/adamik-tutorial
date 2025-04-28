@@ -1,6 +1,7 @@
-import { AdamikChain } from "./types";
+import { adamikAPIKey, adamikURL } from "@/utils/utils";
 import { logApiCall, logApiResponse } from "../contexts/ApiLogsContext";
 import { apiLogsInstance } from "./apiLogsManager";
+import { AdamikChain } from "./types";
 
 /**
  * Fetches information for a specific blockchain by its chainId
@@ -9,8 +10,8 @@ import { apiLogsInstance } from "./apiLogsManager";
  */
 export const adamikGetChain = async (chainId: string): Promise<AdamikChain> => {
   try {
-    const apiKey = import.meta.env.VITE_ADAMIK_API_KEY;
-    const apiBaseUrl = import.meta.env.VITE_ADAMIK_API_BASE_URL;
+    const apiKey = adamikAPIKey();
+    const apiBaseUrl = adamikURL();
 
     if (!apiKey || !apiBaseUrl) {
       throw new Error(

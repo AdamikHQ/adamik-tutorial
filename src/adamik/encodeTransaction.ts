@@ -1,5 +1,10 @@
 import { logApiCall, logApiResponse } from "../contexts/ApiLogsContext";
-import { errorTerminal, infoTerminal } from "../utils/utils";
+import {
+  adamikAPIKey,
+  adamikURL,
+  errorTerminal,
+  infoTerminal,
+} from "../utils/utils";
 import { apiLogsInstance } from "./apiLogsManager";
 import { AdamikAPIError, AdamikTransactionEncodeResponse } from "./types";
 
@@ -47,9 +52,7 @@ export const encodeTransaction = async ({
   // Log API call
   let logId = 0;
   if (apiLogsInstance) {
-    const apiUrl =
-      import.meta.env.VITE_ADAMIK_API_BASE_URL ||
-      "https://api-staging.adamik.io";
+    const apiUrl = adamikURL();
     const url = `${apiUrl}/api/${chainId}/transaction/encode`;
 
     logId = logApiCall(
@@ -62,14 +65,8 @@ export const encodeTransaction = async ({
   }
 
   try {
-    const apiUrl =
-      import.meta.env.VITE_ADAMIK_API_BASE_URL ||
-      "https://api-staging.adamik.io";
-    const apiKey = import.meta.env.VITE_ADAMIK_API_KEY;
-
-    if (!apiKey) {
-      throw new Error("ADAMIK API key is not set");
-    }
+    const apiUrl = adamikURL();
+    const apiKey = adamikAPIKey();
 
     const postTransactionEncode = await fetch(
       `${apiUrl}/api/${chainId}/transaction/encode`,

@@ -1,13 +1,11 @@
-import { AdamikBalance } from "./types";
+import { adamikURL } from "@/utils/utils";
 import { logApiCall, logApiResponse } from "../contexts/ApiLogsContext";
 import { apiLogsInstance } from "./apiLogsManager";
 
 export const getAccountState = async (chainId: string, accountId: string) => {
   try {
     // Log the API call
-    const apiUrl = `${
-      import.meta.env.VITE_ADAMIK_API_BASE_URL
-    }/api/${chainId}/account/${accountId}/state`;
+    const apiUrl = `${adamikURL()}/api/${chainId}/account/${accountId}/state`;
     let logId = -1;
 
     if (apiLogsInstance) {
