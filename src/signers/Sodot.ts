@@ -94,12 +94,13 @@ export class SodotSigner implements BaseSigner {
       case AdamikCurve.SECP256K1:
         this.keyIds = isProduction()
           ? ["dummy", "dummy1", "dummy2"] // Note: we need to tricks production because it will be hanlde by proxy
-          : import.meta.env.SODOT_EXISTING_ECDSA_KEY_IDS?.split(",") || [];
+          : import.meta.env.VITE_SODOT_EXISTING_ECDSA_KEY_IDS?.split(",") || [];
         break;
       case AdamikCurve.ED25519:
         this.keyIds = isProduction()
           ? ["dummy", "dummy1", "dummy2"] // Note: we need to tricks production because it will be hanlde by proxy
-          : import.meta.env.SODOT_EXISTING_ED25519_KEY_IDS?.split(",") || [];
+          : import.meta.env.VITE_SODOT_EXISTING_ED25519_KEY_IDS?.split(",") ||
+            [];
         break;
       default:
         throw new Error(`Unsupported curve: ${signerSpec.curve}`);

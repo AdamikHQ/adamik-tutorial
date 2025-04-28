@@ -1,6 +1,6 @@
+import { logApiCall, logApiResponse } from "../contexts/ApiLogsContext";
 import { errorTerminal, infoTerminal } from "../utils/utils";
 import { apiLogsInstance } from "./apiLogsManager";
-import { logApiCall, logApiResponse } from "../contexts/ApiLogsContext";
 import {
   AdamikAPIError,
   AdamikBroadcastResponse,
@@ -27,7 +27,8 @@ export const broadcastTransaction = async (
   let logId = 0;
   if (apiLogsInstance) {
     const apiUrl =
-      import.meta.env.VITE_ADAMIK_API_URL || "https://api-staging.adamik.io";
+      import.meta.env.VITE_ADAMIK_API_BASE_URL ||
+      "https://api-staging.adamik.io";
     const url = `${apiUrl}/api/${chainId}/transaction/broadcast`;
 
     logId = logApiCall(
