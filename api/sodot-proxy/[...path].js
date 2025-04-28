@@ -42,10 +42,6 @@ export default async function handler(req, res) {
       keyIds = process.env[`SODOT_EXISTING_ED25519_KEY_IDS`].split(",");
     }
 
-    if (body.key_id) {
-      body.key_id = keyIds[vertexNumber];
-    }
-
     // Parse the request body if it's a POST, PUT, or PATCH request
     let body;
     if (["POST", "PUT", "PATCH"].includes(req.method)) {
@@ -63,6 +59,10 @@ export default async function handler(req, res) {
     console.log(`Proxying request to: ${targetUrl}`);
     console.log(`Request method: ${req.method}`);
     console.log(`Request body:`, body);
+
+    if (body && body.key_id) {
+      body.key_id = keyIds[vertexNumber];
+    }
 
     // Forward the request to the SODOT vertex
     const response = await fetch(targetUrl, {
