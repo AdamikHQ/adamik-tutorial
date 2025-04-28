@@ -49,10 +49,6 @@ export const broadcastTransaction = async (
     const apiUrl = adamikURL();
     const apiKey = adamikAPIKey();
 
-    if (!apiKey) {
-      throw new Error("ADAMIK API key is not set");
-    }
-
     // Broadcast the transaction using Adamik API
     const broadcastResponse = await fetch(
       `${apiUrl}/api/${chainId}/transaction/broadcast`,
