@@ -1,13 +1,13 @@
-import React, { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import {
   ChevronDown,
   ChevronRight,
+  Cpu,
   Key,
   Lock,
   Shield,
-  Cpu,
 } from "lucide-react";
+import React, { useEffect, useRef, useState } from "react";
 
 export interface ApiLogEntry {
   id: number;
@@ -121,7 +121,6 @@ const ApiLogs: React.FC<ApiLogsProps> = ({ logs, className }) => {
       }
     }
 
-    // Handle Adamik API calls
     if (endpoint.includes("/api/chains") && !endpoint.includes("/chains/")) {
       return "Fetching all blockchain networks";
     }
