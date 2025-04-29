@@ -2,26 +2,31 @@ import { json } from "micro";
 
 export default async function handler(req, res) {
   try {
-    // Extract vertex number from query parameter
-    const vertexNumber = req.query.vertex;
-    if (vertexNumber === undefined) {
-      return res.status(400).json({ error: "Missing vertex parameter" });
+    // Get the path from the URL path segments
+    let path = "";
+    if (req.query.path) {
+      // Handle both array and string cases
+      if (Array.isArray(req.query.path)) {
+        path = `/${req.query.path.join("/")}`;
+      } else if (typeof req.query.path === "string") {
+        path = `/${req.query.path}`;
+      }
     }
+
+    console.log(`Path segments:`, req.query.path);
+    console.log(`Constructed path: ${path}`);
 
     // Get the environment variables for the vertex
-    const vertexUrl = process.env[`SODOT_VERTEX_URL_${vertexNumber}`];
-    const apiKey = process.env[`SODOT_VERTEX_API_KEY_${vertexNumber}`];
+    const apiKey = process.env[`ADAMIK_API_KEY`];
+    const apiBaseUrl = process.env[`ADAMIK_API_BASE_URL`];
 
-    if (!vertexUrl || !apiKey) {
+    if (!apiKey) {
       return res.status(500).json({
-        error: `Missing environment variables for vertex ${vertexNumber}`,
-        vertexUrl: !!vertexUrl,
+        error: `Missing environment variables for adamik proxy`,
         apiKey: !!apiKey,
+        apiBaseUrl: !!apiBaseUrl,
       });
     }
-
-    // Get the path from the URL (everything after /api/sodot-proxy)
-    const path = req.url.split("/api/sodot-proxy")[1] || "";
 
     // Parse the request body if it's a POST, PUT, or PATCH request
     let body;
@@ -35,11 +40,11 @@ export default async function handler(req, res) {
       }
     }
 
-    // Construct the full URL to the SODOT vertex
-    const targetUrl = `${vertexUrl}${path}`;
+    // Construct the full URL to the adamik proxy
+    const targetUrl = `${apiBaseUrl}${path}`;
     console.log(`Proxying request to: ${targetUrl}`);
-    console.log(`Method: ${req.method}`);
-    console.log(`Body: ${JSON.stringify(body)}`);
+    console.log(`Request method: ${req.method}`);
+    console.log(`Request body:`, body);
 
     // Forward the request to the SODOT vertex
     const response = await fetch(targetUrl, {
@@ -52,8 +57,8 @@ export default async function handler(req, res) {
     });
 
     // Get the response data
-    let data;
     const contentType = response.headers.get("content-type");
+    let data;
 
     if (contentType && contentType.includes("application/json")) {
       data = await response.json();
@@ -63,14 +68,14 @@ export default async function handler(req, res) {
 
     console.log(`Response status: ${response.status}`);
     console.log(
-      `Response data: ${typeof data === "string" ? data : JSON.stringify(data)}`
+      `Response data:`,
+      typeof data === "string" ? data.substring(0, 100) + "..." : data
     );
 
-    // Return the response
     return res.status(response.status).json(data);
   } catch (error) {
     console.error("Proxy error:", error);
-    return res.status(500).json({
+    res.status(500).json({
       error: "Internal Server Error",
       message: error.message,
       stack: error.stack,

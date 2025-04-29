@@ -1,3 +1,4 @@
+import { adamikAPIKey, adamikURL } from "@/utils/utils";
 import { errorTerminal } from "../utils";
 import { AdamikAPIError, AdamikTransactionEncodeResponse } from "./types";
 
@@ -19,11 +20,11 @@ export const deployAccount = async ({
   };
 
   const deployTransactionEncode = await fetch(
-    `${process.env.ADAMIK_API_BASE_URL}/api/${chainId}/transaction/encode`,
+    `${adamikURL()}/api/${chainId}/transaction/encode`,
     {
       method: "POST",
       headers: {
-        Authorization: process.env.ADAMIK_API_KEY!,
+        Authorization: adamikAPIKey(),
         "Content-Type": "application/json",
       },
       body: JSON.stringify(requestBody),
