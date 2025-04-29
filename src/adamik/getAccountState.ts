@@ -1,4 +1,4 @@
-import { adamikURL } from "@/utils/utils";
+import { adamikAPIKey, adamikURL } from "@/utils/utils";
 import { logApiCall, logApiResponse } from "../contexts/ApiLogsContext";
 import { apiLogsInstance } from "./apiLogsManager";
 
@@ -20,7 +20,7 @@ export const getAccountState = async (chainId: string, accountId: string) => {
     const response = await fetch(apiUrl, {
       method: "GET",
       headers: {
-        Authorization: import.meta.env.VITE_ADAMIK_API_KEY!,
+        Authorization: adamikAPIKey(),
         "Content-Type": "application/json",
       },
     });
