@@ -23,8 +23,8 @@ export default async function handler(req, res) {
     console.log(`Constructed path: ${path}`);
 
     // Get the environment variables for the vertex
-    const vertexUrl = process.env[`VITE_SODOT_VERTEX_URL_${vertexNumber}`];
-    const apiKey = process.env[`VITE_SODOT_VERTEX_API_KEY_${vertexNumber}`];
+    const vertexUrl = process.env[`SODOT_VERTEX_URL_${vertexNumber}`];
+    const apiKey = process.env[`SODOT_VERTEX_API_KEY_${vertexNumber}`];
 
     if (!vertexUrl || !apiKey) {
       return res.status(500).json({
@@ -32,6 +32,14 @@ export default async function handler(req, res) {
         vertexUrl: !!vertexUrl,
         apiKey: !!apiKey,
       });
+    }
+
+    const curve = path.split("/")[1];
+    let keyIds = [];
+    if (curve === "ecdsa") {
+      keyIds = process.env[`SODOT_EXISTING_ECDSA_KEY_IDS`].split(",");
+    } else if (curve === "ed25519") {
+      keyIds = process.env[`SODOT_EXISTING_ED25519_KEY_IDS`].split(",");
     }
 
     // Parse the request body if it's a POST, PUT, or PATCH request
@@ -51,6 +59,10 @@ export default async function handler(req, res) {
     console.log(`Proxying request to: ${targetUrl}`);
     console.log(`Request method: ${req.method}`);
     console.log(`Request body:`, body);
+
+    if (body && body.key_id) {
+      body.key_id = keyIds[vertexNumber];
+    }
 
     // Forward the request to the SODOT vertex
     const response = await fetch(targetUrl, {

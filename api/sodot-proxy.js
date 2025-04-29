@@ -26,8 +26,8 @@ export default async function handler(req, res) {
     }
 
     // Get the environment variables for the vertex
-    const vertexUrl = process.env[`VITE_SODOT_VERTEX_URL_${vertexNumber}`];
-    const apiKey = process.env[`VITE_SODOT_VERTEX_API_KEY_${vertexNumber}`];
+    const vertexUrl = process.env[`SODOT_VERTEX_URL_${vertexNumber}`];
+    const apiKey = process.env[`SODOT_VERTEX_API_KEY_${vertexNumber}`];
 
     if (!vertexUrl || !apiKey) {
       return res.status(500).json({

@@ -1,14 +1,15 @@
-import { AdamikAPIError, AdamikEncodePubkeyToAddressResponse } from "./types";
+import { adamikAPIKey, adamikURL } from "@/utils/utils";
 import { logApiCall, logApiResponse } from "../contexts/ApiLogsContext";
 import { apiLogsInstance } from "./apiLogsManager";
+import { AdamikAPIError, AdamikEncodePubkeyToAddressResponse } from "./types";
 
 export const encodePubKeyToAddress = async (
   pubKey: string,
   chainId: string
 ) => {
   try {
-    const apiBaseUrl = import.meta.env.VITE_ADAMIK_API_BASE_URL;
-    const apiKey = import.meta.env.VITE_ADAMIK_API_KEY;
+    const apiBaseUrl = adamikURL();
+    const apiKey = adamikAPIKey();
 
     // Log the API call
     const apiUrl = `${apiBaseUrl}/api/${chainId}/address/encode`;

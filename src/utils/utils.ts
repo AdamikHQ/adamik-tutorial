@@ -1,6 +1,5 @@
 import picocolors from "picocolors";
 import { AdamikSignatureFormat } from "../adamik/types";
-import { Signer } from "../signers";
 
 /**
  * Formats a number to remove trailing zeros and decimal point if needed
@@ -172,4 +171,22 @@ export const extractSignature = (
   } else {
     throw new Error(`Unsupported signature format: ${signatureFormat}`);
   }
+};
+
+export const isProduction = (): boolean => {
+  // Check if we're in a production environment
+  // This could be NODE_ENV === 'production' or a custom environment variable
+  return (
+    import.meta.env.PROD === true || window.location.hostname !== "localhost"
+  );
+};
+
+export const adamikURL = (): string => {
+  return isProduction()
+    ? "/api/adamik-proxy"
+    : import.meta.env.VITE_ADAMIK_API_BASE_URL;
+};
+
+export const adamikAPIKey = (): string => {
+  return isProduction() ? "" : import.meta.env.VITE_ADAMIK_API_KEY;
 };

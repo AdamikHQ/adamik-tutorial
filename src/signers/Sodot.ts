@@ -1,9 +1,9 @@
+import { apiLogsInstance } from "../adamik/apiLogsManager";
 import {
   AdamikCurve,
   AdamikHashFunction,
   AdamikSignerSpec,
 } from "../adamik/types";
-import { apiLogsInstance } from "../adamik/apiLogsManager";
 import { logApiCall, logApiResponse } from "../contexts/ApiLogsContext";
 import {
   errorTerminal,
@@ -11,7 +11,6 @@ import {
   infoTerminal,
   italicInfoTerminal,
 } from "../utils/utils";
-import { Signer } from "./index";
 import { BaseSigner } from "./types";
 
 type SodotSignatureResponse =
@@ -53,17 +52,17 @@ export class SodotSigner implements BaseSigner {
         // Production URLs (Vercel proxy)
         {
           url: "/api/sodot-proxy",
-          apiKey: import.meta.env.VITE_SODOT_VERTEX_API_KEY_0!,
+          apiKey: import.meta.env.SODOT_VERTEX_API_KEY_0!,
           vertexParam: "0",
         },
         {
           url: "/api/sodot-proxy",
-          apiKey: import.meta.env.VITE_SODOT_VERTEX_API_KEY_1!,
+          apiKey: import.meta.env.SODOT_VERTEX_API_KEY_1!,
           vertexParam: "1",
         },
         {
           url: "/api/sodot-proxy",
-          apiKey: import.meta.env.VITE_SODOT_VERTEX_API_KEY_2!,
+          apiKey: import.meta.env.SODOT_VERTEX_API_KEY_2!,
           vertexParam: "2",
         },
       ]
@@ -93,12 +92,15 @@ export class SodotSigner implements BaseSigner {
 
     switch (signerSpec.curve) {
       case AdamikCurve.SECP256K1:
-        this.keyIds =
-          import.meta.env.VITE_SODOT_EXISTING_ECDSA_KEY_IDS?.split(",") || [];
+        this.keyIds = isProduction()
+          ? ["dummy", "dummy1", "dummy2"] // Note: we need to tricks production because it will be hanlde by proxy
+          : import.meta.env.VITE_SODOT_EXISTING_ECDSA_KEY_IDS?.split(",") || [];
         break;
       case AdamikCurve.ED25519:
-        this.keyIds =
-          import.meta.env.VITE_SODOT_EXISTING_ED25519_KEY_IDS?.split(",") || [];
+        this.keyIds = isProduction()
+          ? ["dummy", "dummy1", "dummy2"] // Note: we need to tricks production because it will be hanlde by proxy
+          : import.meta.env.VITE_SODOT_EXISTING_ED25519_KEY_IDS?.split(",") ||
+            [];
         break;
       default:
         throw new Error(`Unsupported curve: ${signerSpec.curve}`);
