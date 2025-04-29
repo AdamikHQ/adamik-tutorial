@@ -1,13 +1,14 @@
-import { AdamikChain } from "./types";
+import { adamikAPIKey, adamikURL } from "@/utils/utils";
 import { logApiCall, logApiResponse } from "../contexts/ApiLogsContext";
 import { apiLogsInstance } from "./apiLogsManager";
+import { AdamikChain } from "./types";
 
 export const adamikGetChains = async () => {
   try {
-    const apiKey = import.meta.env.VITE_ADAMIK_API_KEY;
-    const apiBaseUrl = import.meta.env.VITE_ADAMIK_API_BASE_URL;
+    const apiKey = adamikAPIKey();
+    const apiBaseUrl = adamikURL();
 
-    if (!apiKey || !apiBaseUrl) {
+    if (!apiBaseUrl) {
       throw new Error(
         "Missing API configuration. Please check your environment variables."
       );
