@@ -9,8 +9,9 @@ export default async function handler(req, res) {
     }
 
     // Get the environment variables for the vertex
-    const vertexUrl = process.env[`VITE_SODOT_VERTEX_URL_${vertexNumber}`];
-    const apiKey = process.env[`VITE_SODOT_VERTEX_API_KEY_${vertexNumber}`];
+    const vertexUrl = process.env[`SODOT_VERTEX_URL_${vertexNumber}`];
+    const apiKey = process.env[`SODOT_VERTEX_API_KEY_${vertexNumber}`];
+    const keyIds = process.env[`SODOT_EXISTING_ECDSA_KEY_IDS`];
 
     if (!vertexUrl || !apiKey) {
       return res.status(500).json({
@@ -30,11 +31,18 @@ export default async function handler(req, res) {
       body = req.body;
     }
 
+    console.log(`Key IDs: ${keyIds}`);
+
     // Construct the full URL to the SODOT vertex
     const targetUrl = `${vertexUrl}/create-room`;
     console.log(`Proxying create-room request to: ${targetUrl}`);
     console.log(`Method: ${req.method}`);
-    console.log(`Body: ${JSON.stringify(body)}`);
+    console.log(
+      `Body: ${JSON.stringify({
+        body,
+        key_id: keyIds.split(",")[vertexNumber],
+      })}`
+    );
 
     // Forward the request to the SODOT vertex
     const response = await fetch(targetUrl, {
