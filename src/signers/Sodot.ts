@@ -11,6 +11,7 @@ import {
   infoTerminal,
   italicInfoTerminal,
 } from "../utils/utils";
+import { Signer } from "./index";
 import { BaseSigner } from "./types";
 
 type SodotSignatureResponse =
