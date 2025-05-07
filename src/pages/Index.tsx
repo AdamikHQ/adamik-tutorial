@@ -23,15 +23,27 @@ const Index = () => {
       <header className="w-full py-6 px-8 flex justify-between items-center">
         <div className="flex items-center space-x-2">
           <Button
-            variant="ghost"
-            onClick={() => navigate("/about")}
-            className="text-sm font-medium hover:bg-gray-100"
+            variant="default"
+            onClick={() => window.open("https://adamik.io", "_blank")}
+            className="flex items-center space-x-2 bg-[#0D0D40] hover:bg-[#0D0D40]/90 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
           >
-            About
+            <img
+              src="/Adamik_symbol_flat_white.svg"
+              alt="Adamik"
+              className="h-5 w-5"
+            />
+            <span>Adamik Website</span>
           </Button>
         </div>
 
-        <nav className="flex items-center">
+        <nav className="flex items-center space-x-2">
+          <Button
+            variant="ghost"
+            onClick={() => navigate("/about")}
+            className="text-sm font-medium hover:bg-gray-100 mr-2"
+          >
+            About
+          </Button>
           <a
             href="https://github.com/AdamikHQ/adamik-tutorial"
             target="_blank"
