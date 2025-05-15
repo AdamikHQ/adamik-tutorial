@@ -1,19 +1,18 @@
 import { Turnkey } from "@turnkey/sdk-server";
+import { apiLogsInstance } from "../adamik/apiLogsManager";
 import {
   AdamikCurve,
   AdamikHashFunction,
   AdamikSignerSpec,
 } from "../adamik/types";
+import { logApiCall, logApiResponse } from "../contexts/ApiLogsContext";
 import {
   extractSignature,
   getCoinTypeFromDerivationPath,
   infoTerminal,
   italicInfoTerminal,
 } from "../utils";
-import { Signer } from "./index";
 import { BaseSigner } from "./types";
-import { apiLogsInstance } from "../adamik/apiLogsManager";
-import { logApiCall, logApiResponse } from "../contexts/ApiLogsContext";
 
 export class TurnkeySigner implements BaseSigner {
   private turnkeyClient: Turnkey;
@@ -226,6 +225,33 @@ export class TurnkeySigner implements BaseSigner {
         this.signerSpec.hashFunction,
         this.signerSpec.curve
       ),
+    });
+
+    infoTerminal(`Signature`);
+    await italicInfoTerminal(
+      JSON.stringify(
+        { r: txSignResult.r, s: txSignResult.s, v: txSignResult.v },
+        null,
+        2
+      )
+    );
+
+    return extractSignature(this.signerSpec.signatureFormat, txSignResult);
+  }
+
+  public async signHash(hash: string): Promise<string> {
+    if (!this.pubKey) {
+      this.pubKey = await this.getPubkey();
+    }
+
+    const txSignResult = await this.turnkeyClient.apiClient().signRawPayload({
+      signWith: this.pubKey,
+      payload: hash,
+      encoding: "PAYLOAD_ENCODING_HEXADECIMAL",
+      hashFunction:
+        this.signerSpec.curve === AdamikCurve.ED25519
+          ? "HASH_FUNCTION_NOT_APPLICABLE"
+          : "HASH_FUNCTION_NO_OP",
     });
 
     infoTerminal(`Signature`);
