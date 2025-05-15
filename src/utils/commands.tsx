@@ -1,22 +1,20 @@
-import React from "react";
+import { apiLogsInstance } from "../adamik/apiLogsManager";
+import { broadcastTransaction } from "../adamik/broadcastTransaction";
+import { encodeTransaction } from "../adamik/encodeTransaction";
+import { adamikGetChain } from "../adamik/getChain";
+import { adamikGetChains } from "../adamik/getChains";
+import { AdamikChain } from "../adamik/types";
+import { logApiCall, logApiResponse } from "../contexts/ApiLogsContext";
+import { SodotSigner } from "../signers/Sodot";
+import { showroomChains } from "./showroomChains";
 import {
   Command,
   CommandResult,
-  resetWorkflowState,
-  workflowState,
   isTutorialCompleted,
+  resetWorkflowState,
   setTutorialCompleted,
+  workflowState,
 } from "./terminalTypes";
-import { showroomChains } from "./showroomChains";
-import { SodotSigner } from "../signers/Sodot";
-import { formatNumber } from "./utils";
-import { AdamikChain } from "../adamik/types";
-import { adamikGetChain } from "../adamik/getChain";
-import { adamikGetChains } from "../adamik/getChains";
-import { apiLogsInstance } from "../adamik/apiLogsManager";
-import { logApiCall, logApiResponse } from "../contexts/ApiLogsContext";
-import { encodeTransaction } from "../adamik/encodeTransaction";
-import { broadcastTransaction } from "../adamik/broadcastTransaction";
 
 // Help command
 export const helpCommand: Command = {
@@ -621,7 +619,8 @@ export const signTxCommand: Command = {
         workflowState.transaction.transaction.encoded
       ) {
         // Extract just the encoded transaction string
-        encodedTx = workflowState.transaction.transaction.encoded;
+        encodedTx =
+          workflowState.transaction.transaction.encoded[0]?.hash.value;
 
         // Ensure it has the 0x prefix (which will be removed by the signer)
         if (!encodedTx.startsWith("0x")) {
@@ -647,7 +646,7 @@ export const signTxCommand: Command = {
 
       try {
         // Sign the transaction
-        const signature = await signer.signTransaction(encodedTx);
+        const signature = await signer.signHash(encodedTx);
 
         // Log API response for signing
         if (apiLogsInstance) {
