@@ -621,7 +621,8 @@ export const signTxCommand: Command = {
         workflowState.transaction.transaction.encoded
       ) {
         // Extract just the encoded transaction string
-        encodedTx = workflowState.transaction.transaction.encoded;
+        encodedTx =
+          workflowState.transaction.transaction.encoded[0]?.hash.value;
 
         // Ensure it has the 0x prefix (which will be removed by the signer)
         if (!encodedTx.startsWith("0x")) {
@@ -647,7 +648,7 @@ export const signTxCommand: Command = {
 
       try {
         // Sign the transaction
-        const signature = await signer.signTransaction(encodedTx);
+        const signature = await signer.signHash(encodedTx);
 
         // Log API response for signing
         if (apiLogsInstance) {
