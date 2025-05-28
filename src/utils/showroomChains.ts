@@ -66,13 +66,14 @@ export const showroomChains: Record<
     // For Avalanche, we'll use self-send
     defaultAmount: "0.01",
   },
-  solana: {
-    name: "Solana",
-    ticker: "SOL",
-    explorerUrl: "https://solscan.io/tx/",
-    // For Solana, we'll use self-send
-    defaultAmount: "0.001",
-  },
+  //TODO: Add Solana once merge in production
+  // solana: {
+  //   name: "Solana",
+  //   ticker: "SOL",
+  //   explorerUrl: "https://solscan.io/tx/",
+  //   // For Solana, we'll use self-send
+  //   defaultAmount: "0.001",
+  // },
   aptos: {
     name: "Aptos",
     ticker: "APT",
