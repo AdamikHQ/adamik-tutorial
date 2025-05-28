@@ -620,9 +620,32 @@ export const signTxCommand: Command = {
         workflowState.transaction.transaction &&
         workflowState.transaction.transaction.encoded
       ) {
-        // Extract just the encoded transaction string
-        encodedTx =
-          workflowState.transaction.transaction.encoded[0]?.hash.value;
+        // Handle different transaction structures
+        const encoded = workflowState.transaction.transaction.encoded;
+
+        if (Array.isArray(encoded) && encoded.length > 0) {
+          // Array format: try different possible structures
+          if (encoded[0]?.hash?.value) {
+            // TON-style: encoded[0].hash.value
+            encodedTx = encoded[0].hash.value;
+          } else if (encoded[0]?.raw?.value) {
+            // Aptos-style: encoded[0].raw.value
+            encodedTx = encoded[0].raw.value;
+          } else if (typeof encoded[0] === "string") {
+            // If first element is a string, use it directly
+            encodedTx = encoded[0];
+          } else {
+            throw new Error("Unexpected encoded transaction format in array");
+          }
+        } else if (typeof encoded === "string") {
+          // String format: use directly
+          encodedTx = encoded;
+        } else if (encoded?.hash?.value) {
+          // Object format with hash.value
+          encodedTx = encoded.hash.value;
+        } else {
+          throw new Error("Unexpected encoded transaction format");
+        }
 
         // Ensure it has the 0x prefix (which will be removed by the signer)
         if (!encodedTx.startsWith("0x")) {

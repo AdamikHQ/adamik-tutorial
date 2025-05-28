@@ -896,7 +896,7 @@ export class SodotSigner implements BaseSigner {
       this.keyIds,
       [44, Number(this.signerSpec.coinType), 0, 0, 0],
       this.signerSpec.curve,
-      "none"
+      this.signerSpec.curve === AdamikCurve.ED25519 ? undefined : "none"
     );
 
     if (!signature) {
