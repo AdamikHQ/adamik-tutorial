@@ -228,4 +228,51 @@ export class LocalSigner implements BaseSigner {
       ? ethers.sha256(input)
       : ethers.keccak256(input);
   }
+
+  async signHash(hash: string): Promise<string> {
+    infoTerminal(`Signing hash with ${this.signerSpec.curve}`, this.signerName);
+
+    const hashBytes = hexToBytes(hash);
+
+    switch (this.signerSpec.curve) {
+      case AdamikCurve.SECP256K1: {
+        const wallet = await this.getSecp256k1Wallet();
+        const sig = wallet.signingKey.sign(hashBytes);
+
+        return extractSignature(
+          this.signerSpec.signatureFormat as AdamikSignatureFormat,
+          {
+            r: sig.r.slice(2),
+            s: sig.s.slice(2),
+            v: sig.v.toString(16),
+          }
+        );
+      }
+      case AdamikCurve.ED25519: {
+        const keyPair = await this.getEd25519KeyPair();
+        const signature = nacl.sign.detached(hashBytes, keyPair.secretKey);
+
+        return extractSignature(
+          this.signerSpec.signatureFormat as AdamikSignatureFormat,
+          {
+            r: bytesToHex(signature.slice(0, 32)),
+            s: bytesToHex(signature.slice(32, 64)),
+          }
+        );
+      }
+      case AdamikCurve.STARK: {
+        const privateKey = await this.getStarkPrivateKey();
+        const signature = ec.starkCurve.sign(hashBytes, privateKey);
+        return extractSignature(
+          this.signerSpec.signatureFormat as AdamikSignatureFormat,
+          {
+            r: signature.r.toString(16),
+            s: signature.s.toString(16),
+          }
+        );
+      }
+      default:
+        throw new Error(`Unsupported curve: ${this.signerSpec.curve}`);
+    }
+  }
 }
