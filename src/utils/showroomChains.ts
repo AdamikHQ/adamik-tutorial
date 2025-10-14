@@ -86,7 +86,7 @@ export const showroomChains: Record<
     ticker: "XLM",
     explorerUrl: "https://stellar.expert/explorer/public/tx/",
     // For Stellar, we'll use self-send
-    defaultAmount: "1",
+    defaultAmount: "0.01",
   },
   // bsc: {
   //   name: "BNB Chain",
