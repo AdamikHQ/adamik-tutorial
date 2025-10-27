@@ -88,6 +88,13 @@ export const showroomChains: Record<
     // For Stellar, we'll use self-send
     defaultAmount: "0.01",
   },
+  "stellar-testnet": {
+    name: "Stellar Testnet",
+    ticker: "XLM",
+    explorerUrl: "https://stellar.expert/explorer/testnet/tx/",
+    // For Stellar testnet, we'll use self-send
+    defaultAmount: "0.01",
+  },
   // bsc: {
   //   name: "BNB Chain",
   //   ticker: "BNB",
