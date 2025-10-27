@@ -8,6 +8,8 @@ import {
   broadcastTxCommand,
   exploreChainsCommand,
 } from "./commands";
+import { Signer, signerSelector, isSignerAvailable } from "../signers";
+import { TurnkeySigner } from "../signers/Turnkey";
 import { SodotSigner } from "../signers/Sodot";
 import { encodePubKeyToAddress } from "../adamik/encodePubkeyToAddress";
 import { getAccountState } from "../adamik/getAccountState";
@@ -152,8 +154,15 @@ export const executeCommand = async (
           );
         }
 
-        // Step 2: Create SodotSigner instance and generate pubkey
-        const signer = new SodotSigner(chainId, chain.signerSpec);
+        // Step 2: Create appropriate signer instance and generate pubkey
+        let signer;
+        if (isSignerAvailable(Signer.TURNKEY)) {
+          signer = new TurnkeySigner(chainId, chain.signerSpec);
+        } else if (isSignerAvailable(Signer.SODOT)) {
+          signer = new SodotSigner(chainId, chain.signerSpec);
+        } else {
+          throw new Error("No secure signer available. Please configure Turnkey or Sodot.");
+        }
         infoTerminal(`Generating keys for ${chain.name}...`, "TERMINAL");
         const pubkey = await signer.getPubkey();
         if (!pubkey) {

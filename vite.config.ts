@@ -29,6 +29,10 @@ export default defineConfig(({ mode }) => ({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/sodot-vertex-2/, ""),
       },
+      "/turnkey-proxy": {
+        target: "http://localhost:3001",
+        changeOrigin: true,
+      },
     },
   },
   plugins: [react(), mode === "development" && componentTagger()].filter(

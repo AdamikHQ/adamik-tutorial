@@ -1,4 +1,3 @@
-import { Turnkey } from "@turnkey/sdk-server";
 import { apiLogsInstance } from "../adamik/apiLogsManager";
 import {
   AdamikCurve,
@@ -14,26 +13,47 @@ import {
 } from "../utils/utils";
 import { BaseSigner } from "./types";
 
+// Helper function to determine if we're running in a production environment
+const isProduction = (): boolean => {
+  return (
+    import.meta.env.PROD === true || window.location.hostname !== "localhost"
+  );
+};
+
 export class TurnkeySigner implements BaseSigner {
-  private turnkeyClient: Turnkey;
   public chainId: string;
   public signerSpec: AdamikSignerSpec;
   public signerName = "TURNKEY";
 
   private pubKey: string | undefined;
+  private useProxy: boolean;
 
   constructor(chainId: string, signerSpec: AdamikSignerSpec) {
     infoTerminal("Initializing Turnkey signer...", this.signerName);
     this.chainId = chainId;
     this.signerSpec = signerSpec;
+    this.useProxy = isProduction();
+  }
 
-    this.turnkeyClient = new Turnkey({
-      apiBaseUrl: import.meta.env.VITE_TURNKEY_BASE_URL as string,
-      apiPublicKey: import.meta.env.VITE_TURNKEY_API_PUBLIC_KEY as string,
-      apiPrivateKey: import.meta.env.VITE_TURNKEY_API_PRIVATE_KEY as string,
-      defaultOrganizationId: import.meta.env
-        .VITE_TURNKEY_ORGANIZATION_ID as string,
+  private async callTurnkeyAPI(endpoint: string, data: any): Promise<any> {
+    const url = this.useProxy
+      ? `/api/turnkey-proxy/${endpoint}`
+      : `/turnkey-proxy/${endpoint}`;
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
     });
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error || "Turnkey API request failed");
+    }
+
+    return response.json();
   }
 
   static isConfigValid(): boolean {
@@ -89,14 +109,10 @@ export class TurnkeySigner implements BaseSigner {
     }
 
     try {
-      const { accounts } = await this.turnkeyClient
-        .apiClient()
-        .getWalletAccounts({
-          walletId: import.meta.env.VITE_TURNKEY_WALLET_ID as string,
-          paginationOptions: {
-            limit: "100",
-          },
-        });
+      const { accounts } = await this.callTurnkeyAPI("get-wallet-accounts", {
+        walletId: import.meta.env.VITE_TURNKEY_WALLET_ID as string,
+        paginationOptions: { limit: "100" },
+      });
 
       // Log success response
       if (apiLogsInstance && getAccountsLogId !== -1) {
@@ -135,12 +151,10 @@ export class TurnkeySigner implements BaseSigner {
         );
       }
 
-      const accountDetails = await this.turnkeyClient
-        .apiClient()
-        .getWalletAccount({
-          walletId: account.walletId,
-          accountId: account.accountId,
-        });
+      const accountDetails = await this.callTurnkeyAPI("get-wallet-account", {
+        walletId: account.walletId,
+        accountId: account.accountId,
+      });
 
       // Log success response
       if (apiLogsInstance && getAccountLogId !== -1) {
@@ -236,15 +250,13 @@ export class TurnkeySigner implements BaseSigner {
         this.signerName
       );
 
-      const signResult = await this.turnkeyClient
-        .apiClient()
-        .signRawPayload({
-          walletId,
-          signWith: this.pubKey!,
-          payload: hash,
-          hashFunction: "HASH_FUNCTION_NOT_APPLICABLE",
-          encoding: "ENCODING_HEX",
-        });
+      const signResult = await this.callTurnkeyAPI("sign-raw-payload", {
+        walletId,
+        signWith: this.pubKey!,
+        payload: hash,
+        hashFunction: "HASH_FUNCTION_NOT_APPLICABLE",
+        encoding: "ENCODING_HEX",
+      });
 
       // Log success response
       if (apiLogsInstance && logId !== -1) {
