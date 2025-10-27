@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils";
 import { useApiLogs } from "../contexts/ApiLogsContext";
 import { DEFAULT_WELCOME_MESSAGE } from "../constants/messages";
 import SodotConfigStatus from "./SodotConfigStatus";
+import TurnkeyConfigStatus from "./TurnkeyConfigStatus";
+import { Signer, isSignerAvailable } from "../signers";
 import { showroomChains } from "../utils/showroomChains";
 import { workflowState, isTutorialCompleted } from "../utils/terminalTypes";
 
@@ -55,6 +57,7 @@ const Terminal = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const [signerConfigChecked, setSignerConfigChecked] =
     useState<boolean>(false);
+  const [selectedSigner, setSelectedSigner] = useState<Signer | null>(null);
   const [currentFlowStep, setCurrentFlowStep] = useState<number>(0); // Start is the current step (yellow)
   const [isProcessingCommand, setIsProcessingCommand] =
     useState<boolean>(false); // Track if a command is processing
@@ -103,6 +106,19 @@ const Terminal = ({
       onProgressUpdate(currentFlowStep);
     }
   }, [currentFlowStep, onProgressUpdate]);
+
+  // Determine which signer to use on mount
+  useEffect(() => {
+    // Check which signer is available, prioritizing Turnkey
+    if (isSignerAvailable(Signer.TURNKEY)) {
+      setSelectedSigner(Signer.TURNKEY);
+    } else if (isSignerAvailable(Signer.SODOT)) {
+      setSelectedSigner(Signer.SODOT);
+    } else {
+      // No secure signer available, will proceed without one
+      setSignerConfigChecked(true);
+    }
+  }, []);
 
   // Process initial commands on mount
   useEffect(() => {
@@ -752,8 +768,11 @@ const Terminal = ({
         ref={terminalRef}
         className="terminal-content flex-1 p-4 overflow-y-auto"
       >
-        {!signerConfigChecked && (
+        {!signerConfigChecked && selectedSigner === Signer.SODOT && (
           <SodotConfigStatus onConfigChecked={handleConfigChecked} />
+        )}
+        {!signerConfigChecked && selectedSigner === Signer.TURNKEY && (
+          <TurnkeyConfigStatus onConfigChecked={handleConfigChecked} />
         )}
 
         {signerConfigChecked && showWelcomeMessage && (

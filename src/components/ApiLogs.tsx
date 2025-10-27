@@ -12,7 +12,7 @@ import React, { useEffect, useRef, useState } from "react";
 export interface ApiLogEntry {
   id: number;
   timestamp: Date;
-  provider: "Adamik" | "Signer" | "System";
+  provider: "Adamik" | "Signer" | "Turnkey" | "System";
   endpoint: string;
   method: "GET" | "POST" | "PUT" | "DELETE";
   request?: any;
@@ -50,6 +50,8 @@ const ApiLogs: React.FC<ApiLogsProps> = ({ logs, className }) => {
         return "text-blue-400";
       case "Signer":
         return "text-purple-400";
+      case "Turnkey":
+        return "text-yellow-400";
       case "System":
         return "text-gray-400";
       default:
@@ -118,6 +120,19 @@ const ApiLogs: React.FC<ApiLogsProps> = ({ logs, className }) => {
       }
       if (endpoint.includes("/create-room")) {
         return "Setting up Secure Signing Environment";
+      }
+    }
+
+    // Handle Turnkey API calls
+    if (endpoint.includes("/turnkey")) {
+      if (endpoint.includes("/get-wallet-accounts")) {
+        return "Get Wallet Accounts";
+      }
+      if (endpoint.includes("/get-wallet-account")) {
+        return "Get Wallet Account Details";
+      }
+      if (endpoint.includes("/sign-raw-payload")) {
+        return "Signing Transaction";
       }
     }
 
@@ -363,7 +378,7 @@ const ApiLogs: React.FC<ApiLogsProps> = ({ logs, className }) => {
                   >
                     {displayLog.method}
                   </span>
-                  {displayLog.provider === "Signer" ? (
+                  {(displayLog.provider === "Signer" || displayLog.provider === "Turnkey") ? (
                     <div className="flex items-center gap-1.5">
                       {getOperationIcon(displayLog)}
                       <span className="text-sm font-medium text-gray-200">
@@ -380,6 +395,11 @@ const ApiLogs: React.FC<ApiLogsProps> = ({ logs, className }) => {
                       Secure MPC
                     </span>
                   )}
+                  {displayLog.provider === "Turnkey" && (
+                    <span className="ml-2 text-xs text-yellow-400 bg-yellow-400/10 px-2 py-0.5 rounded">
+                      Turnkey
+                    </span>
+                  )}
                 </div>
 
                 {/* Basic information - always visible */}
@@ -392,6 +412,8 @@ const ApiLogs: React.FC<ApiLogsProps> = ({ logs, className }) => {
                   >
                     {displayLog.provider === "Signer"
                       ? "Secure Signer"
+                      : displayLog.provider === "Turnkey"
+                      ? "Turnkey"
                       : displayLog.provider}
                   </span>
                   <span className="text-xs text-gray-400">

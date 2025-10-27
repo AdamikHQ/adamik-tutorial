@@ -40,3 +40,20 @@ export const SIGNER_ERROR_MESSAGE = (
 export const SODOT_CHECKING_MESSAGE = SIGNER_CHECKING_MESSAGE;
 export const SODOT_CONNECTED_MESSAGE = SIGNER_CONNECTED_MESSAGE;
 export const SODOT_ERROR_MESSAGE = SIGNER_ERROR_MESSAGE;
+
+// Turnkey-specific messages
+export const TURNKEY_CHECKING_MESSAGE = (
+  <span className="text-yellow-400">
+    Verifying Turnkey configuration...
+  </span>
+);
+
+export const TURNKEY_CONNECTED_MESSAGE = (
+  <span className="text-green-400">✓ Turnkey configuration verified</span>
+);
+
+export const TURNKEY_ERROR_MESSAGE = (
+  <span className="text-red-400">
+    ✗ Turnkey configuration invalid. Some features may not work properly.
+  </span>
+);

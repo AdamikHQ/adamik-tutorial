@@ -6,6 +6,8 @@ import { adamikGetChains } from "../adamik/getChains";
 import { AdamikChain } from "../adamik/types";
 import { logApiCall, logApiResponse } from "../contexts/ApiLogsContext";
 import { SodotSigner } from "../signers/Sodot";
+import { TurnkeySigner } from "../signers/Turnkey";
+import { Signer, signerSelector, isSignerAvailable } from "../signers";
 import { showroomChains } from "./showroomChains";
 import {
   Command,
@@ -605,11 +607,21 @@ export const signTxCommand: Command = {
     }
 
     try {
-      // Get the signer
-      const signer = new SodotSigner(
-        workflowState.selectedChain!,
-        workflowState.selectedChainData!.signerSpec
-      );
+      // Get the appropriate signer (prefer Turnkey if available)
+      let signer;
+      if (isSignerAvailable(Signer.TURNKEY)) {
+        signer = new TurnkeySigner(
+          workflowState.selectedChain!,
+          workflowState.selectedChainData!.signerSpec
+        );
+      } else if (isSignerAvailable(Signer.SODOT)) {
+        signer = new SodotSigner(
+          workflowState.selectedChain!,
+          workflowState.selectedChainData!.signerSpec
+        );
+      } else {
+        throw new Error("No secure signer available. Please configure Turnkey or Sodot.");
+      }
 
       // Extract the encoded transaction data
       let encodedTx = "";
@@ -658,12 +670,17 @@ export const signTxCommand: Command = {
       // Log API call for signing
       let logId = 0;
       if (apiLogsInstance) {
+        const signerName = signer instanceof TurnkeySigner ? "Turnkey" : "Signer";
+        const endpoint = signer instanceof TurnkeySigner
+          ? "/turnkey/sign-raw-payload"
+          : "/sodot-vertex-0/ecdsa/sign";
         logId = logApiCall(
           apiLogsInstance,
-          "Signer",
-          "/sodot-vertex-0/ecdsa/sign",
+          signerName,
+          endpoint,
           "POST",
-          encodedTx
+          encodedTx,
+          "Signing Transaction"
         );
       }
 

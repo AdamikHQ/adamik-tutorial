@@ -1,11 +1,13 @@
 import { AdamikSignerSpec } from "../adamik/types";
 import { LocalSigner } from "./LocalSigner";
 import { SodotSigner } from "./Sodot";
+import { TurnkeySigner } from "./Turnkey";
 import { BaseSigner } from "./types";
 
 export enum Signer {
   LOCAL = "LOCAL MNEMONIC (UNSECURE)",
-  SODOT = "Secure Signer",
+  SODOT = "Secure Signer (Sodot)",
+  TURNKEY = "TURNKEY",
 }
 
 export const signerSelector = async (
@@ -21,6 +23,10 @@ export const signerSelector = async (
       // Should throw an error if the config is not valid.
       SodotSigner.isConfigValid();
       return new SodotSigner(chainId, signerSpec);
+    case Signer.TURNKEY:
+      // Should throw an error if the config is not valid.
+      TurnkeySigner.isConfigValid();
+      return new TurnkeySigner(chainId, signerSpec);
     default:
       throw new Error(`Unsupported signer: ${signerName}`);
   }
@@ -32,7 +38,17 @@ export const isSignerAvailable = (signer: Signer): boolean => {
     case Signer.LOCAL:
       return !!process.env.UNSECURE_LOCAL_SEED;
     case Signer.SODOT:
-      return SodotSigner.isConfigValid();
+      try {
+        return SodotSigner.isConfigValid();
+      } catch (e) {
+        return false;
+      }
+    case Signer.TURNKEY:
+      try {
+        return TurnkeySigner.isConfigValid();
+      } catch (e) {
+        return false;
+      }
     default:
       return false;
   }
