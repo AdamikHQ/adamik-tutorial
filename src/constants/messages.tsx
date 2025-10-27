@@ -3,7 +3,7 @@ import React from "react";
 // React component messages
 export const DEFAULT_WELCOME_MESSAGE = (
   <span>
-    Welcome to Turnkey Multichain Demo. Available commands:{" "}
+    Welcome to Multichain Demo. Available commands:{" "}
     <span className="font-mono">
       <span className="text-purple-500">$</span>{" "}
       <span className="text-green-500 font-bold">help</span>

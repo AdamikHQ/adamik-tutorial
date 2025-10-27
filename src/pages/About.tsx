@@ -19,7 +19,7 @@ const About = () => {
 
         <nav className="flex items-center">
           <a
-            href="https://github.com/AdamikHQ/adamik-tutorial/tree/signer-turnkey"
+            href="https://github.com/AdamikHQ/adamik-tutorial"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center w-14 h-14 rounded-md hover:bg-gray-100"
@@ -35,27 +35,27 @@ const About = () => {
         <div className="max-w-3xl w-full mx-auto animate-text-fade-in opacity-0">
           <div className="text-center mb-10">
             <h2 className="text-3xl font-bold tracking-tight mb-3">
-              About Turnkey Multichain Demo
+              About Multichain Demo
             </h2>
             <p className="text-lg text-gray-600">
-              Interact with over 60 blockchain networks using Turnkey and Adamik
-              technologies.
+              Interact with over 90 blockchain networks using secure signing and
+              Adamik technologies.
             </p>
           </div>
 
           <div className="bg-white rounded-lg shadow-xl p-8 space-y-6">
             <div>
               <h3 className="text-xl font-semibold mb-3">
-                What is Turnkey Multichain Demo?
+                What is Multichain Demo?
               </h3>
               <p className="text-gray-600">
-                Turnkey Multichain Demo is an interactive tool designed to
-                showcase how developers can interact with multiple blockchain
-                networks using Turnkey's secure signing technology. Through a
-                command-line interface, you can explore different blockchains,
-                generate cryptographic keys using Turnkey technology, create
-                blockchain addresses, check account balances, and execute
-                transactions across multiple networks.
+                Multichain Demo is an interactive tool designed to showcase how
+                developers can interact with multiple blockchain networks using
+                secure signing technology. Through a command-line interface, you can
+                explore different blockchains, generate cryptographic keys using
+                Turnkey technology, create blockchain addresses, check
+                account balances, and execute transactions across multiple
+                networks.
               </p>
             </div>
 
@@ -71,7 +71,7 @@ const About = () => {
                 </li>
                 <li>API call logging and visualization</li>
                 <li>
-                  Support for over 60 blockchain networks including Ethereum,
+                  Support for over 90 blockchain networks including Ethereum,
                   Optimism, TON, and more
                 </li>
               </ul>
@@ -206,7 +206,7 @@ const About = () => {
 
       {/* Footer */}
       <footer className="w-full py-6 px-8 text-center text-sm text-gray-500">
-        © {new Date().getFullYear()} Turnkey Multichain. All rights reserved.
+        © {new Date().getFullYear()} Multichain Demo. All rights reserved.
       </footer>
     </div>
   );

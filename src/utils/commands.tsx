@@ -885,20 +885,19 @@ export const exploreChainsCommand: Command = {
               // First-time completion - show congratulations message
               <div className="mt-6 p-4 border border-blue-500 rounded-md bg-blue-900/20">
                 <p className="text-blue-300 font-medium mb-2">
-                  🎉 Congratulations on successfully interacting with the{" "}
+                  🎉 You just completed the Adamik tutorial on{" "}
                   {showroomChains[workflowState.selectedChain]?.name ||
                     workflowState.selectedChain}{" "}
                   blockchain!
                 </p>
                 <p className="text-gray-300 mb-3">
-                  Try the flow again to see how easily you can scale across any
-                  blockchain network.
+                  Want to try another chain? Type start to switch.
                 </p>
                 <p className="text-gray-300 mb-3">
-                  Explore the source code of this application on GitHub:
+                  Or ready to build your own multi-chain application?
                 </p>
                 <a
-                  href="https://github.com/AdamikHQ/adamik-tutorial/tree/signer-turnkey"
+                  href="https://github.com/AdamikHQ/adamik-tutorial"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-block px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
